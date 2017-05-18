@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="initial-scale=1">
+	<title>Таймер</title>
+	<link rel="stylesheet" type="text/css" href="timer.css">
+	<script type="text/javascript" src="../media/js/jquery-1.7.2.min.js"></script>
+	<script type="text/javascript" src="../media/js/jquery.json-2.3.min.js"></script>
+	<script type="text/javascript" src="../media/js/knockout-2.0.0.js"></script>
+	<script type="text/javascript" src="../media/js/jstorage.js"></script>	
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script type="text/javascript" src="timer.js"></script>	
+</head>
+<body>
+	<section class="timer-widget">
+		<hgroup>
+			<h1><input type="text" class="timer-title switch" placeholder="Назовем работу?" data-bind="value: timerTitle"></h1>
+			<p class="lightgrey"><small>Считаем длительность и стоимость работы.</small></p>
+		</hgroup>
+		<p>Цена нового периода: <span class="nowrap"><input class="price" type="text" placeholder="цена" data-bind="value: defaultPrice"> руб/час</span>.</p>		
+		<ul class="periods" data-bind="foreach: periods">
+			<li>
+				<small class="date">(<strong data-bind="text: dateHtml" ></strong>)</small> 
+				<span data-bind="text: startHtml"></span>&nbsp;&mdash; 
+				<span data-bind="text: endHtml"></span>&nbsp;= 
+				<span data-bind="html: deltaHtml"></span>, 
+				<span class="cost"><span data-bind="text: cost"></span> руб</span>, 
+				<small><em>(по <input class="price" type="text" placeholder="цена" data-bind="value: price"> руб/час)</em></small>, 
+				<input type="text" class="notes" placeholder="что делал?" data-bind="value: notes"> 
+				<small><a class="delete" onclick="deletePeriod(event)">&times; удалить</a></small>
+			</li>
+		</ul>
+		<p class="total" data-bind="css: { visible: periods().length > 0 }">Итого: <span data-bind="html: totalTimeHtml"></span>, <span class="cost"><span data-bind="text: totalCost"></span> руб</span></p>
+		<p><button class="toggle">Старт</button> <a class="clear switch" href="#cleartimer">Очистить таймер</a></p>
+		<p id="cleartimer" class="switched">При очистке таймера его название и все периоды удалятся со страницы и из памяти.</p>
+
+		<p><a class="export">Экспорт в текстовом формате</a></p>
+		<div class="exported-text"></div>
+
+	</section><!-- timer widget end -->
+
+	<p>Таймер сохраняется в хранилище броузера, то есть при перезагрузке и повторном заходе на страницу	данные не потеряются (если не выставлено очищение кукиз и локального хранилища в броузере)</p>
+
+
+
+<!-- Google Script -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-48337655-1', 'mr-woodman.ru');
+  ga('send', 'pageview');
+
+</script>
+</body>
+</html>

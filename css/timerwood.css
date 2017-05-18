@@ -1,0 +1,1150 @@
+/* Timerwood */
+
+@import url('../fonts/pfbeausanspro.css');
+@import url('../fonts/ptmono.css');
+
+* {
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+ul, ol {
+	list-style: none;
+}
+input:focus, button:focus, textarea:focus {
+	outline: none;
+}
+button, a {
+	cursor: pointer;
+}
+a:hover {
+	text-decoration: underline;
+}
+a {
+	color: #333;
+}
+
+input[type="text"] {
+	font-size: 24px;
+	height: 54px;
+	box-shadow: inset 0px 0px 0px 1px #e5e5e5;
+	-webkit-box-shadow: inset 0px 0px 0px 1px #e5e5e5;
+	-moz-box-shadow: inset 0px 0px 0px 1px #e5e5e5;
+	padding: 0 0.625em;
+	display: inline-block;
+	vertical-align: baseline;
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+}
+input[type=text].small {
+	font-size: 16px;
+	height: 27px;
+	padding: 0 7px;
+	opacity: 1;
+	vertical-align: baseline;
+	display: inline-block;
+	box-shadow: inset 0px 0px 0px 1px #e5e5e5;
+	-webkit-box-shadow: inset 0px 0px 0px 1px #e5e5e5;
+	-moz-box-shadow: inset 0px 0px 0px 1px #e5e5e5;
+}
+
+
+/* Шрифты */
+body, input, button, textarea {
+	font-family: PF Beau Sans, sans-serif;
+	font-size: 18px;
+	font-weight: 300;
+	line-height: 27px;
+	color: #333;
+}
+*[number] {
+	font-family: PT Mono, monospace;
+}
+strong {
+	font-weight: 600;
+}
+h1, h2, h3, h4, h5, h6 {
+	font-weight: 500;
+}
+
+/* Ближе к серёдке страница */
+@media screen and (max-width: 800px) {
+	page.front {
+		padding-left: 2.5em;
+		padding-right: 2.5em;
+	}
+}
+@media screen and (max-width: 600px) {
+	page.front {
+		padding-left: 1.5em;
+		padding-right: 1.5em;
+	}
+}
+page {
+	padding: 4.5em 4.5em 2em 4.5em;
+	/*max-width: 50em;*/
+	margin: 0 auto;
+	display: block;
+	position: relative;
+}
+page > nav {
+	position: relative;
+}
+page {
+	position: relative;
+	-webkit-transition: all 0.2s ease-out;
+	-moz-transition: all 0.2s ease-out;
+	transition: all 0.2s ease-out;
+	right: 0em;
+}
+page.back {
+	color: #888;
+	background-color: #333;
+	position: fixed;
+	top: 0px;
+	right: -25em;
+	bottom: 0px;
+	width: 20em;
+	padding-left: 2.5em;
+	padding-right: 2.5em;
+	opacity: 0;
+}
+page.back.menu {
+	right: 0em;
+	opacity: 1;
+	z-index: 2;
+}
+page.front.menu {
+	right: 25em;
+}
+page.notes.menu {
+	right: 25em;
+}
+page.notes {
+	height: 0px;
+	padding-top: 0px;
+	padding-bottom: 0px;
+	overflow: hidden;
+	opacity: 0;
+}
+page.notes.shownotes {
+	height: 300px;
+	padding-top: 4.5em;
+	padding-bottom: 2em;
+	opacity: 1;
+}
+
+body {
+	overflow-x: hidden;
+}
+
+/* Мелкие детали */
+a.delete {
+	color: #F15A22;
+}
+
+*[ng-controller] {
+	position: relative;
+}
+
+
+/* задник чёрный */
+page.back strong {
+	color: #ccc;
+	font-weight: 400;
+}
+page.back article {
+	font-size: 14px;
+}
+page.back article a {
+	color: #ccc;
+}
+page.back select {
+	width: 40px;
+	margin-right: 5px;
+	background-color: #888;
+	color: whitesmoke;
+}
+page.back select.medium {
+	width: 100px;
+}
+page.back select:focus {
+	background-color: whitesmoke;
+	color: #333;
+}
+page.back input[type=text] {
+	background-color: #888;
+	color: whitesmoke;
+	font-size: 14px;
+	-webkit-box-shadow: none;
+	-moz-box-shadow: none;
+	box-shadow: none;
+}
+page.back input[type=text]:focus {
+	background-color: whitesmoke;
+	color: #333;
+}
+page.back .export input[type=submit] {
+	margin-left: -10px;
+	border-bottom-right-radius: 5px;
+	border-top-right-radius: 5px;
+	vertical-align: top;
+	padding: 0 0.5em;
+	font-size: 14px;
+	font-weight: 500;
+	background-color: whitesmoke;
+	cursor: pointer;
+	height: 27px;
+}
+page.back > nav.menu {
+	width: 100%;
+	display: block;
+}
+page.back > nav.menu > .menu-icon {
+	display: block;
+	padding-left: 0;
+}
+page.back > nav.menu > .menu-icon:before,
+page.back > nav.menu > .menu-icon:after {
+	left: 0px;
+}
+page.back > nav.menu > .menu-icon .tip {
+	display: none;
+}
+page.back > nav.menu > .menu-icon .tip {
+	display: inline;
+	font-size: 12px;
+	vertical-align: center;
+	margin-left: 10px;
+}
+
+
+/* Футер */
+page > footer {
+	text-align: center;
+	box-shadow: 0px -1px 0px 0px #e5e5e5;
+	padding: 4em;
+}
+page > footer > * {
+	font-size: 14px;
+}
+
+/* Сложная кнопка старт-стоп таймера */
+div[ng-controller="TimerCtrl"] {
+	position: relative;
+	height: 3em;
+	text-align: center;
+	margin-bottom: 6em;
+}
+div[ng-controller="TimerCtrl"] > * {
+	display: inline-block;
+	vertical-align: top;
+	text-align: left;
+}
+div[ng-controller="TimerCtrl"] button[ng-click="toggle()"] {
+	font-weight: normal;
+	font-size: 21px;
+	color: #fff;
+	height: 51px;
+	line-height: 51px;
+	padding: 0 65px 0 1.5em;
+	text-align: left;
+	background-color: #f2f2f2;
+	box-shadow: 0 3px 0px 0px #e5e5e5;
+	color: #333;
+	border-radius: 10px;
+	z-index: 1;
+	position: relative;
+	border-bottom-right-radius: 0;
+	border-top-right-radius: 0;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	width: 190px;
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+div[ng-controller="TimerCtrl"].simple button[ng-click="toggle()"] {
+	border-radius: 10px;
+	position: relative;
+}
+div[ng-controller="TimerCtrl"].stopped button[ng-click="toggle()"]:active,
+div[ng-controller="TimerCtrl"].started button[ng-click="toggle()"] {
+	background-color: #F15A22;
+	box-shadow: 0 -3px 0px 0px #C1272D;
+	-webkit-box-shadow: 0 -3px 0px 0px #C1272D;
+	-moz-box-shadow: 0 -3px 0px 0px #C1272D;
+	top: 3px;
+	color: #fff;
+}
+div[ng-controller="TimerCtrl"] .new-subtask {
+	position: absolute;
+	font-size: 14px;
+	bottom: -36px;
+	right: 1em;
+}
+div[ng-controller="TimerCtrl"] .path {
+	position: absolute;
+	left: 210px;
+	top: -36px;
+	font-size: 14px;
+}
+div[ng-controller="TimerCtrl"] .time {
+	position: relative;
+	font-family: PT Mono, monospace;
+}
+div[ng-controller="TimerCtrl"] .time .hour,
+div[ng-controller="TimerCtrl"] .time .divider,
+div[ng-controller="TimerCtrl"] .time .min {
+	font-size: 30px;
+	position: relative;
+	top: 2px;
+}
+div[ng-controller="TimerCtrl"].started .time .hour.low,
+div[ng-controller="TimerCtrl"].started .time .divider.low,
+div[ng-controller="TimerCtrl"].started .time .min.low {
+	opacity: 0.5;
+}
+div[ng-controller="TimerCtrl"] .time .sec {
+	font-size: 15px;
+	line-height: 1em;
+	display: block;
+	position: absolute;
+	right: 25px;
+	top: 15px;
+	width: 25px;
+	text-align: center;
+}
+div[ng-controller="TimerCtrl"].started .time .sec {
+	font-weight: bold;
+}
+div[ng-controller="TimerCtrl"] .time .ms {
+	font-size: 10px;
+	line-height: 1em;
+	display: block;
+	position: absolute;
+	right: 25px;
+	bottom: 11px;
+	width: 25px;
+	text-align: center;
+}
+div[ng-controller="TimerCtrl"] .task {
+	box-shadow: inset 0 0 0 1px #e5e5e5;
+	-webkit-box-shadow: inset 0 0 0 1px #e5e5e5;
+	-moz-box-shadow: inset 0 0 0 1px #e5e5e5;
+	position: relative;
+	padding: 0 1em 0 215px;
+	font-size: 24px;
+	line-height: normal;
+	height: 54px;
+	width: 100%;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	border-radius: 10px;
+}
+div[ng-controller="TimerCtrl"] a[ng-click="toggleType()"] {
+	position: absolute;
+	bottom: -36px;
+	font-size: 14px;
+	left: 36px;
+}
+div[ng-controller="TimerCtrl"].simple a[ng-click="toggleType()"] {
+	left: 50%;
+	margin-left: -60px;
+}
+
+/* Виды списков таймера */
+.switch-views > .view {
+	display: none;
+}
+.switch-views > .view.show {
+	display: block;
+	position: relative;
+}
+.switch-views > nav {
+	text-align: right;
+	padding-right: 1em;
+	box-shadow: inset 0px -1px 0px 0px #e5e5e5;
+	-webkit-box-shadow: inset 0px -1px 0px 0px #e5e5e5;
+	-moz-box-shadow: inset 0px -1px 0px 0px #e5e5e5;
+	font-size: 14px;
+	line-height: 27px;
+	position: relative;
+}
+.switch-views > nav a {
+	margin-left: 0.5em;
+}
+
+/* Переключение недавних задач */
+.toggle-all {
+	position: relative;
+}
+.toggle-all a {
+	font-size: 14px;
+	position: absolute;
+	top: -27px;
+	right: 1em;
+}
+.toggle-all:after {
+	content: " ";
+	position: absolute;
+	left: 0;
+	bottom: 0px;
+	height: 0px;
+	width: 100%;
+	border-bottom: solid #e5e5e5 1px;
+}
+
+/* Список задач */
+.task-list .duration,
+.task-list .duration-edit {
+	font-family: PT Mono, monospace;
+	opacity: 0.5;
+	font-size: 80%;
+}
+.task-list .duration-edit {
+	opacity: 0.5;
+	/*text-decoration: underline;*/
+	cursor: pointer;
+	box-shadow: 0 0 0 1px #e5e5e5;
+	border-radius: 5px;
+	display: inline-block;
+	height: 25px;
+	padding:0 0.5em;
+}
+.task-list .duration-edit:hover {
+	opacity: 1;
+}
+.task-list .task.selfshort .duration {
+	display: none;
+}
+.task-list .task.selfshort.leaf .duration {
+	display: inline;
+}
+.task-list .duration:before {
+	content: "–";
+	display: inline-block;
+	padding: 0px 0.5em;
+}
+.task-list .duration:hover:before {
+	text-decoration: none;
+	opacity: 0.5;
+}
+.task-list .duration-total {
+	font-weight: 200;
+	margin-left: 2em;
+}
+.price[ng-controller=TasksViewCtrl] .task-list .duration-total:after,
+.price[ng-controller=TasksViewCtrl] .task-list > li > .task.leaf .duration:after {
+	content: ",";
+}
+.price[ng-controller=TasksViewCtrl] .task-list .task.leaf .duration:after {
+	content: "/";
+	margin-left: 0.25em;
+}
+.task-list .price {
+	font-weight: 400;
+	margin-left: 1em;
+	display: none;
+}
+.task-list .price:after {
+	content: " руб.";
+}
+.rur .task-list .price:after {
+	content: " руб.";
+}
+.usd .task-list .price:after {
+	content: " $";
+}
+.price[ng-controller=TasksViewCtrl] .task-list .price {
+	display: inline;
+}
+.task-list .leaf > .price {
+	margin-left: 1em;
+	font-family: PT Mono, monospace;
+	opacity: 0.5;
+	font-size: 80%;
+}
+.task-list > li > .task.leaf > .price {
+	margin-left: 1em;
+}
+.task-list .leaf > .price {
+	margin-left: 0.25em;
+}
+.task-list > li:first-child {
+	padding-top: 27px;
+}
+.task-list > li > .task {
+	margin-top: 81px;
+}
+.recent .task-list > li > .task {
+	margin-top: 54px;
+}
+.task-list > li:first-child > .task {
+	margin-top: 0px;
+}
+.all .task-list > li:first-child > .task {
+	margin-top: 27px;
+}
+.all .task-list > li:first-child > .task.leaf {
+	margin-top: 0px;
+}
+.task-list > li > .task.leaf {
+	margin-top: 0px;
+}
+.task-list > li:last-child > .task:last-child {
+	margin-bottom: 27px;
+}
+.task-list > li > .task .duration-total {
+	font-weight: 200;
+	opacity: 1;
+	font-size: 24px;
+}
+.task-list > li > .task .price {
+	font-weight: 400;
+	opacity: 1;
+	font-size: 24px;
+}
+.task-list > li > .task.leaf .price {
+	font-size: 80%;
+}
+.task-list li li {
+	padding-left: 2em;
+}
+.task-list ul {
+	margin-bottom: 27px;
+}
+.task-list > li > ul {
+	margin-top: 14px;
+	margin-bottom: 81px;
+}
+.task-list > li:last-child > ul {
+	margin-bottom: 27px;
+}
+.task-list .controls {
+	display: none;
+	text-align: right;
+	vertical-align: baseline;
+	float: right;
+	padding-right: 14px;
+	font-size: 14px;
+}
+.task-list .controls > * {
+	margin-left: 0.5em;
+	display: inline-block;
+	vertical-align: baseline;
+}
+.task-list .task:hover .controls,
+.task-list .task.edit .controls {
+	display: inline-block;
+}
+.task-list .task {
+	padding-left: 14px;
+	font-size: 16px;
+	height: 27px;
+	line-height: 27px;
+}
+.task-list .task:hover {
+	box-shadow: inset 0px -1px 0px 0px #e5e5e5;
+	-webkit-box-shadow: inset 0px -1px 0px 0px #e5e5e5;
+	-moz-box-shadow: inset 0px -1px 0px 0px #e5e5e5;
+}
+.task-list .task.edit {
+	box-shadow: none;
+}
+.task-list .task.selected {
+	background-color: whitesmoke;
+}
+.task-list > li > .task .name {
+	font-size: 24px;
+	line-height: 27px;
+	height: 27px;
+}
+.task-list > li > .task.leaf .name {
+	font-size: inherit;
+}
+.task-list .edit input[type=text] {
+	margin-left: -7px;
+	width: 50%;
+}
+.task-list .task.leaf  a.continue-task,
+.task-list .task a.create-subtask,
+.task-list .task .duration-total {
+	display: inline;
+}
+.task-list .task a.continue-task,
+.task-list .task.leaf a.create-subtask,
+.task-list .task.leaf .duration-total {
+	display: none;
+}
+.task-list .task.edit a.continue-task,
+.task-list .task.edit a.create-subtask {
+	display: none;
+}
+.task-list .task .controls .sub-task,
+.task-list .task .controls .edit,
+.task-list .task .controls .filter-storage {
+	display: inline;
+}
+.task-list .task .controls .save,
+.task-list .task .controls .cancel,
+.task-list .task .controls .delete {
+	display: none;
+}
+.task-list .task.edit .controls .sub-task,
+.task-list .task.edit .controls .edit,
+.task-list .task.edit .controls .filter-storage,
+.task-list .task .duration-edit,
+.task-list .task.edit .duration,
+.task-list .task.edit .duration-total {
+	display: none;
+}
+.task-list .task.edit .controls .save,
+.task-list .task.edit .controls .cancel,
+.task-list .task.edit .controls .delete {
+	display: inline;
+}
+.task-list .task input[type="text"].name {
+	display: none;
+}
+.task-list .task.edit input[type="text"].name,
+.task-list .task.edit .duration-edit {
+	display: inline-block;
+}
+
+
+/* Хронология задач по дате */
+.date-list > li {
+	padding-top: 27px;
+	padding-bottom: 27px;
+	position: relative;
+}
+.date-list header {
+	line-height: 27px;
+	height: 27px;
+	padding-left: 14px;
+	font-weight: 300;
+	font-size: 24px;
+	margin-bottom: 14px;
+}
+.date-list header .duration {
+	margin-left: 2em;
+	font-weight: 200;
+}
+*[ng-controller=DateViewCtrl].price .date-list header .duration:after,
+*[ng-controller=MonthViewCtrl].price .date-list header .duration:after {
+	content: ",";
+}
+*[ng-controller=DateViewCtrl].price .date-list header.short .duration:after,
+*[ng-controller=MonthViewCtrl].price .date-list header.short .duration:after {
+	content: none;
+}
+.date-list header .price {
+	font-weight: 400;
+	margin-left: 1em;
+}
+.date-list header .price:after {
+	content: " руб.";
+}
+.rur .date-list header .price:after {
+	content: " руб.";
+}
+.usd .date-list header .price:after {
+	content: " $";
+}
+.date-list header.short .price {
+	display: none;
+}
+.date-list li li {
+	padding-left: 14px;
+	height: 27px;
+	position: relative;
+}
+.date-list li li .task {
+	font-size: 16px;
+	display: inline-block;
+	vertical-align: baseline;
+}
+.date-list li li .duration {
+	font-family: PT Mono, monospace;
+	display: inline-block;
+	vertical-align: baseline;
+	font-size: 14px;
+	opacity: 0.5;
+}
+.date-list li li .duration-edit {
+	font-family: PT Mono, monospace;
+	font-size: 80%;
+	opacity: 0.5;
+	cursor: pointer;
+	box-shadow: 0 0 0 1px #e5e5e5;
+	border-radius: 5px;
+	display: inline-block;
+	height: 25px;
+	padding: 0 0.5em;
+	display: none;
+}
+.date-list li li .duration-edit:hover {
+	opacity: 1;
+}
+.date-list li li .price {
+	font-family: PT Mono, monospace;
+	display: inline-block;
+	vertical-align: baseline;
+	font-size: 14px;
+	opacity: 0.5;
+}
+.date-list li li:hover {
+	box-shadow: inset 0px -1px 0px 0px #e5e5e5;
+	-webkit-box-shadow: inset 0px -1px 0px 0px #e5e5e5;
+	-moz-box-shadow: inset 0px -1px 0px 0px #e5e5e5;
+}
+.date-list li li.edit:hover {
+	box-shadow: none;
+}
+.date-list .controls {
+	display: none;
+	text-align: right;
+	margin-right: 1em;
+	font-size: 14px;
+	position: absolute;
+	font-family: PF Beau Sans, sans-serif;
+	right: 0;
+	top: 0;
+}
+.date-list li li:hover .controls {
+	display: block;
+}
+.date-list li li:hover .controls > * {
+	display: inline-block;
+	vertical-align: baseline;
+}
+.date-list li li.edit .controls {
+	display: inline-block;
+}
+.date-list li li .controls > * {
+	margin-left: 0.5em;
+}
+.date-list header:hover .controls {
+	display: block;
+	top: 27px;
+}
+.date-list header:hover {
+	box-shadow: inset 0px -1px 0px 0px #e5e5e5;
+	-webkit-box-shadow: inset 0px -1px 0px 0px #e5e5e5;
+	-moz-box-shadow: inset 0px -1px 0px 0px #e5e5e5;
+}
+.date-list .edit input[type=text].details {
+	margin-left: -7px;
+	width: 50%;
+}
+.date-list .edit input[type=text].duration {
+	opacity: 1;
+	position: relative;
+	top: -1px;
+	width: 4em;
+}
+.leaf-task-list li.view .task {
+	display: inline-block;
+}
+.leaf-task-list .task span:after {
+	content: ", ";
+}
+.leaf-task-list .task span:last-child:after {
+	content: none;
+}
+.leaf-task-list li.edit .task {
+	display: none;
+}
+.leaf-task-list li.view input[type=text] {
+	display: none;
+}
+.leaf-task-list li.edit input[type=text],
+.leaf-task-list li.edit .duration-edit {
+	display: inline-block;
+	vertical-align: top;
+}
+
+.leaf-task-list input[type=text].date {
+	font-family: PT Mono, monospace;
+	font-size: 14px;
+	width: 6em;
+	margin-left: -7px;
+}
+*[ng-controller=DateViewCtrl].price .leaf-task-list .duration:after,
+*[ng-controller=MonthViewCtrl].price .leaf-task-list .duration:after {
+	content: ",";
+}
+*[ng-controller=DateViewCtrl].price .leaf-task-list li.short .duration:after,
+*[ng-controller=MonthViewCtrl].price .leaf-task-list li.short .duration:after {
+	content: none;
+}
+*[ng-controller=DateViewCtrl].price .leaf-task-list li.short .price,
+*[ng-controller=MonthViewCtrl].price .leaf-task-list li.short .price {
+	display: none;
+}
+/*.leaf-task-list li.edit span.duration,*/
+.leaf-task-list li.view input.duration,
+.leaf-task-list li.edit span.price,
+.leaf-task-list li.edit .controls .edit,
+.leaf-task-list li.view .controls .delete,
+.leaf-task-list li.view .controls .save,
+.leaf-task-list li.view .controls .cancel,
+.leaf-task-list li.edit .controls .filter-storage  {
+	display: none;
+}
+.leaf-task-list li.edit input.duration,
+.leaf-task-list li span.duration {
+	display: inline-block;
+}
+
+
+/* Список записей хранилища */
+.storage-list {
+	font-family: PT Mono, monospace;
+	font-size: 14px;
+	padding-top: 0px;
+	padding-bottom: 0px;
+}
+.storage-list li {
+	position: relative;
+	padding: 0 1em;
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+.storage-list span.start,
+.storage-list span.duration,
+.storage-list span.grey {
+	opacity: 0.5;
+}
+.storage-list span.details {
+	cursor: pointer;
+}
+.storage-list span.details:hover {
+	text-decoration: underline;
+}
+/* меню записи хранилища */
+.storage-list li:hover {
+	box-shadow: inset 0px -1px 0px 0px #e5e5e5;
+	-webkit-box-shadow: inset 0px -1px 0px 0px #e5e5e5;
+	-moz-box-shadow: inset 0px -1px 0px 0px #e5e5e5;
+}
+.storage-list li.edit:hover {
+	box-shadow: none;
+}
+.storage-list .controls {
+	position: absolute;
+	right: 0;
+	top: 0;
+	display: none;
+	font-family: PF Beau Sans, sans-serif;
+	margin-right: 1em;
+}
+.storage-list .controls > * {
+	margin-left: 0.5em;
+}
+.storage-list li.edit .controls,
+.storage-list li:hover .controls {
+	display: inline-block;
+}
+.storage-list input[type=text] {
+	font-family: PT Mono, monospace;
+	font-size: 14px;
+}
+.storage-list input[type=text].date {
+	width: 6em;
+	margin-left: -7px;
+}
+.storage-list input[type=text].start {
+	width: 3.25em;
+}
+.storage-list input[type=text].duration {
+	width: 4em;
+}
+.storage-list input[type=text].details {
+	width: 40%;
+}
+.storage-list .view span.start,
+.storage-list .view span.details,
+.storage-list .view span.duration,
+.storage-list .view a.delete,
+.storage-list .view a.edit {
+	display: inline;
+}
+.storage-list .edit span.start,
+.storage-list .edit span.details,
+.storage-list .edit span.duration,
+.storage-list .edit a.edit {
+	display: none;
+}
+
+.storage-list .view input.start,
+.storage-list .view input.details,
+.storage-list .view input.duration,
+.storage-list .view a.save,
+.storage-list .view a.cancel {
+	display: none;
+}
+.storage-list .edit input.start,
+.storage-list .edit input.details,
+.storage-list .edit input.duration {
+	display: inline-block;
+}
+.storage-list .edit a.save,
+.storage-list .edit a.cancel {
+	display: inline;
+}
+
+
+/* Поиск в видах */
+.view .search-entries {
+	position: absolute;
+	top: -28px;
+	left: 7px;
+	width: 50%;
+	white-space: nowrap;
+}
+.view .search-entries input[type="text"] {
+	box-shadow: none;
+	background-color: transparent;
+	width: 100%;
+	font-size: 14px;
+	/*font-style: italic;*/
+	font-weight: 300;
+	-webkit-box-shadow: 0 -1px 0 0 #e5e5e5;
+	-moz-box-shadow: 0 -1px 0 0 #e5e5e5;
+	box-shadow: 0 -1px 0 0 #e5e5e5;
+}
+.view .search-entries .clear-filter {
+	position: absolute;
+	left: 395px;
+	top: 2px;
+	cursor: pointer;
+	text-decoration: none;
+	white-space: nowrap;
+}
+.view .search-entries .tip {
+	font-size: 12px;
+	opacity: 0.5;
+	vertical-align: baseline;
+}
+.view .search-entries .clear-filter .tip {
+	font-size: 12px;
+	vertical-align: top;
+	opacity: 0.5;
+}
+
+
+/* цена в видах */
+.view .price-hour {
+	position: absolute;
+	top: -28px;
+	left: 14px;
+	white-space: nowrap;
+	font-size: 14px;
+}
+.view .price-hour input[type="text"] {
+	box-shadow: none;
+	background-color: transparent;
+	width: 40px;
+	font-size: 14px;
+	text-align: right;
+	font-weight: 600;
+}
+.view .price-hour input[type="text"]:after {
+	content: "рублей";
+}
+
+.usd .view .price-hour input[type="text"]:after {
+	content: "$";
+}
+
+/* Иконка в контролах */
+.controls .icon {
+	position: relative;
+	top: 2px;
+	height: 16px;
+}
+
+/* попап */
+.dialog {
+	position: fixed;
+	left: 0px; right: 0px; top: 0px; bottom: 0px;
+	width: 100%; height: 100%;
+	background-color: rgba(255,255,255,0.8);
+	text-align: center;
+	z-index: 10;
+}
+.dialog:before {
+	content: " ";
+	height: 100%;
+	display: inline-block;
+	vertical-align: middle;
+	width: 1px;
+}
+.dialog article {
+	display: inline-block;
+	vertical-align: middle;
+	text-align: left;
+	width: 400px;
+	padding: 20px 40px;
+	background-color: white;
+	border-radius: 10px;
+	box-shadow: 0px 0px 50px rgba(0,0,0,0.1);
+	-webkit-box-shadow: 0px 0px 50px rgba(0,0,0,0.1);
+	-moz-box-shadow: 0px 0px 50px rgba(0,0,0,0.1);
+	font-size: 18px !important;
+	color: #333;
+}
+.dialog a.ok,
+.dialog a.cancel {
+	text-decoration: underline;
+	cursor: pointer;
+	color: #333;
+}
+.dialog article h3 {
+	text-align: center;
+	margin-bottom: 27px;
+}
+.dialog article p {
+	margin-bottom: 27px;
+}
+.dialog article p:last-child {
+	margin-bottom: 0px;
+}
+.dialog article label {
+	font-size: 14px;
+	text-align: center;
+	cursor: pointer;
+}
+
+
+/* меню */
+page > nav.menu {
+	position: absolute;
+	right: 4.5em;
+	top: 27px;
+	margin-right: 14px;
+	text-decoration: none;
+	white-space: nowrap;
+}
+page.back > nav.menu {
+	right: auto;
+	left: 2em;
+}
+page > nav.menu > * {
+	font-size: 14px;
+}
+page > nav.menu a {
+	/*display: none;*/
+}
+page > nav.menu:hover a {
+	/*display: inline-block;*/
+	/*padding-right: 0.625em;*/
+}
+page > nav.menu > .menu-icon {
+	cursor: pointer;
+	font-weight: 500;
+	position: relative;
+	margin-left: 7px;
+	display: inline-block;
+	vertical-align: top;
+	text-decoration: none;
+	padding: 0 10px;
+	text-align: left;
+}
+page > nav.menu > .menu-icon:before {
+	content: "—";
+	position: absolute;
+	top: -0.375em;
+	left: 10px;
+}
+page > nav.menu > .menu-icon:after {
+	content: "—";
+	position: absolute;
+	top: 0.375em;
+	left: 10px;
+}
+
+page > nav.menu .account-info {
+	opacity: 0.5;
+	vertical-align: middle;
+	margin-right: -7px;
+}
+
+
+/* помощь */
+page > nav > .help {
+	font-size: 14px;
+	/*padding: 0 14px;*/
+	/*font-weight: 400;*/
+	/*position: absolute;*/
+	/*right: 0px;*/
+	/*top: -54px;*/
+}
+page.front > nav > .help {
+	display: none;
+}
+page.front > nav:hover > .help {
+	display: inline;
+}
+
+help {
+	font-size: 12px;
+	font-weight: 400;
+	line-height: 1.45;
+	display: inline-block;
+	font-style: italic;
+	color: rgba(0,0,0,0.5);
+}
+help.plain {
+	 font-size: 14px;
+	 line-height: 27px;
+	 color: #333;
+	 font-style: normal;
+	 padding-left: 14px;
+	 padding-right: 14px;
+}
+help.plain p {
+	margin-bottom: 27px;
+}
+help strong {
+	font-weight: 600;
+	color: #F05A24;
+}
+
+help.button-help {
+	position: absolute;
+	top: 80px;
+	left: 110px;
+}
+help.button-help img {
+	position: absolute;
+	left: -60px;
+	top: -10px;
+}
+help.input-help {
+	position: absolute;
+	top: -50px;
+	left: 280px;
+}
+help.input-help img {
+	position: absolute;
+	left: -45px;
+	top: 15px;
+}
+help.views-help {
+	position: absolute;
+	top: -85px;
+	right: 0px;
+	width: 360px;
+	text-align: left;
+}
+help.views-help img {
+	position: absolute;
+	left: 180px;
+	top: 45px;
+}
