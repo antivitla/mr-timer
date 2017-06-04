@@ -21,7 +21,7 @@ class Petrov {
       .then(res => {
         console.log('petrov get', accountCode, res.data.status)
         if (!res.data.status) {
-          throw new Error(`${accountCode}: ${res.data.error}`)
+          throw new Error(`Account '${accountCode}' error: ${res.data.error}`)
         }
         return res.data
       })
@@ -33,7 +33,7 @@ class Petrov {
       .then(res => {
         console.log('petrov post', accountCode, res.data.status)
         if (!res.data.status) {
-          throw new Error(`${accountCode}: ${res.data.error}`)
+          throw new Error(`Account '${accountCode}' error: ${res.data.error}`)
         }
         return res.data
       })
@@ -46,7 +46,7 @@ class Petrov {
         console.log('petrov put', accountCode, res.data.status)
         if (!res.data.status) {
           console.log('put', res.data)
-          throw new Error(`${accountCode}: ${res.data.error}`)
+          throw new Error(`Account '${accountCode}' error: ${res.data.error}`)
         }
         return res.data
       })
@@ -58,7 +58,7 @@ class Petrov {
       .then(res => {
         console.log('petrov delete', accountCode, res.data.status)
         if (!res.data.status) {
-          throw new Error(`${accountCode}: ${res.data.error}`)
+          throw new Error(`Account '${accountCode}' error: ${res.data.error}`)
         }
         return res.data
       })
