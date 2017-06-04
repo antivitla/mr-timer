@@ -1,5 +1,5 @@
 <template lang="pug">
-  div.mr-timer
+  div.titata
     div {{message}}
     petrov
 </template>

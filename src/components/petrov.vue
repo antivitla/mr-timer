@@ -3,7 +3,6 @@
     h2 Petrov API
     p.url
       span.method {{method}}
-      //- span.url {{url}}/
       input(
         type="text"
         v-bind:class="{error: !account}"
@@ -13,21 +12,10 @@
 
     p.send
       button(
-        @click="send('GET')"
-        v-bind:class="isLastMethod('GET')"
-        v-bind:disabled="isDisabled") get
-      button(
-        @click="send('POST')"
-        v-bind:class="isLastMethod('POST')"
-        v-bind:disabled="isDisabled") post
-      button(
-        @click="send('PUT')"
-        v-bind:class="isLastMethod('PUT')"
-        v-bind:disabled="isDisabled") put
-      button(
-        @click="send('DELETE')"
-        v-bind:class="isLastMethod('DELETE')"
-        v-bind:disabled="true") delete
+        v-for="method in methods"
+        @click="send(method.name)"
+        v-bind:class="isLastMethod(method.name)"
+        v-bind:disabled="isDisabled") {{method.name}}
 
     p.response(v-bind:class="{error: !status}" v-if="response")
       pre {{response}}
@@ -36,12 +24,20 @@
 <script>
   import Petrov from '@/petrov'
 
+  const methods = [
+    { name: 'GET' },
+    { name: 'POST' },
+    { name: 'PUT' },
+    { name: 'DELETE' }
+  ]
+
   export default {
     name: 'petrov',
     data () {
       return {
         url: Petrov.baseUrl,
         account: '',
+        methods,
         method: 'GET',
         response: '',
         status: true,
@@ -86,7 +82,6 @@
     margin 20px
 
     .method
-      font-weight 500
       margin-right 20px
       &:after
         content "/"
@@ -120,8 +115,6 @@
       padding 0 15px
       min-width 70px
       cursor pointer
-      font-weight 500
-      // font-size 16px
       outline none
       vertical-align top
       &[disabled]
