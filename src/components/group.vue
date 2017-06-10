@@ -1,13 +1,13 @@
 <template lang="pug">
-  .storage
-    storage-item(
+  .group
+    group-item(
       v-for="entry in entries"
       :key="entry.uid()"
       :entry="entry")
 </template>
 
 <script>
-  import storageItem from '@/components/storage-item'
+  import groupItem from '@/components/group-item'
 
   export default {
     props: [
@@ -15,7 +15,7 @@
     ],
 
     components: {
-      storageItem
+      groupItem
     }
   }
 </script>

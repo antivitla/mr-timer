@@ -3,9 +3,9 @@ import Vuex from 'vuex'
 import storage from './storage'
 import user from './user'
 import i18n from './i18n'
-import { DayPlugin, DayGroupStore } from './day'
-import { MonthPlugin, MonthGroupStore } from './month'
-import { TaskPlugin, TaskGroupStore } from './task'
+import { DaysPlugin } from './groups/days'
+import { MonthsPlugin } from './groups/months'
+import { TasksPlugin } from './groups/tasks'
 
 Vue.use(Vuex)
 
@@ -14,10 +14,11 @@ export default new Vuex.Store({
   modules: {
     storage,
     user,
-    i18n,
-    DayGroupStore,
-    MonthGroupStore,
-    TaskGroupStore
+    i18n
   },
-  plugins: [DayPlugin, MonthPlugin, TaskPlugin]
+  plugins: [
+    DaysPlugin,
+    MonthsPlugin,
+    TasksPlugin
+  ]
 })

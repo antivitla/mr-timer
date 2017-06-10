@@ -1,6 +1,9 @@
 <template lang="pug">
   .timer
-    | Timer
+    button.toggle 00
+    input(
+      type="text"
+      placeholder="Зодачка")
 </template>
 
 <script>

@@ -61,7 +61,9 @@ export default class Group {
   // когда доберутся
   duration () {
     return this.children
-      .reduce((d, c) => d + c.duration(), 0)
+      .reduce((duration, child) => {
+        return duration + child.duration()
+      }, 0)
   }
 
   // Пройтись по предкам и собрать имена
@@ -88,6 +90,8 @@ export default class Group {
   addEntry (entry, depth = 0) {
     // Нужно получить путь записи
     const path = this.resolvePath(entry)
+    // Айди последнего добавленного
+    let lastInsertedId
     // Пытаемся вставить в уже существующего ребёнка
     const childIndex = this.children
       .findIndex(item => {
@@ -111,13 +115,13 @@ export default class Group {
         constructors: this.constructors
       })
       proxy.addEntry(entry, depth + 1) // 1
-      this.addChild(proxy) // 2
+      lastInsertedId = this.addChild(proxy) // 2
     } else {
       // Финальное добавление с сортировкой
       this.addChild(entry)
     }
     // Пересортировочка
-    this.refreshOrderPosition()
+    this.refreshOrderPosition(lastInsertedId || childIndex)
   }
 
   // Удаляем запись рекурсивно и пустые узлы
@@ -149,14 +153,12 @@ export default class Group {
 
   addChild (child) {
     if (this.children.indexOf(child) < 0) {
-      const id = insertSorted({
+      return insertSorted({
         child,
-        children: this.children.slice(0),
+        children: this.children,
         compare: (a, b) => lastUpdated(a) - lastUpdated(b),
         dir: 1
       })
-      this.children.splice(id, 0, child)
-      return id
     } else {
       console.warn(`Попытка добавить дубликат в ${this.path()}`, child)
     }
@@ -165,16 +167,14 @@ export default class Group {
   removeChild (child) {
     const id = this.children.indexOf(child)
     if (id > -1) {
-      return this.children.splice(id, 1)
+      this.children.splice(id, 1)
     }
   }
 
-  refreshOrderPosition () {
-    if (this.parent) {
-      const list = this.parent.children.slice(0)
-      const id = list.indexOf(this)
-      list.splice(id, 1)
-      this.parent.addChild(this)
+  refreshOrderPosition (childId) {
+    if (childId > -1) {
+      const child = this.children.splice(childId, 1)[0]
+      this.addChild(child)
     }
   }
 }

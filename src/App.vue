@@ -14,22 +14,53 @@
       timer
 
       //- Petrov API view
-      petrov
+      //- petrov
+
+      //- Tasks view
+      .tasks
+        group-item(
+          v-for="task in Tasks.children"
+          :key="task.name"
+          :entry="task")
+
+      //- Months view
+      .months
+        group-item(
+          v-for="month in Months.children"
+          :key="month.name"
+          :entry="month")
 
       //- Storage view
-      storage(v-bind:entries="storageEntries")
+      //- storage-item(
+        v-for="entry in Storage.entries"
+        :key="entry.uid()
+        :entry="entry")
 </template>
 
 <script>
-  import timer from '@/components/timer'
-  import storage from '@/components/storage'
-  import petrov from '@/components/petrov'
-  import { mapMutations, mapGetters, mapActions } from 'vuex'
   import moment from 'moment'
+  import { mapMutations, mapGetters, mapActions } from 'vuex'
+  import timer from '@/components/timer'
+  import groupItem from '@/components/group-item'
+  import storageItem from '@/components/storage-item'
+  import petrov from '@/components/petrov'
+  import { Tasks } from '@/store/groups/tasks'
+  import { Months } from '@/store/groups/months'
+  import { Days } from '@/store/groups/days'
+  import { Storage } from '@/store/storage'
 
   moment.locale('ru')
 
   export default {
+    data () {
+      return {
+        Tasks,
+        Months,
+        Days,
+        Storage
+      }
+    },
+
     created () {
       this.refreshAppWithUserData(this.detectUserKey())
     },
@@ -44,8 +75,7 @@
       ...mapGetters([
         'userKey',
         'userMode',
-        'userGuestKey',
-        'storageEntries'
+        'userGuestKey'
       ])
     },
 
@@ -75,8 +105,9 @@
 
     components: {
       timer,
-      storage,
-      petrov
+      petrov,
+      groupItem,
+      storageItem
     }
   }
 </script>

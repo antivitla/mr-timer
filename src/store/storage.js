@@ -3,46 +3,28 @@ import Petrov from '@/petrov'
 import { insertSorted } from '@/utils/sorted'
 import async from 'async'
 
-const state = {
-  entries: [],
-  activeEntry: null
-}
+export const Storage = ({
+  entries: []
+})
 
-const getters = {
-  storageEntriesCount: state => state.entries.length,
-  storageEntries: state => state.entries
-}
-
-const mutations = {
+export const mutations = {
   addEntry (state, payload) {
-    const entry = new Entry(payload.entry)
     return insertSorted({
-      child: entry,
-      children: state.entries,
+      child: payload.entry,
+      children: Storage.entries,
       compare: (a, b) => a.start - b.start,
       dir: 1
     })
   },
-  removeEntry (state, payload) {
-    const id = state.entries.indexOf(payload.entry)
-    if (id > -1) {
-      state.entries.splice(id, 1)
-      return id
-    }
-  },
-  updateEntry (state, payload) {
-    // Merge update
-    // commit remove
-    // commit add
-  },
-  clearEntries (state) {
-    state.entries = []
+
+  clearEntries (state, payload) {
+    Storage.entries = []
   }
 }
 
 let addEntryTimeout
 
-const actions = {
+export const actions = ({
   loadEntries ({ state, commit, rootState }) {
     // Очищаем предыдущий запрос
     clearTimeout(addEntryTimeout)
@@ -66,8 +48,12 @@ const actions = {
               throw new Error('Error parsing remote data ' + error)
             }
             async.eachSeries(entries, (entry, next) => {
-              commit('addEntry', { entry })
-              addEntryTimeout = setTimeout(next, 20)
+              commit('addEntry', { entry: new Entry(entry) })
+              addEntryTimeout = setTimeout(next, 5)
+            }, error => {
+              if (error) {
+                console.warn(error)
+              }
             })
           }
         })
@@ -78,11 +64,9 @@ const actions = {
       // Или грузиться локально?
     }
   }
-}
+})
 
 export default {
-  state,
-  getters,
   mutations,
   actions
 }
