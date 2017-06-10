@@ -21,6 +21,7 @@
     "babel": "inherit"
   },
   "dependencies": {
+    "autosize": "^3.0.21",
     "axios": "^0.16.2",
     "chance": "^1.0.9",
     "moment": "^2.18.1",

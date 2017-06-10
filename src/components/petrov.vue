@@ -99,7 +99,7 @@
         color silver
       &.error
         text-align center
-        box-shadow 0px 1px 0px 0px ttt-red
+        box-shadow 0px 1px 0px 0px tttc-red
 
     .send
       align-items flex-start
@@ -124,20 +124,20 @@
 
       &:hover
       &.active
-        background-color ttt-red
+        background-color tttc-red
         color white
-        border-color ttt-red-darker
+        border-color tttc-red
       &:active
-        background-color ttt-red
+        background-color tttc-red
         color white
         border-bottom none
-        border-top solid 3px ttt-red-darker
+        border-top solid 3px tttc-red
 
     .response
       overflow-x hidden
       margin 40px 0px
       &.error
-        color ttt-red
+        color tttc-red
       pre
         margin 0
 </style>

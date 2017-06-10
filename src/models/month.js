@@ -15,10 +15,7 @@ export default class Month extends Group {
     super(obj)
     this.start = parseStart(obj.name)
     this.name = obj.name
-  }
-
-  type () {
-    return 'month'
+    this.type = 'month'
   }
 
   lastUpdated () {

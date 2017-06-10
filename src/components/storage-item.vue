@@ -48,7 +48,7 @@
       display inline-block
 
     .start
-      color ttt-text-muted
+      color tttc-text-muted
       font-size 14px
       font-family PT Mono
       width 180px
@@ -59,7 +59,7 @@
         margin 0px 10px 0px 10px
 
     .duration
-      color ttt-text-muted
+      color tttc-text-muted
       font-family PT Mono
       font-size 14px
       width 50px

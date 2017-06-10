@@ -354,6 +354,11 @@
       "resolved": "https://registry.npmjs.org/autoprefixer/-/autoprefixer-6.7.7.tgz",
       "dev": true
     },
+    "autosize": {
+      "version": "3.0.21",
+      "from": "autosize@latest",
+      "resolved": "https://registry.npmjs.org/autosize/-/autosize-3.0.21.tgz"
+    },
     "ava": {
       "version": "0.19.1",
       "from": "ava@latest",
@@ -2289,7 +2294,7 @@
     },
     "es6-promise": {
       "version": "4.0.5",
-      "from": "es6-promise@>=4.0.3 <4.1.0",
+      "from": "https://registry.npmjs.org/es6-promise/-/es6-promise-4.0.5.tgz",
       "resolved": "https://registry.npmjs.org/es6-promise/-/es6-promise-4.0.5.tgz",
       "dev": true
     },

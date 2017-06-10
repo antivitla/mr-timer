@@ -17,6 +17,13 @@ export const mutations = {
     })
   },
 
+  removeEntry (state, payload) {
+    const id = Storage.entries.indexOf(payload.entry)
+    if (id > -1) {
+      Storage.entries.splice(id, 1)
+    }
+  },
+
   clearEntries (state, payload) {
     Storage.entries = []
   }
@@ -48,7 +55,9 @@ export const actions = ({
               throw new Error('Error parsing remote data ' + error)
             }
             async.eachSeries(entries, (entry, next) => {
-              commit('addEntry', { entry: new Entry(entry) })
+              commit('addEntry', {
+                entry: new Entry(entry)
+              })
               addEntryTimeout = setTimeout(next, 5)
             }, error => {
               if (error) {
