@@ -24,10 +24,6 @@ function lastUpdated (groupOrEntry) {
   return updated
 }
 
-function compareUpdated (a, b) {
-  return lastUpdated(a) - lastUpdated(b)
-}
-
 function generateName () {
   return `item-${uuid()}`
 }
@@ -92,8 +88,6 @@ export default class Group {
   addEntry (entry, depth = 0) {
     // Нужно получить путь записи
     const path = this.resolvePath(entry)
-    // Для ускорения сортировки будущей
-    let lastInsertedId
     // Пытаемся вставить в уже существующего ребёнка
     const childIndex = this.children
       .findIndex(item => {
@@ -117,13 +111,13 @@ export default class Group {
         constructors: this.constructors
       })
       proxy.addEntry(entry, depth + 1) // 1
-      lastInsertedId = this.addChild(proxy) // 2
+      this.addChild(proxy) // 2
     } else {
       // Финальное добавление с сортировкой
       this.addChild(entry)
     }
     // Пересортировочка
-    this.refreshOrder(lastInsertedId || childIndex)
+    this.refreshOrderPosition()
   }
 
   // Удаляем запись рекурсивно и пустые узлы
@@ -155,12 +149,14 @@ export default class Group {
 
   addChild (child) {
     if (this.children.indexOf(child) < 0) {
-      return insertSorted({
+      const id = insertSorted({
         child,
-        children: this.children,
+        children: this.children.slice(0),
         compare: (a, b) => lastUpdated(a) - lastUpdated(b),
         dir: 1
       })
+      this.children.splice(id, 0, child)
+      return id
     } else {
       console.warn(`Попытка добавить дубликат в ${this.path()}`, child)
     }
@@ -173,35 +169,12 @@ export default class Group {
     }
   }
 
-  refreshOrder (lastInsertedId) {
-    // Быстрая проверка на порядок
-    if (lastInsertedId && lastInsertedId > -1) {
-      const bro = this.children
-        .slice(
-          lastInsertedId - 1,
-          lastInsertedId + 2)
-      // Если ребёнок один, всё в порядке уже
-      if (bro.length < 2) {
-        // главное чтоб не пусто
-        if (bro.length === 0) {
-          console.warn(`refreshOrder: нет детей у ${this.path()}`)
-        }
-        return
-      }
-      // Если нет, проверяем
-      const isOrdered = [0, 1].every(id => {
-        if (!bro[id + 1]) {
-          return true
-        } else {
-          return compareUpdated(bro[id], bro[id + 1]) > 0
-        }
-      })
-      if (isOrdered) {
-        return
-      }
+  refreshOrderPosition () {
+    if (this.parent) {
+      const list = this.parent.children.slice(0)
+      const id = list.indexOf(this)
+      list.splice(id, 1)
+      this.parent.addChild(this)
     }
-    // Ну нет так нет, полноформатный сортинг
-    // (в обратном порядке - свежее вперед!)
-    this.children.sort((a, b) => compareUpdated(b, a))
   }
 }
