@@ -6,7 +6,7 @@ function safeGetAtIndex (id, array) {
   if (array.length > id) {
     return array[id]
   } else {
-    return array.slice(-1)
+    return array.slice(-1)[0]
   }
 }
 
@@ -65,11 +65,11 @@ export default class Group {
   // когда доберутся
   duration () {
     return this.children
-      .reduce((d, c) => d + c.duration, 0)
+      .reduce((d, c) => d + c.duration(), 0)
   }
 
   // Пройтись по предкам и собрать имена
-  getPath () {
+  path () {
     const path = []
     let parent = this
     while (parent) {
@@ -84,6 +84,11 @@ export default class Group {
     return this.path().join('/')
   }
 
+  batch (action, children) {
+    children.forEach(child => this[action](child))
+  }
+
+  // Добавляем запись (оборачивая в узел)
   addEntry (entry, depth = 0) {
     // Нужно получить путь записи
     const path = this.resolvePath(entry)
@@ -106,7 +111,7 @@ export default class Group {
         depth,
         this.constructors)
       const proxy = new ExtendedGroup({
-        getPath: this.getPath,
+        resolvePath: this.resolvePath,
         name: path[depth],
         parent: this,
         constructors: this.constructors
@@ -153,7 +158,8 @@ export default class Group {
       return insertSorted({
         child,
         children: this.children,
-        compare: (a, b) => lastUpdated(a) - lastUpdated(b)
+        compare: (a, b) => lastUpdated(a) - lastUpdated(b),
+        dir: 1
       })
     } else {
       console.warn(`Попытка добавить дубликат в ${this.path()}`, child)
@@ -195,6 +201,7 @@ export default class Group {
       }
     }
     // Ну нет так нет, полноформатный сортинг
-    this.children.sort((a, b) => compareUpdated(a, b))
+    // (в обратном порядке - свежее вперед!)
+    this.children.sort((a, b) => compareUpdated(b, a))
   }
 }
