@@ -1,6 +1,19 @@
-# titata
+# Titamo&#x301;ta
 
-> Time Task Track
+Fast & clean tracking of time, task and money. For my fellow coders.
+
+*Powered by [vuejs](https://vuejs.org/)*
+
+### Features (roadmap)
+
+- (TODO) reports
+- view trees by days, months, years, tasks
+- (TODO) custom report and view trees
+- persist on server with zero auth
+- persist local
+- (TODO) export data
+- (TODO) integration with bitbucket, youtrack, github issues, trello
+- **chibi girls**
 
 ## Build Setup
 
