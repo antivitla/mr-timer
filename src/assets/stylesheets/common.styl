@@ -1,3 +1,16 @@
+body
+input
+textarea
+button
+select
+option
+  font-family Rubik, sans-serif
+  font-size 16px
+  line-height 20px
+  font-weight 300
+  color tttc-text
+  outline none
+
 select
 option
   font-size 14px
@@ -24,6 +37,16 @@ h2
 
 .material-icons
   font-size 18px
+  &.md-14
+    font-size 14px
+  &.md-16
+    font-size 16px
+  &.md-18
+    font-size 18px
+  &.md-20
+    font-size 20px
+  &.md-24
+    font-size 24px
 
 * + .material-icons
 .material-icons + *
@@ -32,5 +55,76 @@ h2
 [valign="middle"]
   vertical-align middle
 
+a
+  cursor pointer
+
 a[href]
   color steelblue
+
+// Color marks
+[color]
+  position relative
+[color]:before
+  content ' '
+  position absolute
+  left -1em
+  top 50%
+  transform translateY(-50%)
+  width 0.5em
+  height 0.5em
+  border-radius 30%
+  background-color gainsboro
+[color="0"]:before
+  background-color lighten(tttc-jan, 20%)
+[color="1"]:before
+  background-color lighten(tttc-feb, 20%)
+[color="2"]:before
+  background-color lighten(tttc-mar, 20%)
+[color="3"]:before
+  background-color lighten(tttc-apr, 20%)
+[color="4"]:before
+  background-color lighten(tttc-may, 20%)
+[color="5"]:before
+  background-color lighten(tttc-jun, 20%)
+[color="6"]:before
+  background-color lighten(tttc-jul, 20%)
+[color="7"]:before
+  background-color lighten(tttc-aug, 20%)
+[color="8"]:before
+  background-color lighten(tttc-sep, 20%)
+[color="9"]:before
+  background-color lighten(tttc-oct, 20%)
+[color="10"]:before
+  background-color lighten(tttc-nov, 20%)
+[color="11"]:before
+  background-color lighten(tttc-dec, 20%)
+
+button
+.button
+  border 0px
+  background-color tttc-back-gray
+  border-radius 5px
+  line-height 20px
+  font-size 18px
+  font-weight 300
+  padding 10px 40px
+  cursor pointer
+  border-bottom solid tttc-border 3px
+  outline none
+  &:active
+    border-top solid darken(tttc-border, 3%) 3px
+    border-bottom-width 0px
+    background-color darken(tttc-back-gray, 3%)
+
+.icon-button
+  display inline-block
+  i.material-icons
+    font-size inherit
+    line-height inherit
+    display block
+  &.lg
+    font-size 24px
+    width 24px
+    height 24px
+    line-height 24px
+    text-align center

@@ -2,10 +2,15 @@ import Entry from '@/models/entry'
 import Petrov from '@/petrov'
 import { insertSorted } from '@/utils/sorted'
 import async from 'async'
+import appName from './app-name'
 
 export const Storage = ({
   entries: []
 })
+
+const state = {
+  localStorageKey: appName + '-entries'
+}
 
 export const mutations = {
   addEntry (state, payload) {
@@ -31,16 +36,29 @@ export const mutations = {
 
 let addEntryTimeout
 
+function delayedAddEntries (entries, commit) {
+  async.eachSeries(entries, (entry, next) => {
+    commit('addEntry', {
+      entry: new Entry(entry)
+    })
+    addEntryTimeout = setTimeout(next, 5)
+  }, error => {
+    if (error) {
+      console.warn(error)
+    }
+  })
+}
+
 export const actions = ({
-  loadEntries ({ state, commit, rootState }) {
+  loadEntries ({ state, commit, getters }) {
     // Очищаем предыдущий запрос
     clearTimeout(addEntryTimeout)
     // Грузиться с удалённого аккаунта?
-    if (rootState.user.key !== 'local') {
-      Petrov.get(rootState.user.key)
+    if (getters['userKey'] !== 'local') {
+      Petrov.get(getters['userKey'])
         .catch(() => {
           // Если не найден аккаунт, создаём его
-          return Petrov.post(rootState.user.key)
+          return Petrov.post(getters['userKey'])
         })
         .then((res) => {
           // Теперь точно есть аккаунт...
@@ -54,28 +72,68 @@ export const actions = ({
             } catch (error) {
               throw new Error('Error parsing remote data ' + error)
             }
-            async.eachSeries(entries, (entry, next) => {
-              commit('addEntry', {
-                entry: new Entry(entry)
-              })
-              addEntryTimeout = setTimeout(next, 5)
-            }, error => {
-              if (error) {
-                console.warn(error)
-              }
-            })
+            // Добавляем записи с задержкой
+            delayedAddEntries(entries, commit)
           }
         })
         .catch(error => {
-          console.log(error)
+          console.error(error)
         })
     } else {
       // Или грузиться локально?
+      let entries = []
+      const key = state.localStorageKey
+      const raw = localStorage.getItem(key) ||
+        localStorage.getItem('Timerwood-Log')
+      if (raw) {
+        try {
+          entries = JSON.parse(raw).entries
+        } catch (error) {
+          console.warn('Error parsing localStorage', error)
+        }
+        // Добавляем записи с задержкой
+        delayedAddEntries(entries, commit)
+      }
     }
+  },
+
+  saveEntries ({ state, getters }) {
+    const raw = JSON.stringify({
+      entries: Storage.entries
+    })
+    let key = state.localStorageKey
+    if (getters['userKey'] !== 'local') {
+      key = key + '-' + getters['userKey']
+    }
+    localStorage.setItem(key, raw)
+  },
+
+  addEntry (context, payload) {
+    context.commit('addEntry', payload)
+    context.dispatch('saveEntries')
+  },
+
+  removeEntry (context, payload) {
+    context.commit('removeEntry', payload)
+    context.dispatch('saveEntries')
+  },
+
+  updateEntry (context, payload) {
+    const updatedEntry = new Entry(
+      Object.assign({}, payload.entry, payload.update))
+    context.commit('removeEntry', {
+      entry: payload.entry
+    })
+    context.commit('addEntry', {
+      entry: updatedEntry
+    })
+    context.dispatch('saveEntries')
+    return updatedEntry
   }
 })
 
 export default {
+  state,
   mutations,
   actions
 }

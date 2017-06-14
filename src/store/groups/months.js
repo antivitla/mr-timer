@@ -23,6 +23,9 @@ export function MonthsPlugin (store) {
     if (mutation.type === 'addEntry') {
       Months.addEntry(mutation.payload.entry)
     }
+    if (mutation.type === 'removeEntry') {
+      Months.removeEntry(mutation.payload.entry)
+    }
     if (mutation.type === 'clearEntries') {
       Months.children = []
     }

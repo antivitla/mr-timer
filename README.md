@@ -1,6 +1,6 @@
-# Titamo&#x301;ta
+# Tatimo&#x301;ta
 
-Fast & clean tracking of time, task and money. For my fellow coders.
+Fast & clean tracking of task, timer and money. For my fellow coders.
 
 *Powered by [vuejs](https://vuejs.org/)*
 

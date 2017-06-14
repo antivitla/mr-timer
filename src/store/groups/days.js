@@ -25,6 +25,9 @@ export function DaysPlugin (store) {
     if (mutation.type === 'addEntry') {
       Days.addEntry(mutation.payload.entry)
     }
+    if (mutation.type === 'removeEntry') {
+      Days.removeEntry(mutation.payload.entry)
+    }
     if (mutation.type === 'clearEntries') {
       Days.children = []
     }

@@ -1,16 +1,21 @@
 <template lang="pug">
-  .timer(:class="{ active: timerActive }")
+  .timer(
+    :class="{ active: timerActive }")
     button(@click="toggle")
       span.main
-        span.hrs {{ hrs }}
-        span.delimiter :
-        span.min {{ min }}
+        span.hrs(
+          :class="{ low: hrs < 1 }") {{ hrs }}
+        span.delimiter(
+          :class="{ low: min < 1 }") :
+        span.min(
+          :class="{ low: min < 1 }") {{ min }}
       span.sec {{ sec }}
       span.ms {{ ms }}
     list-input(
       v-model="details"
       :debounce="1000"
       :on-submit="toggle"
+      :focus="timerActive"
       :placeholder="placeholder")
 </template>
 
@@ -20,8 +25,13 @@
   import funny from 'mr-funny'
   import funnyTemplates from '@/funny/templates'
   import capitalize from '@/utils/capitalize'
-  import digitize from '@/utils/digitize'
   import Entry from '@/models/entry'
+  import {
+    durationHH,
+    durationMMfraction,
+    durationSSfraction,
+    durationMSfraction
+  } from '@/utils/time'
 
   function funnyTask (locale) {
     return funny.phrase(funnyTemplates[locale].base)
@@ -34,7 +44,8 @@
       return {
         details: [],
         placeholder: '',
-        ms: '000'
+        ms: '000',
+        focusOnEvent: 'focus-timer'
       }
     },
 
@@ -57,14 +68,12 @@
           // (we will start that task little later in 'toggle').
           // We can detect this by absense of previous details
           if (prev.length) {
-            // console.log('change entry details', this.details)
-            const updatedEntry = new Entry(
-              Object.assign({}, this.timerEntry, {
-                details: this.details
-              }))
-            this.removeEntry({ entry: this.timerEntry })
-            this.addEntry({ entry: updatedEntry })
-            this.setTimerEntry({ entry: updatedEntry })
+            const entry = this.timerEntry
+            const update = { details: this.details }
+            this.updateEntry({ entry, update })
+              .then(updatedEntry => {
+                this.setTimerEntry({ entry: updatedEntry })
+              })
           }
         }
       }
@@ -72,20 +81,13 @@
 
     computed: {
       hrs () {
-        if (this.timerDuration < 3600000) {
-          return digitize(0, 2)
-        } else {
-          return digitize(
-            parseInt(this.timerDuration / (1000 * 60 * 60), 10), 2)
-        }
+        return durationHH(this.timerDuration)
       },
       min () {
-        return digitize(
-          (new Date(this.timerDuration)).getUTCMinutes(), 2)
+        return durationMMfraction(this.timerDuration)
       },
       sec () {
-        return digitize(
-          (new Date(this.timerDuration)).getUTCSeconds(), 2)
+        return durationSSfraction(this.timerDuration)
       },
       ...mapGetters([
         'locale',
@@ -105,6 +107,8 @@
           } else {
             this.details = details
           }
+          // Emit event for focusing timer
+          this.$emit(this.focusOnEvent)
           const entry = new Entry({ details })
           this.startTimer({ entry })
           // Start ms tick
@@ -120,21 +124,22 @@
         }
       },
       tick () {
-        this.ms = digitize(
-          ((new Date()).getTime() - this.timerEntry.start) % 1000, 3)
+        const d = (new Date()).getTime() - this.timerEntry.start
+        this.ms = durationMSfraction(d)
         tickTimeout = setTimeout(this.tick, 50)
       },
       stopTick () {
         clearTimeout(tickTimeout)
       },
       ...mapMutations([
-        'addEntry',
-        'removeEntry',
         'setTimerEntry'
       ]),
       ...mapActions([
         'startTimer',
-        'stopTimer'
+        'stopTimer',
+        'addEntry',
+        'removeEntry',
+        'updateEntry'
       ])
     },
 
@@ -147,7 +152,6 @@
 
   .timer
     position relative
-    margin-bottom 60px
 
     button
       height 60px
@@ -180,6 +184,7 @@
         font-size 30px
         line-height 30px
         margin-left -15px
+        display flex
       .delimiter
         font-size 26px
       .sec
@@ -198,6 +203,10 @@
         margin-left 50px
         text-align center
         display block
+      .hrs.low
+      .delimiter.low
+      .min.low
+        opacity 0.5
 
     textarea
       margin-top 20px
@@ -212,7 +221,6 @@
       resize none
       background-color white
       border solid 1px tttc-border
-      // border-bottom-width 4px
       font-size 24px
       line-height 30px
       &::placeholder
@@ -230,8 +238,6 @@
         color tttc-text-invert-highlight
         border-color tttc-back-dark
         border-bottom-width 1px
-        // border-top-width 4px
-
 
     @media (min-width 768px)
       button
@@ -247,4 +253,5 @@
       textarea
         padding-left 220px
         text-align left
+        margin-top 0px
 </style>

@@ -15,6 +15,9 @@ export function TasksPlugin (store) {
     if (mutation.type === 'addEntry') {
       Tasks.addEntry(mutation.payload.entry)
     }
+    if (mutation.type === 'removeEntry') {
+      Tasks.removeEntry(mutation.payload.entry)
+    }
     if (mutation.type === 'clearEntries') {
       Tasks.children = []
     }

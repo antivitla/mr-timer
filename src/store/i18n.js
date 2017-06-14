@@ -25,7 +25,7 @@ export const currencies = ({
     symbol: '€',
     isBefore: true
   },
-  chy: {
+  cny: {
     code: 'cny',
     symbol: '¥',
     isBefore: false
@@ -39,6 +39,23 @@ const ru = ({
     months: 'месяцы',
     days: 'дни',
     years: 'годы'
+  },
+  time: {
+    at: 'в'
+  },
+  price: {
+    label: 'цена',
+    perHour: 'в час'
+  },
+  duration: {
+    hr: {
+      zero: 'часов',
+      one: 'час',
+      few: 'часа',
+      many: 'часов'
+    },
+    min: 'мин',
+    sec: 'сек'
   }
 })
 
@@ -49,6 +66,23 @@ const en = ({
     months: 'months',
     days: 'days',
     years: 'years'
+  },
+  time: {
+    at: 'at'
+  },
+  price: {
+    label: 'price',
+    perHour: 'per hour'
+  },
+  duration: {
+    hr: {
+      zero: 'h',
+      one: 'h',
+      few: 'h',
+      many: 'h'
+    },
+    min: 'min',
+    sec: 'sec'
   }
 })
 
@@ -59,21 +93,23 @@ export const translate = ({
 
 const state = {
   language: 'ru',
-  currency: 'rub',
-  languages,
-  currencies
+  currency: 'rub'
 }
 
 const getters = {
-  locale (state) {
-    return state.language
+  locale: state => state.language,
+  currency: state => state.currency,
+  isCurrencySymbolBefore: state => {
+    return currencies[state.currency].isBefore
   }
 }
 
 const mutations = {
   setLocale (state, payload) {
-    console.log(payload)
     state.language = payload.locale
+  },
+  setCurrency (state, payload) {
+    state.currency = payload.currency
   }
 }
 

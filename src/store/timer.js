@@ -16,24 +16,12 @@ const state = {
 }
 
 export const getters = {
-  timerStart (state) {
-    return state.entry.start
-  },
-  timerStop (state) {
-    return state.entry.stop
-  },
-  timerDuration (state) {
-    return state.entry.stop - state.entry.start
-  },
-  timerActive (state) {
-    return state.active
-  },
-  timerDelay (state) {
-    return state.delay
-  },
-  timerEntry (state) {
-    return state.entry
-  }
+  timerStart: state => state.entry.start,
+  timerStop: state => state.entry.stop,
+  timerDuration: state => state.entry.stop - state.entry.start,
+  timerActive: state => state.active,
+  timerDelay: state => state.delay,
+  timerEntry: state => state.entry
 }
 
 export const mutations = {
