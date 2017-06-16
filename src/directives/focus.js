@@ -11,6 +11,12 @@ export const focusAndSelectAll = ({
     if (value.focus) {
       focusAndSelect(element, 0, element.value.length)
     }
+  },
+
+  componentUpdated (element, { value }) {
+    if (value.focus) {
+      focusAndSelect(element, 0, element.value.length)
+    }
   }
 })
 
@@ -22,6 +28,12 @@ export const focusAndSelectRange = ({
   },
 
   update (element, { value }) {
+    if (value.focus) {
+      focusAndSelect(element, value.start, value.end)
+    }
+  },
+
+  componentUpdated (element, { value }) {
     if (value.focus) {
       focusAndSelect(element, value.start, value.end)
     }

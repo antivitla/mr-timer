@@ -2,42 +2,41 @@
   div.storage-item
     span.edit(
       v-if="isEditingTask && editingTaskUid === uid"
-      @keyup.esc="cancelTaskEditing()"
-      v-esc-outside="cancelTaskEditing"
-      v-click-outside="cancelTaskEditing")
+      @keyup.esc="stopTaskEditing()"
+      v-esc-outside="stopTaskEditing"
+      v-click-outside="stopTaskEditing")
       span.start
         input(
           type="text"
           v-focus-and-select-all="editingFocus === 'start'"
-          :value="editingTaskFields.start"
+          :value="edit.start"
           @input="updateStart($event)"
           @keyup.enter="submit()")
       span.details
         list-input(
           :focus="editingFocus === 'details'"
-          :value="editingTaskFields.details"
+          :value="edit.details"
           @input-original-event="updateDetails($event)"
           :on-submit="submit")
       span.duration
         input(
           type="text"
           v-focus-and-select-all="editingFocus === 'duration'"
-          :value="editingTaskFields.duration"
+          :value="edit.duration"
           @input="updateDuration($event)"
           @keyup.enter="submit()")
       span.actions
-        //- a.icon-button.filter
-        //-   i.material-icons filter_list
         a.icon-button.delete(@click="removeEntry({ entry })")
           i.material-icons delete
-        a.icon-button.cancel(@click="cancelTaskEditing()")
+        a.icon-button.cancel(@click="stopTaskEditing()")
           i.material-icons block
 
     span.read(v-else)
       span.start(
         v-once
         v-long-click="500"
-        @long-click="startEdit('start')") {{ start }}
+        @long-click="startEdit('start')"
+        @normal-click="startTask()") {{ start }}
       span.details(
         v-once
         v-long-click="500"
@@ -45,47 +44,51 @@
         @normal-click="startTask()") {{ details }}
       span.duration(
         v-long-click="500"
-        @long-click="startEdit('duration')") {{ duration }}
+        @long-click="startEdit('duration')"
+        @normal-click="startTask()") {{ duration }}
 </template>
 
 <script>
-  import { mapGetters, mapMutations } from 'vuex'
+  import { mapGetters, mapMutations, mapActions } from 'vuex'
   import { translate } from '@/store/i18n'
-  import {
-    durationHHMM,
-    durationHHMMSS,
-    timeDDMMYYYY,
-    timeHHMM
-  } from '@/utils/time'
+  import { duration, durationEditable } from '@/utils/duration'
+  import { timeEditable } from '@/utils/time'
   import longClick from '@/directives/long-click'
   import clickOutside from '@/directives/click-outside'
   import escOutside from '@/directives/esc-outside'
   import { focusAndSelectAll } from '@/directives/focus'
   import listInput from '@/components/list-input'
+  import bus from '@/event-bus'
+  import Entry from '@/models/entry'
 
   export default {
     props: ['entry'],
+
+    data () {
+      return {
+        edit: {
+          details: null,
+          duration: null,
+          start: null
+        }
+      }
+    },
 
     computed: {
       details () {
         return this.entry.details.join(' / ')
       },
       duration () {
-        const d = this.entry.duration()
+        const d = duration(this.entry.duration())
         if (this.entry === this.timerEntry) {
-          return durationHHMMSS(d)
+          return d.format('HH:mm:ss')
         } else {
-          return durationHHMM(d)
+          return d.format('HH:mm')
         }
       },
       start () {
-        const d = new Date(this.entry.start)
-        const date = timeDDMMYYYY(d)
-        const time = timeHHMM(d)
-        const label = date + ' ' +
-          translate[this.locale].time.at + ' ' +
-          time
-        return label
+        return timeEditable
+          .stringify(this.entry.start, translate[this.locale].time.at)
       },
       uid () {
         return this.entry.uid()
@@ -103,25 +106,71 @@
     methods: {
       startTask () {
         console.log('start task')
+        bus.$emit('start-task', {
+          entry: new Entry({
+            start: new Date().getTime(),
+            stop: new Date().getTime(),
+            details: this.entry.details.slice(0)
+          })
+        })
       },
-
+      clearEdit () {
+        this.edit.details = null
+        this.edit.duration = null
+        this.edit.start = null
+      },
       startEdit (field) {
-        this.$store.commit('startTaskEditing', {
+        this.clearEdit()
+        this.stopTaskEditing()
+        let payload = {
           focus: field,
           edit: {
             start: this.entry.start,
             details: this.entry.details,
-            stop: this.entry.stop,
             duration: this.entry.duration()
           },
           uid: this.entry.uid()
-        })
+        }
+        this.edit.start = timeEditable
+          .stringify(this.entry.start, translate[this.locale].time.at)
+        this.edit.details = this.entry.details.join(' / ')
+        this.edit.duration = durationEditable
+          .stringify(this.entry.duration())
+        this.startTaskEditing(payload)
+      },
+      updateDetails (event) {
+        this.edit.details = event.target.value
+      },
+      updateDuration (event) {
+        this.edit.duration = event.target.value
+      },
+      updateStart (event) {
+        this.edit.start = event.target.value
+        const start = timeEditable
+          .parse(this.edit.start)
+        this.edit.duration = durationEditable
+          .stringify(this.entry.stop - start)
       },
       submit () {
-        console.log('submit')
+        const start = timeEditable
+          .parse(this.edit.start)
+        const duration = durationEditable
+          .parse(this.edit.duration)
+        const stop = start + duration
+        const details = this.edit.details.split('/').map(d => d.trim())
+        const payload = {
+          entry: this.entry,
+          update: { start, stop, details }
+        }
+        this.stopTaskEditing()
+        this.updateEntry(payload)
       },
       ...mapMutations([
-        'cancelTaskEditing',
+        'stopTaskEditing',
+        'startTaskEditing'
+      ]),
+      ...mapActions([
+        'updateEntry',
         'removeEntry'
       ])
     },

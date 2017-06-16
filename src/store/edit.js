@@ -22,6 +22,13 @@ const mutations = {
 
   cancelTaskEditing (state, payload) {
     state.isEditing = false
+  },
+
+  stopTaskEditing (state) {
+    state.isEditing = false
+    state.edit = null
+    state.uid = null
+    state.focus = 'details'
   }
 }
 

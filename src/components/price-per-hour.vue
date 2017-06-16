@@ -14,7 +14,7 @@
 <script>
   import { mapGetters, mapActions } from 'vuex'
   import debounce from '@/utils/debounce'
-  import capitalize from '@/utils/capitalize'
+  import capitalize from 'lodash/capitalize'
   import { translate } from '@/store/i18n'
 
   export default {

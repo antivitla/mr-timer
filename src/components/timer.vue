@@ -16,6 +16,7 @@
       :debounce="1000"
       :on-submit="toggle"
       :focus="timerActive"
+      :reset-focus-on="resetFocusOnEvent"
       :placeholder="placeholder")
 </template>
 
@@ -24,14 +25,10 @@
   import listInput from './list-input'
   import funny from 'mr-funny'
   import funnyTemplates from '@/funny/templates'
-  import capitalize from '@/utils/capitalize'
+  import capitalize from 'lodash/capitalize'
   import Entry from '@/models/entry'
-  import {
-    durationHH,
-    durationMMfraction,
-    durationSSfraction,
-    durationMSfraction
-  } from '@/utils/time'
+  import { duration, durationFraction } from '@/utils/duration'
+  import bus from '@/event-bus'
 
   function funnyTask (locale) {
     return funny.phrase(funnyTemplates[locale].base)
@@ -45,12 +42,16 @@
         details: [],
         placeholder: '',
         ms: '000',
-        focusOnEvent: 'focus-timer'
+        resetFocusOnEvent: 'start-task'
       }
     },
 
     created () {
       this.placeholder = capitalize(funnyTask(this.locale))
+      bus.$on('start-task', payload => {
+        this.start(payload.entry)
+        this.$emit(this.resetFocusOnEvent)
+      })
     },
 
     watch: {
@@ -81,13 +82,16 @@
 
     computed: {
       hrs () {
-        return durationHH(this.timerDuration)
+        return duration(this.timerDuration)
+          .format('HH')
       },
       min () {
-        return durationMMfraction(this.timerDuration)
+        return durationFraction(this.timerDuration)
+          .format('mm')
       },
       sec () {
-        return durationSSfraction(this.timerDuration)
+        return durationFraction(this.timerDuration)
+          .format('ss')
       },
       ...mapGetters([
         'locale',
@@ -100,32 +104,40 @@
     methods: {
       toggle () {
         if (!this.timerActive) {
-          // Start timer with guaranteed details
-          let details = [this.placeholder]
-          if (this.details.length) {
-            details = this.details.slice(0)
-          } else {
-            this.details = details
-          }
-          // Emit event for focusing timer
-          this.$emit(this.focusOnEvent)
-          const entry = new Entry({ details })
-          this.startTimer({ entry })
-          // Start ms tick
-          this.tick()
-          // Add new entry
-          this.addEntry({ entry })
-          this.placeholder = capitalize(funnyTask(this.locale))
+          this.start()
         } else {
-          // Stop
-          this.stopTimer()
-          // Stop ms tick
-          this.stopTick()
+          this.stop()
         }
       },
+      start (newEntry) {
+        this.stop()
+        // Start timer with guaranteed details
+        let details = [this.placeholder]
+        if (newEntry) {
+          this.details = newEntry.details.slice(0)
+        } else if (this.details.length) {
+          details = this.details.slice(0)
+        } else {
+          this.details = details
+        }
+        const entry = newEntry || new Entry({ details })
+        this.startTimer({ entry })
+        // Start ms tick
+        this.tick()
+        // Add new entry
+        this.addEntry({ entry })
+        this.placeholder = capitalize(funnyTask(this.locale))
+      },
+      stop () {
+        // Stop
+        this.stopTimer()
+        // Stop ms tick
+        this.stopTick()
+      },
       tick () {
-        const d = (new Date()).getTime() - this.timerEntry.start
-        this.ms = durationMSfraction(d)
+        const d = new Date().getTime() - this.timerEntry.start
+        this.ms = durationFraction(d)
+          .format('ms')
         tickTimeout = setTimeout(this.tick, 50)
       },
       stopTick () {

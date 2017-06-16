@@ -1,6 +1,6 @@
 import Entry from '@/models/entry'
 import Petrov from '@/petrov'
-import { insertSorted } from '@/utils/sorted'
+import sortedIndexBy from 'lodash/sortedIndexBy'
 import async from 'async'
 import appName from './app-name'
 
@@ -14,12 +14,11 @@ const state = {
 
 export const mutations = {
   addEntry (state, payload) {
-    return insertSorted({
-      child: payload.entry,
-      children: Storage.entries,
-      compare: (a, b) => a.start - b.start,
-      dir: 1
-    })
+    const id = sortedIndexBy(
+      Storage.entries,
+      payload.entry,
+      item => -item.start)
+    Storage.entries.splice(id, 0, payload.entry)
   },
 
   removeEntry (state, payload) {
@@ -48,6 +47,8 @@ function delayedAddEntries (entries, commit) {
     }
   })
 }
+
+let lockedBatchOperations = false
 
 export const actions = ({
   loadEntries ({ state, commit, getters }) {
@@ -104,6 +105,8 @@ export const actions = ({
     let key = state.localStorageKey
     if (getters['userKey'] !== 'local') {
       key = key + '-' + getters['userKey']
+      // Save remote
+      Petrov.put(getters['userKey'], { entries: Storage.entries })
     }
     localStorage.setItem(key, raw)
   },
@@ -129,6 +132,54 @@ export const actions = ({
     })
     context.dispatch('saveEntries')
     return updatedEntry
+  },
+
+  batchUpdateEntries (context, payload) {
+    if (!lockedBatchOperations) {
+      lockedBatchOperations = true
+      async.eachSeries(payload.entries, (entry, next) => {
+        // Переименование
+        if (payload.update.details) {
+          const source = payload.update.details.source.join('/')
+          const target = payload.update.details.target.join('/')
+          entry.details = entry.details.join('/')
+            .replace(new RegExp('^' + source), target)
+            .split('/')
+            .map(d => d.trim())
+        }
+        // Изменение длительностей
+        if (payload.update.stop) {
+          if (payload.update.stop.add) {
+            entry.stop = entry.stop + payload.update.stop.add
+          }
+        }
+        context.commit('removeEntry', { entry })
+        context.commit('addEntry', { entry: new Entry(entry) })
+        setTimeout(next, 5)
+      }, error => {
+        if (error) {
+          console.warn(error)
+        }
+        lockedBatchOperations = false
+        context.dispatch('saveEntries')
+      })
+    }
+  },
+
+  batchRemoveEntries (context, payload) {
+    if (!lockedBatchOperations) {
+      lockedBatchOperations = true
+      async.eachSeries(payload.entries, (entry, next) => {
+        context.commit('removeEntry', { entry })
+        setTimeout(next, 5)
+      }, error => {
+        if (error) {
+          console.warn(error)
+        }
+        lockedBatchOperations = false
+        context.dispatch('saveEntries')
+      })
+    }
   }
 })
 

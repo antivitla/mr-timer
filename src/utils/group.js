@@ -1,4 +1,6 @@
 import moment from 'moment'
+import Entry from '@/models/entry'
+import Group from '@/models/group'
 
 export function parseStartMoment (name, start, formats) {
   const supportedTypes = ['string', 'number', 'function']
@@ -16,4 +18,16 @@ export function parseStartMoment (name, start, formats) {
     validStart = moment()
   }
   return validStart.isValid() ? validStart : moment()
+}
+
+export function extractEntries (item) {
+  let entries = []
+  item.children.forEach(child => {
+    if (child instanceof Entry) {
+      entries.push(child)
+    } else if (child instanceof Group) {
+      entries = entries.concat(extractEntries(child))
+    }
+  })
+  return entries
 }

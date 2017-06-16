@@ -1,6 +1,6 @@
+import sortedIndexBy from 'lodash/sortedIndexBy'
 import uuid from 'uuid/v1'
 import Entry from './entry'
-import { insertSorted } from '../utils/sorted'
 
 function safeGetAtIndex (id, array) {
   if (array.length > id) {
@@ -153,12 +153,9 @@ export default class Group {
 
   addChild (child) {
     if (this.children.indexOf(child) < 0) {
-      return insertSorted({
-        child,
-        children: this.children,
-        compare: (a, b) => lastUpdated(a) - lastUpdated(b),
-        dir: 1
-      })
+      const id = sortedIndexBy(
+        this.children, child, item => -lastUpdated(item))
+      this.children.splice(id, 0, child)
     } else {
       console.warn(`Попытка добавить дубликат в ${this.path()}`, child)
     }

@@ -24,6 +24,7 @@
     "autosize": "^3.0.21",
     "axios": "^0.16.2",
     "chance": "^1.0.9",
+    "lodash": "https://registry.npmjs.org/lodash/-/lodash-4.17.4.tgz",
     "moment": "^2.18.1",
     "moment-duration-format": "^1.3.0",
     "mr-funny": "^1.1.2",

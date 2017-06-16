@@ -1,138 +1,93 @@
-import pluralize from './pluralize'
-
-export function durationHH (ms) {
-  let hh = 0
-  if (ms >= 3600000) {
-    hh = parseInt(ms / 3600000, 10)
+function safeDate (arg) {
+  if (arg && parseInt(arg, 10)) {
+    return new Date(parseInt(arg, 10))
+  } else {
+    return new Date()
   }
-  if (hh < 10) {
-    hh = ('0' + hh).substr(-2)
-  }
-  return hh
 }
 
-export function durationMMfraction (ms) {
-  let mm = parseInt((ms % 3600000) / 60000, 10)
-  if (mm < 10) {
-    mm = ('0' + mm).substr(-2)
+const timeFormat = {
+  'HH': function (ms) {
+    let h = new Date(ms).getHours()
+    if (h < 10) {
+      h = ('0' + h).substr(-2)
+    }
+    return h
+  },
+
+  'HH:mm': function (ms) {
+    const d = new Date(ms)
+    let hh = d.getHours()
+    if (hh < 10) {
+      hh = ('0' + hh).substr(-2)
+    }
+    let mm = d.getMinutes()
+    if (mm < 10) {
+      mm = ('0' + mm).substr(-2)
+    }
+    return hh + ':' + mm
+  },
+
+  'DD.MM.YYYY': function (ms) {
+    const d = new Date(ms)
+    let dd = d.getDate()
+    if (dd < 10) {
+      dd = ('0' + dd).substr(-2)
+    }
+    let mm = d.getMonth() + 1
+    if (mm < 10) {
+      mm = ('0' + mm).substr(-2)
+    }
+    const yy = d.getFullYear()
+    return dd + '.' + mm + '.' + yy
+  },
+
+  'YYYY.MM.DD': function (ms) {
+    const d = new Date(ms)
+    let dd = d.getDate()
+    if (dd < 10) {
+      dd = ('0' + dd).substr(-2)
+    }
+    let mm = d.getMonth() + 1
+    if (mm < 10) {
+      mm = ('0' + mm).substr(-2)
+    }
+    const yy = d.getFullYear()
+    return yy + '.' + mm + '.' + dd
   }
-  return mm
 }
 
-export function durationSSfraction (ms) {
-  let ss = parseInt((ms % 60000) / 1000, 10)
-  if (ss < 10) {
-    ss = ('0' + ss).substr(-2)
+export function time (ms) {
+  return {
+    format (f) {
+      return timeFormat[f](ms)
+    }
   }
-  return ss
 }
 
-export function durationMSfraction (ms) {
-  let mls = ms % 1000
-  if (mls < 100) {
-    mls = ('00' + mls).substr(-3)
-  }
-  return mls
-}
+export const timeEditable = {
+  stringify (ms, at) {
+    const d = safeDate(ms)
+    const dd = ('0' + d.getDate()).slice(-2)
+    const mm = ('0' + (d.getMonth() + 1)).slice(-2)
+    const yy = d.getFullYear()
+    const hh = ('0' + d.getHours()).slice(-2)
+    const min = ('0' + d.getMinutes()).slice(-2)
+    return dd + '.' + mm + '.' + yy + ' ' + at + ' ' + hh + ':' + min
+  },
 
-export function durationHHMM (ms) {
-  let hh = 0
-  if (ms >= 3600000) {
-    hh = parseInt(ms / 3600000, 10)
+  parse (str) {
+    const r = /(\d{1,2})\.(\d{1,2})\.(\d{4}).*?(\d{1,2}):(\d{1,2})/
+    const match = str.match(r) ? str.match(r).map(n => parseInt(n)) : null
+    if (match) {
+      const d = new Date()
+      d.setDate(match[1])
+      d.setMonth(match[2] - 1)
+      d.setFullYear(match[3])
+      d.setHours(match[4])
+      d.setMinutes(match[5])
+      return d.getTime()
+    }
+    return parseInt(str, 10)
   }
-  if (hh < 10) {
-    hh = ('0' + hh).substr(-2)
-  }
-  let mm = parseInt((ms % 3600000) / 60000, 10)
-  if (mm < 10) {
-    mm = ('0' + mm).substr(-2)
-  }
-  return hh + ':' + mm
-}
-
-export function durationHHMMSS (ms) {
-  let hh = 0
-  if (ms >= 3600000) {
-    hh = parseInt(ms / 3600000, 10)
-  }
-  if (hh < 10) {
-    hh = ('0' + hh).substr(-2)
-  }
-  let mm = parseInt((ms % 3600000) / 60000, 10)
-  if (mm < 10) {
-    mm = ('0' + mm).substr(-2)
-  }
-  let ss = parseInt((ms % 60000) / 1000, 10)
-  if (ss < 10) {
-    ss = ('0' + ss).substr(-2)
-  }
-  return hh + ':' + mm + ':' + ss
-}
-
-export function durationHuman (d, hrWords, minWord, secWord) {
-  let hh = 0
-  if (d >= 3600000) {
-    hh = parseInt(d / 3600000, 10)
-  }
-  const mm = parseInt((d % 3600000) / 60000, 10)
-  const ss = parseInt((d % 60000) / 1000, 10)
-  let H = ''
-  if (hh) {
-    H = hh + ' ' + pluralize(hh, hrWords)
-  }
-  let M = ''
-  if (mm) {
-    M = mm + ' ' + minWord
-  }
-  let S = ''
-  if (ss && mm < 1) {
-    S = ss + ' ' + secWord
-  }
-  return (H + ' ' + M + ' ' + S).replace('  ', ' ').trim()
-}
-
-export function timeHH (d) {
-  let h = d.getHours()
-  if (h < 10) {
-    h = ('0' + h).substr(-2)
-  }
-  return h
-}
-
-export function timeHHMM (d) {
-  let hh = d.getHours()
-  if (hh < 10) {
-    hh = ('0' + hh).substr(-2)
-  }
-  let mm = d.getMinutes()
-  if (mm < 10) {
-    mm = ('0' + mm).substr(-2)
-  }
-  return hh + ':' + mm
-}
-
-export function timeDDMMYYYY (d) {
-  let dd = d.getDate()
-  if (dd < 10) {
-    dd = ('0' + dd).substr(-2)
-  }
-  let mm = d.getMonth() + 1
-  if (mm < 10) {
-    mm = ('0' + mm).substr(-2)
-  }
-  const yy = d.getFullYear()
-  return dd + '.' + mm + '.' + yy
-}
-
-export function timeYYYYMMDD (d) {
-  let dd = d.getDate()
-  if (dd < 10) {
-    dd = ('0' + dd).substr(-2)
-  }
-  let mm = d.getMonth() + 1
-  if (mm < 10) {
-    mm = ('0' + mm).substr(-2)
-  }
-  const yy = d.getFullYear()
-  return yy + '.' + mm + '.' + dd
 }

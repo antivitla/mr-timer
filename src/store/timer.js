@@ -1,9 +1,15 @@
 import Entry from '@/models/entry'
 
 let timerTimeout
+const saveDelay = 60000
+let lastSaveTime = new Date().getTime()
 
 function tick (context) {
   context.commit('tickTimer')
+  if (new Date().getTime() - lastSaveTime > saveDelay) {
+    context.dispatch('saveEntries')
+    lastSaveTime = new Date().getTime()
+  }
   timerTimeout = setTimeout(() => {
     tick(context)
   }, context.state.delay)

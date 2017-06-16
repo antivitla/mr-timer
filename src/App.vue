@@ -1,9 +1,12 @@
 <template lang="pug">
+  //- .app(
+  //-     :class="{ 'timer-active': timerActive, 'modal-active': modal.active }"
   .app(
-    :class="{ 'timer-active': timerActive, 'modal-active': modal.active }"
+    :class="{ 'timer-active': timerActive }"
     :lang="locale"
     :currency="currency"
-    :is-currency-symbol-before="isCurrencySymbolBefore")
+    :is-currency-symbol-before="isCurrencySymbolBefore"
+    v-body-scrolltop-on="scrollTopEvents")
     .page
       main
         //- Timer control
@@ -69,15 +72,16 @@
   import groupItem from '@/components/group-item'
   import storageItem from '@/components/storage-item'
   import siteFooter from '@/components/site-footer'
-  import modal from '@/components/modal'
+  // import modal from '@/components/modal'
   // import editTaskModal from '@/components/modals/edit-task-modal'
   import { Tasks } from '@/store/groups/tasks'
   import { Months } from '@/store/groups/months'
   import { Days } from '@/store/groups/days'
   import { Storage } from '@/store/storage'
   import { translate, languages, currencies } from '@/store/i18n'
-  import capitalize from '@/utils/capitalize'
-  import bus from '@/event-bus'
+  import capitalize from 'lodash/capitalize'
+  // import bus from '@/event-bus'
+  import bodyScrolltopOn from '@/directives/body-scrolltop-on'
 
   export default {
     data () {
@@ -86,12 +90,13 @@
         Months,
         Days,
         Storage,
-        modal: {
-          active: false,
-          id: null,
-          data: null,
-          position: undefined
-        }
+        // modal: {
+        //   active: false,
+        //   id: null,
+        //   data: null,
+        //   position: undefined
+        // },
+        scrollTopEvents: ['start-task']
       }
     },
 
@@ -99,8 +104,8 @@
       this.refreshAppWithUserData(this.detectUserKey())
       this.refreshLocale()
       this.loadRates()
-      bus.$on('open-modal', this.openModal.bind(this))
-      bus.$on('close-modal', this.closeModal.bind(this))
+      // bus.$on('open-modal', this.openModal.bind(this))
+      // bus.$on('close-modal', this.closeModal.bind(this))
     },
 
     watch: {
@@ -136,13 +141,13 @@
         const l = Object.keys(languages).find(lang => {
           return this.$route.query[lang] !== undefined
         })
-        return l || 'ru'
+        return l || this.locale || 'ru'
       },
       detectCurrency () {
         const c = Object.keys(currencies).find(code => {
           return this.$route.query[code] !== undefined
         })
-        return c || 'rub'
+        return c || this.currency || 'rub'
       },
       refreshAppWithUserData (userKey) {
         this.clearEntries()
@@ -162,15 +167,15 @@
       viewLabel (view) {
         return capitalize(translate[this.locale].view[view])
       },
-      openModal (modal) {
-        this.modal.active = true
-        this.modal.id = modal.id
-        this.modal.data = modal.data
-        this.modal.position = modal.position
-      },
-      closeModal () {
-        this.modal.active = false
-      },
+      // openModal (modal) {
+      //   this.modal.active = true
+      //   this.modal.id = modal.id
+      //   this.modal.data = modal.data
+      //   this.modal.position = modal.position
+      // },
+      // closeModal () {
+      //   this.modal.active = false
+      // },
       ...mapMutations([
         'clearEntries',
         'clearUser',
@@ -185,14 +190,18 @@
       ])
     },
 
+    directives: {
+      bodyScrolltopOn
+    },
+
     components: {
       petrov,
       timer,
       pricePerHour,
       groupItem,
       storageItem,
-      siteFooter,
-      modal
+      siteFooter
+      // modal
     }
   }
 </script>

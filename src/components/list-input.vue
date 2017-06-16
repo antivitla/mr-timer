@@ -14,6 +14,7 @@
   import autosize from 'autosize'
   import debounce from '@/utils/debounce'
   import { focusAndSelectRange } from '@/directives/focus'
+  import bus from '@/event-bus'
 
   function parseList (list) {
     return (typeof list === 'string' ? list.split('/') : list)
@@ -35,11 +36,15 @@
       'placeholder',
       'debounce',
       'onSubmit',
-      'focus'
+      'focus',
+      'resetFocusOn'
     ],
 
     mounted () {
       autosize(this.$el)
+      bus.$on(this.resetFocusOn, () => {
+        this.focusedOnce = false
+      })
     },
 
     watch: {
@@ -57,7 +62,13 @@
 
     computed: {
       joinedList () {
-        return this.value.join(' / ')
+        let jl = ''
+        if (Array.isArray(this.value)) {
+          jl = this.value.join(' / ')
+        } else if (this.value) {
+          jl = String(this.value)
+        }
+        return jl
       },
       delay () {
         return this.debounce ? parseInt(this.debounce, 10) : 0

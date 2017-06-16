@@ -3,30 +3,30 @@
     span(style="font-size: 10px;")
     .item.edit(
       v-if="isEditingTask && editingTaskUid === entry.uid()"
-      @keyup.esc="cancelTaskEditing()"
-      v-esc-outside="cancelTaskEditing"
-      v-click-outside="cancelTaskEditing")
+      @keyup.esc="stopTaskEditing()"
+      v-esc-outside="stopTaskEditing"
+      v-click-outside="stopTaskEditing")
       span.name(:class="{ 'non-editable': entry.type !== 'task' }")
         list-input(
           v-if="entry.type === 'task'"
           :focus="editingFocus === 'details'"
-          :value="editingTaskFields.details"
+          :value="edit.details"
           @input-original-event="updateDetails($event)"
-          :on-submit="submit")
+          :on-submit="submitTask")
         span(v-else) {{ name }}
       span.duration
         input(
           type="text"
           v-focus-and-select-all="editingFocus === 'duration'"
-          :value="editingTaskFields.duration"
+          :value="edit.duration"
           @input="updateDuration($event)"
-          @keyup.enter="submit()")
+          @keyup.enter="submitTask()")
       span.actions
         //- a.icon-button.filter
         //-   i.material-icons filter_list
-        a.icon-button.delete
+        a.icon-button.delete(@click="removeTask()")
           i.material-icons delete
-        a.icon-button.cancel(@click="cancelTaskEditing()")
+        a.icon-button.cancel(@click="stopTaskEditing()")
           i.material-icons block
 
     .item(v-else)
@@ -53,51 +53,24 @@
 </template>
 
 <script>
-  import moment from 'moment'
-  import { mapGetters, mapMutations } from 'vuex'
-  import capitalize from '@/utils/capitalize'
-  import { durationHuman } from '@/utils/time'
+  import { mapGetters, mapMutations, mapActions } from 'vuex'
+  import { durationHuman, durationEditable } from '@/utils/duration'
+  import itemName from '@/utils/item-name'
+  import { extractEntries } from '@/utils/group'
   import { translate } from '@/store/i18n'
   import longClick from '@/directives/long-click'
   import clickOutside from '@/directives/click-outside'
   import escOutside from '@/directives/esc-outside'
   import { focusAndSelectAll } from '@/directives/focus'
   import listInput from '@/components/list-input'
-  import textareaInput from '@/components/textarea-input'
-  // import bus from '@/event-bus'
+  import bus from '@/event-bus'
+  import Entry from '@/models/entry'
+  import Group from '@/models/group'
+  import funny from 'mr-funny'
+  import funnyTemplates from '@/funny/templates'
 
-  const labels = {
-    month (item) {
-      const d = moment(item.start)
-      let label = capitalize(d.format('MMMM YYYY'))
-      if (d.year() === (new Date()).getFullYear()) {
-        label = label.split(' ')[0]
-      }
-      return label
-    },
-
-    day (item, locale) {
-      const d = moment(item.start)
-      let label = d.format('LL')
-      if (locale === 'ru') {
-        label = label.replace('г.', '').trim()
-      }
-      if (d.year() === (new Date()).getFullYear()) {
-        label = label.split(' ').slice(0, 2).join(' ')
-        if (locale === 'en') {
-          label = label.replace(',', '')
-        }
-      }
-      return label
-    },
-
-    task (item) {
-      return item.name
-    },
-
-    year (item) {
-      return item.name
-    }
+  function funnyTask (locale) {
+    return funny.phrase(funnyTemplates[locale].base)
   }
 
   export default {
@@ -108,10 +81,8 @@
     data () {
       return {
         edit: {
-          details: '',
-          duration: 0,
-          start: new Date().getTime(),
-          stop: new Date().getTime()
+          details: null,
+          duration: null
         }
       }
     },
@@ -123,7 +94,7 @@
 
     computed: {
       name () {
-        return labels[this.entry.type](this.entry, this.locale)
+        return itemName[this.entry.type](this.entry, this.locale)
       },
       duration () {
         const d = translate[this.locale].duration
@@ -153,8 +124,8 @@
         'locale',
         'price',
         'isEditingTask',
-        'editingTaskFields',
         'editingTaskUid',
+        'editingTaskFields',
         'editingFocus'
       ])
     },
@@ -162,42 +133,78 @@
     methods: {
       startTask () {
         console.log('start task', this.entry)
+        console.log('start task')
+        let details = this.entry.details()
+        if (this.entry.children[0] instanceof Group) {
+          details = details.concat(funnyTask(this.locale))
+        }
+        bus.$emit('start-task', {
+          entry: new Entry({
+            start: new Date().getTime(),
+            stop: new Date().getTime(),
+            details
+          })
+        })
+      },
+      clearEdit () {
+        this.edit.details = null
+        this.edit.duration = null
       },
       startEdit (field) {
-        console.log('edit', this.entry)
-        if (this.entry.type === 'task') {
-          this.$store.commit('startTaskEditing', {
-            focus: field,
-            edit: {
-              details: this.entry.details(),
-              duration: this.entry.duration()
-            },
-            uid: this.entry.uid()
-          })
-        } else {
-          this.$store.commit('startTaskEditing', {
-            focus: field,
-            entry: this.entry,
-            edit: {
-              duration: this.entry.duration()
-            },
-            uid: this.entry.uid()
-          })
+        this.clearEdit()
+        this.stopTaskEditing()
+        let payload = {
+          focus: field,
+          edit: {},
+          uid: this.entry.uid()
         }
+        if (this.entry.type === 'task') {
+          payload.edit.details = this.entry.details()
+          this.edit.details = payload.edit.details.join(' / ')
+        }
+        payload.edit.duration = this.entry.duration()
+        this.edit.duration = durationEditable
+          .stringify(payload.edit.duration)
+        this.startTaskEditing(payload)
       },
       updateDetails (event) {
-        console.log('details', event)
         this.edit.details = event.target.value
       },
       updateDuration (event) {
-        console.log('duration', event)
         this.edit.duration = event.target.value
       },
-      submit () {
-        console.log('submit', this.edit, this.editingTaskFields)
+      submitTask () {
+        const entries = extractEntries(this.entry)
+        const update = {}
+        if (this.edit.details !== null) {
+          update.details = {
+            source: this.editingTaskFields.details,
+            target: this.edit.details.split('/').map(d => d.trim())
+          }
+        }
+        if (this.edit.duration !== null) {
+          const dOld = this.entry.duration()
+          const dNew = durationEditable
+            .parse(this.edit.duration)
+          const add = (dNew + entries.length - dOld) / entries.length
+          update.stop = { add }
+        }
+        this.stopTaskEditing()
+        this.batchUpdateEntries({ entries, update })
+      },
+      removeTask () {
+        this.stopTaskEditing()
+        this.batchRemoveEntries({
+          entries: extractEntries(this.entry)
+        })
       },
       ...mapMutations([
-        'cancelTaskEditing'
+        'startTaskEditing',
+        'stopTaskEditing'
+      ]),
+      ...mapActions([
+        'batchRemoveEntries',
+        'batchUpdateEntries'
       ])
     },
 
@@ -209,8 +216,7 @@
     },
 
     components: {
-      listInput,
-      textareaInput
+      listInput
     }
   }
 </script>
