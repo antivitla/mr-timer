@@ -17,7 +17,7 @@ export const mutations = {
     const id = sortedIndexBy(
       Storage.entries,
       payload.entry,
-      item => -item.start)
+      item => -item.stop)
     Storage.entries.splice(id, 0, payload.entry)
   },
 
@@ -139,22 +139,30 @@ export const actions = ({
       lockedBatchOperations = true
       async.eachSeries(payload.entries, (entry, next) => {
         // Переименование
+        let details = entry.details.slice(0)
         if (payload.update.details) {
           const source = payload.update.details.source.join('/')
           const target = payload.update.details.target.join('/')
-          entry.details = entry.details.join('/')
+          details = entry.details.join('/')
             .replace(new RegExp('^' + source), target)
             .split('/')
             .map(d => d.trim())
         }
         // Изменение длительностей
+        let stop = entry.stop
         if (payload.update.stop) {
           if (payload.update.stop.add) {
-            entry.stop = entry.stop + payload.update.stop.add
+            stop = entry.stop + payload.update.stop.add
           }
         }
         context.commit('removeEntry', { entry })
-        context.commit('addEntry', { entry: new Entry(entry) })
+        context.commit('addEntry', {
+          entry: new Entry({
+            start: entry.start,
+            stop,
+            details
+          })
+        })
         setTimeout(next, 5)
       }, error => {
         if (error) {

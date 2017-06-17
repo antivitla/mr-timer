@@ -1,21 +1,27 @@
 <template lang="pug">
-  .group-item(:depth="depth")
-    span(style="font-size: 10px;")
+  .group-item(
+    :depth="depth"
+    :class="{ 'has-children': hasChildren }")
     .item.edit(
+      :class="{ 'active': isTrackingEntry }"
       v-if="isEditingTask && editingTaskUid === entry.uid()"
       @keyup.esc="stopTaskEditing()"
       v-esc-outside="stopTaskEditing"
       v-click-outside="stopTaskEditing")
-      span.name(:class="{ 'non-editable': entry.type !== 'task' }")
+      span.name
+        span.non-editable(
+          v-if="entry.type !== 'task' || isTrackingEntry") {{ name }}
         list-input(
-          v-if="entry.type === 'task'"
+          v-else
           :focus="editingFocus === 'details'"
           :value="edit.details"
           @input-original-event="updateDetails($event)"
           :on-submit="submitTask")
-        span(v-else) {{ name }}
       span.duration
+        span.non-editable(
+          v-if="isTrackingEntry") {{ duration }}
         input(
+          v-else
           type="text"
           v-focus-and-select-all="editingFocus === 'duration'"
           :value="edit.duration"
@@ -29,7 +35,9 @@
         a.icon-button.cancel(@click="stopTaskEditing()")
           i.material-icons block
 
-    .item(v-else)
+    .item(
+      v-else
+      :class="{ 'active': isTrackingEntry }")
       span.name(v-once :color="colorCode")
         span(
           v-if="entry.type === 'task'"
@@ -120,9 +128,25 @@
       depth () {
         return this.entry.path().length - 1
       },
+      hasChildren () {
+        return this.entry.children[0] instanceof Group
+      },
+      activeEntry () {
+        let child = this.entry
+        while (child.children && child.children.length) {
+          child = child.children[0]
+        }
+        return child
+      },
+      isTrackingEntry () {
+        return this.timerActive &&
+          this.activeEntry.uid() === this.timerEntry.uid()
+      },
       ...mapGetters([
         'locale',
         'price',
+        'timerActive',
+        'timerEntry',
         'isEditingTask',
         'editingTaskUid',
         'editingTaskFields',
@@ -132,8 +156,6 @@
 
     methods: {
       startTask () {
-        console.log('start task', this.entry)
-        console.log('start task')
         let details = this.entry.details()
         if (this.entry.children[0] instanceof Group) {
           details = details.concat(funnyTask(this.locale))
@@ -293,10 +315,12 @@
       .name
         width calc(100% + 8px)
         margin 0 0 0.5em -8px
-        &.non-editable
+        .non-editable
           padding-top 4px
           padding-bottom 4px
           padding-left 8px
+          padding-right 8px
+          display block
           box-sizing box-sizing
         textarea
           width 100%
@@ -320,6 +344,13 @@
         margin 0 0 0 -8px
         line-height inherit
         font-size inherit
+        .non-editable
+          padding-top 4px
+          padding-bottom 4px
+          padding-left 8px
+          padding-right 8px
+          display block
+          box-sizing box-sizing
         textarea
         input
           text-align left
@@ -366,14 +397,17 @@
           margin-left auto
           position static
 
+    .item.active
+      color tttc-red
+      .duration
+        color tttc-red
 
-  .view > .group-item > .item
+
+
+  .view > .group-item.has-children > .item
     font-size 32px
     line-height 42px
     font-weight 400
-    // display flex
-    // justify-content space-between
-    // align-items baseline
     .duration
     .cost
       font-size 80%
@@ -391,8 +425,11 @@
           textarea
             font-weight 400
 
-  .view > .group-item:not(:first-child) > .item
+  .view > .group-item.has-children
+    margin-bottom 40px
     margin-top 40px
+    &:first-child
+      margin-top 0px
 
   [currency="rub"]
     .cost:before

@@ -6,9 +6,9 @@
         span.hrs(
           :class="{ low: hrs < 1 }") {{ hrs }}
         span.delimiter(
-          :class="{ low: min < 1 }") :
+          :class="{ low: min < 1 && hrs < 1 }") :
         span.min(
-          :class="{ low: min < 1 }") {{ min }}
+          :class="{ low: min < 1 && hrs < 1 }") {{ min }}
       span.sec {{ sec }}
       span.ms {{ ms }}
     list-input(

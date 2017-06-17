@@ -86,6 +86,8 @@ export const timeEditable = {
       d.setFullYear(match[3])
       d.setHours(match[4])
       d.setMinutes(match[5])
+      d.setSeconds(0)
+      d.setMilliseconds(0)
       return d.getTime()
     }
     return parseInt(str, 10)

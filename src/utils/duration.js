@@ -124,10 +124,7 @@ export const durationEditable = {
     if (hh) {
       H = hh + 'h'
     }
-    let M = ''
-    if (mm) {
-      M = mm + 'm'
-    }
+    const M = mm + 'm'
     return (H + ' ' + M).replace('  ', ' ').trim()
   },
 

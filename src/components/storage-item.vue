@@ -1,5 +1,6 @@
 <template lang="pug">
-  div.storage-item
+  div.storage-item(
+    :class="{ 'active': timerEntry.uid() === uid }")
     span.edit(
       v-if="isEditingTask && editingTaskUid === uid"
       @keyup.esc="stopTaskEditing()"
@@ -13,13 +14,19 @@
           @input="updateStart($event)"
           @keyup.enter="submit()")
       span.details
+        span.non-editable(
+          v-if="timerActive && timerEntry.uid() === uid") {{ details }}
         list-input(
+          v-else
           :focus="editingFocus === 'details'"
           :value="edit.details"
           @input-original-event="updateDetails($event)"
           :on-submit="submit")
       span.duration
+        span.non-editable(
+          v-if="timerActive && timerEntry.uid() === uid") {{ duration }}
         input(
+          v-else
           type="text"
           v-focus-and-select-all="editingFocus === 'duration'"
           :value="edit.duration"
@@ -95,6 +102,7 @@
       },
       ...mapGetters([
         'timerEntry',
+        'timerActive',
         'locale',
         'isEditingTask',
         'editingTaskUid',
@@ -105,7 +113,6 @@
 
     methods: {
       startTask () {
-        console.log('start task')
         bus.$emit('start-task', {
           entry: new Entry({
             start: new Date().getTime(),
@@ -289,6 +296,13 @@
           &:focus
             background-color tttc-back-dark
             color tttc-text-invert-highlight
+        .non-editable
+          padding-top 4px
+          padding-bottom 4px
+          display block
+          padding-left 8px
+          padding-right 8px
+          box-sizing box-sizing
       .duration
         width 6.5em
         margin-right 0px
@@ -313,6 +327,12 @@
           &:focus
             background-color tttc-back-dark
             color tttc-text-invert-highlight
+        .non-editable
+          padding-top 4px
+          padding-bottom 4px
+          display block
+          padding-left 8px
+          padding-right 8px
 
       .actions
         display flex
@@ -345,7 +365,7 @@
           position static
 
   .timer-active
-    .storage-item:first-child
+    .storage-item.active
       color tttc-red
       .start
       .duration
