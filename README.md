@@ -1,4 +1,4 @@
-# Tatimo&#x301;ta
+# Titamo&#x301;ta
 
 Fast & clean tracking of task, timer and money. For my fellow coders.
 

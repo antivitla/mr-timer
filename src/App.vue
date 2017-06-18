@@ -17,8 +17,18 @@
 
         //- View navigation
         nav.view-menu(v-if="Storage.entries.length")
-          price-per-hour
-          .view-switch
+          price-per-hour(
+            v-if="currentView !== 'storage'")
+          .filter-entries(
+            v-if="currentView === 'storage' && !selectionEntries.length")
+            span.label {{ filterLabel }}
+            list-input(
+              v-model="filter"
+              :debounce="50"
+              :placeholder="filterPlaceholderLabel")
+          batch-actions(
+            v-if="currentView === 'storage' && selectionEntries.length")
+          div.view-switch
             a(
               v-for="view in ['tasks', 'months', 'days', 'storage']"
               :class="{ active: currentView === view }"
@@ -45,11 +55,21 @@
             :key="day.name"
             :entry="day")
 
+        .filter-entries(
+          v-if="currentView === 'storage' && !selectionEntries.length && Storage.entries.length")
+          span.label {{ filterLabel }}
+          list-input(
+            v-model="filter"
+            :debounce="50"
+            :placeholder="filterPlaceholderLabel")
+
         //- Storage view
         section.storage.view(v-if="currentView === 'storage'")
+          p.no-results(
+            v-if="!filteredEntries.length") {{ noResultsLabel }}
           storage-item(
-            v-if="currentView === 'storage'"
-            v-for="entry in Storage.entries"
+            v-else
+            v-for="entry in filteredEntries"
             :key="entry.uid()"
             :entry="entry")
 
@@ -72,6 +92,8 @@
   import groupItem from '@/components/group-item'
   import storageItem from '@/components/storage-item'
   import siteFooter from '@/components/site-footer'
+  import batchActions from '@/components/batch-actions'
+  import listInput from '@/components/list-input'
   // import modal from '@/components/modal'
   // import editTaskModal from '@/components/modals/edit-task-modal'
   import { Tasks } from '@/store/groups/tasks'
@@ -80,7 +102,8 @@
   import { Storage } from '@/store/storage'
   import { translate, languages, currencies } from '@/store/i18n'
   import capitalize from 'lodash/capitalize'
-  // import bus from '@/event-bus'
+  import { timeEditable } from '@/utils/time'
+  import bus from '@/event-bus'
   import bodyScrolltopOn from '@/directives/body-scrolltop-on'
 
   export default {
@@ -96,7 +119,11 @@
         //   data: null,
         //   position: undefined
         // },
-        scrollTopEvents: ['start-task']
+        scrollTopEvents: [
+          'start-task',
+          'filter-entries'
+        ],
+        filter: []
       }
     },
 
@@ -106,6 +133,17 @@
       this.loadRates()
       // bus.$on('open-modal', this.openModal.bind(this))
       // bus.$on('close-modal', this.closeModal.bind(this))
+      // filter entries (switch to storage and set filter)
+      bus.$on('filter-entries', (payload) => {
+        this.setCurrentView({ view: 'storage' })
+        this.filter = payload.filter
+      })
+      // Clear filter on view switch
+      this.$store.subscribe(mutation => {
+        if (mutation.type === 'setCurrentView' && mutation.payload.view !== 'storage') {
+          this.filter = []
+        }
+      })
     },
 
     watch: {
@@ -117,6 +155,32 @@
     },
 
     computed: {
+      filteredEntries () {
+        let filtered
+        if (!this.filter || !this.filter.length) {
+          filtered = Storage.entries
+        } else {
+          filtered = Storage.entries.filter(entry => {
+            const str = timeEditable
+              .stringify(entry.start) +
+              ' ' +
+              entry.details.join('/')
+            return this.filter.every(f => {
+              return str.toLowerCase().match(f.toLowerCase())
+            })
+          })
+        }
+        return filtered
+      },
+      filterLabel () {
+        return capitalize(translate[this.locale].filter)
+      },
+      filterPlaceholderLabel () {
+        return translate[this.locale].filterPlaceholder
+      },
+      noResultsLabel () {
+        return capitalize(translate[this.locale].noResultsLabel)
+      },
       ...mapGetters([
         'userKey',
         'userMode',
@@ -125,7 +189,8 @@
         'currency',
         'isCurrencySymbolBefore',
         'currentView',
-        'timerActive'
+        'timerActive',
+        'selectionEntries'
       ])
     },
 
@@ -200,7 +265,9 @@
       pricePerHour,
       groupItem,
       storageItem,
-      siteFooter
+      siteFooter,
+      batchActions,
+      listInput
       // modal
     }
   }
@@ -291,6 +358,53 @@
         margin-bottom 0px
       .view-switch
         margin-left auto
+
+  .filter-entries
+    display flex
+    font-size 14px
+    line-height 24px
+    width 100%
+    margin 20px auto 40px auto
+    flex-direction column
+    text-align center
+    .label
+      color tttc-text-muted
+      margin-right 0.5em
+    textarea
+      font-size inherit
+      line-height 20px
+      padding 2px 0px
+      display block
+      border: none
+      margin 0
+      border-radius 5px
+      background-color white
+      resize none
+      font-weight 500
+      width 100%
+      text-align center
+      &::placeholder
+        font-weight 400
+        color lighten(tttc-text-muted, 20%)
+  .no-results
+    color tttc-text-muted
+    text-align center
+  .view-menu
+    .filter-entries
+      display none
+
+  @media (min-width 768px)
+    .filter-entries
+      display none
+    .view-menu
+      .filter-entries
+        display flex
+        flex-direction row
+        margin 0
+        textarea
+          width calc(50%)
+          text-align left
+          background-color transparent
 
   section.tasks
   section.months

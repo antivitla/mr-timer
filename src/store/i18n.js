@@ -34,7 +34,7 @@ export const currencies = ({
 
 const ru = ({
   view: {
-    storage: 'хранилище',
+    storage: 'история',
     tasks: 'задачи',
     months: 'месяцы',
     days: 'дни',
@@ -56,12 +56,26 @@ const ru = ({
     },
     min: 'мин',
     sec: 'сек'
-  }
+  },
+  entries: {
+    zero: 'записей',
+    one: 'запись',
+    few: 'записи',
+    many: 'записей'
+  },
+  selected: 'выбрано',
+  delete: 'удалить',
+  or: 'или',
+  cancel: 'отменить',
+  filter: 'фильтр',
+  filterPlaceholder: 'разделяй через "/"',
+  noResultsLabel: 'Не найдено',
+  filterByThisLabel: 'найти в истории'
 })
 
 const en = ({
   view: {
-    storage: 'storage',
+    storage: 'history',
     tasks: 'tasks',
     months: 'months',
     days: 'days',
@@ -83,13 +97,32 @@ const en = ({
     },
     min: 'min',
     sec: 'sec'
-  }
+  },
+  entries: {
+    zero: 'entries',
+    one: 'entry',
+    few: 'entries',
+    many: 'entries'
+  },
+  selected: 'selected',
+  delete: 'delete',
+  or: 'or',
+  cancel: 'cancel',
+  filter: 'filter',
+  filterPlaceholder: 'separate by "/"',
+  noResultsLabel: 'No results',
+  filterByThisLabel: 'find in history'
 })
 
 export const translate = ({
   ru,
   en
 })
+
+export function interpolate (str, value, locale) {
+  //
+  console.log(str, value, locale)
+}
 
 const state = {
   language: 'ru',

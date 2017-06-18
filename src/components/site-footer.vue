@@ -18,6 +18,9 @@
 
   footer
     text-align center
+    max-width 1000px
+    margin-left auto
+    margin-right auto
     display: block;
     text-align: center;
     padding-top: 40px;

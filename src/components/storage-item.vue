@@ -3,9 +3,9 @@
     :class="{ 'active': timerEntry.uid() === uid }")
     span.edit(
       v-if="isEditingTask && editingTaskUid === uid"
-      @keyup.esc="stopTaskEditing()"
-      v-esc-outside="stopTaskEditing"
-      v-click-outside="stopTaskEditing")
+      @keyup.esc="cancelEdit()"
+      v-esc-outside="cancelEdit"
+      v-click-outside="cancelEdit")
       span.start
         input(
           type="text"
@@ -35,24 +35,29 @@
       span.actions
         a.icon-button.delete(@click="removeEntry({ entry })")
           i.material-icons delete
-        a.icon-button.cancel(@click="stopTaskEditing()")
+        a.icon-button.cancel(@click="cancelEdit()")
           i.material-icons block
+        span.icon-button.select
+          input(type="checkbox" v-model="selected")
 
-    span.read(v-else)
+    span.read(
+      v-else
+      :class="{ 'selected': selected }"
+      @click="toggleSelectEntry()")
       span.start(
         v-once
         v-long-click="500"
-        @long-click="startEdit('start')"
-        @normal-click="startTask()") {{ start }}
+        @long-click="startEdit('start')") {{ start }}
       span.details(
         v-once
         v-long-click="500"
-        @long-click="startEdit('details')"
-        @normal-click="startTask()") {{ details }}
+        @long-click="startEdit('details')") {{ details }}
       span.duration(
         v-long-click="500"
-        @long-click="startEdit('duration')"
-        @normal-click="startTask()") {{ duration }}
+        @long-click="startEdit('duration')") {{ duration }}
+      span.actions
+        span.icon-button.select(v-if="selectionEntries.length")
+          input(type="checkbox" v-model="selected")
 </template>
 
 <script>
@@ -77,6 +82,25 @@
           details: null,
           duration: null,
           start: null
+        },
+        selected: false
+      }
+    },
+
+    created () {
+      this.$store.subscribe((mutation, state) => {
+        if (mutation.type === 'selectionClear') {
+          this.selected = false
+        }
+      })
+    },
+
+    watch: {
+      selected (value, b) {
+        if (value) {
+          this.selectionAdd({ entry: this.entry })
+        } else {
+          this.selectionRemove({ entry: this.entry })
         }
       }
     },
@@ -100,6 +124,9 @@
       uid () {
         return this.entry.uid()
       },
+      isSelected () {
+        return this.selectionEntries.indexOf(this.entry) > -1
+      },
       ...mapGetters([
         'timerEntry',
         'timerActive',
@@ -107,7 +134,8 @@
         'isEditingTask',
         'editingTaskUid',
         'editingTaskFields',
-        'editingFocus'
+        'editingFocus',
+        'selectionEntries'
       ])
     },
 
@@ -121,14 +149,22 @@
           })
         })
       },
+      toggleSelectEntry () {
+        this.selected = !this.selected
+      },
       clearEdit () {
         this.edit.details = null
         this.edit.duration = null
         this.edit.start = null
       },
       startEdit (field) {
+        // Очистить ранние значения редактирования
         this.clearEdit()
-        this.stopTaskEditing()
+        // Рефрешим на всякий режим редактирования
+        this.cancelEdit()
+        // Сочиняем объект редактирования,
+        // используется как память с чем сравнивать
+        // ну и вообще
         let payload = {
           focus: field,
           edit: {
@@ -138,12 +174,22 @@
           },
           uid: this.entry.uid()
         }
+        // Парсим из сырых цифр (милисекунд и деталей)
+        // в человекочитаемое
         this.edit.start = timeEditable
           .stringify(this.entry.start, translate[this.locale].time.at)
         this.edit.details = this.entry.details.join(' / ')
         this.edit.duration = durationEditable
           .stringify(this.entry.duration())
+        // Го редактировать
         this.startTaskEditing(payload)
+        // Кстати, выбранная запись как будто стала выбрана
+        // в пакетное редактирование
+        // this.selected = true
+      },
+      cancelEdit () {
+        this.stopTaskEditing()
+        // this.selectionClear()
       },
       updateDetails (event) {
         this.edit.details = event.target.value
@@ -169,12 +215,16 @@
           entry: this.entry,
           update: { start, stop, details }
         }
-        this.stopTaskEditing()
+        this.cancelEdit()
         this.updateEntry(payload)
+        this.selectionClear()
       },
       ...mapMutations([
         'stopTaskEditing',
-        'startTaskEditing'
+        'startTaskEditing',
+        'selectionAdd',
+        'selectionRemove',
+        'selectionClear'
       ]),
       ...mapActions([
         'updateEntry',
@@ -202,48 +252,65 @@
     margin 6px auto 20px auto
     @media (min-width 768px)
       margin-bottom 6px
+
     .read
       display flex
       flex-direction column
       padding-top 4px
       padding-bottom 4px
+      position relative
+      &:hover
+      &.selected
+        cursor pointer
+        background-color whitesmoke
+        cursor pointer
+        position relative
       @media (min-width 768px)
         flex-direction row
         align-items baseline
-    .start
-    .details
-    .duration
-      display block
-      cursor pointer
-
-    .start
-      color tttc-text-muted
-      font-size 14px
-      font-family PT Mono
-      white-space nowrap
-      width 165px
-      @media (min-width 768px)
-        line-height 1
-
-    .details
-      width 100%
-      margin-top 5px
-      margin-bottom 5px
-      @media (min-width 768px)
-        width auto
-        max-width calc(100% - 320px)
-        margin 0px 10px 0px 23px
-
-    .duration
-      color tttc-text-muted
-      font-family PT Mono
-      font-size 14px
-      width 100px
-      &:before
-        content "="
-        margin-right 10px
-      @media (min-width 768px)
-        line-height 1
+      .start
+        cursor pointer
+        display block
+        color tttc-text-muted
+        font-size 14px
+        font-family PT Mono
+        white-space nowrap
+        width 165px
+        @media (min-width 768px)
+          line-height 1
+      .details
+        cursor pointer
+        display block
+        width 100%
+        margin-top 5px
+        margin-bottom 5px
+        @media (min-width 768px)
+          width auto
+          max-width calc(100% - 320px)
+          margin 0px 10px 0px 23px
+      .duration
+        cursor pointer
+        display block
+        color tttc-text-muted
+        font-family PT Mono
+        font-size 14px
+        width 100px
+        &:before
+          content "="
+          margin-right 10px
+        @media (min-width 768px)
+          line-height 1
+      .actions
+        position absolute
+        right 0px
+        bottom 0px
+        display flex
+        justify-content flex-end
+        padding-top 4px
+        padding-bottom 4px
+        .select
+          input
+            pointer-events none
 
     .edit
       display flex
@@ -258,6 +325,11 @@
         margin-left -8px
         line-height inherit
         margin-bottom 0.5em
+        display block
+        color tttc-text-muted
+        font-size 14px
+        font-family PT Mono
+        white-space nowrap
         input
           text-align left
           display block
@@ -307,6 +379,9 @@
         width 6.5em
         margin-right 0px
         margin-left -8px
+        display block
+        font-family PT Mono
+        font-size 14px
         line-height inherit
         &:before
           content none
@@ -333,7 +408,6 @@
           display block
           padding-left 8px
           padding-right 8px
-
       .actions
         display flex
         justify-content flex-end
@@ -345,9 +419,10 @@
         padding-bottom 4px
       .icon-button
         font-size 140%
+        input
+          margin-left 0.2em
       .icon-button + .icon-button
         margin-left 0.375em
-
       @media (min-width 768px)
         flex-direction row
         .start
@@ -373,7 +448,6 @@
         color tttc-red
       .details
         font-weight 500
-
       .start input
       .details textarea
       .duration input

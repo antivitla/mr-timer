@@ -1,6 +1,7 @@
 let spinnerTimeout
 
 export function setTimerSpinner (x, y) {
+  console.log('set timer spinner')
   removeTimerSpinner()
   let div = document.createElement('div')
   div.classList.add('long-click')
@@ -10,6 +11,7 @@ export function setTimerSpinner (x, y) {
 }
 
 export function removeTimerSpinner () {
+  console.log('remove timer spinner')
   clearTimeout(spinnerTimeout)
   const timers = document.querySelectorAll('.long-click')
   timers.forEach(timer => {
@@ -18,6 +20,7 @@ export function removeTimerSpinner () {
 }
 
 function handleMouseDown (data, event) {
+  console.log('mouse down', event)
   // Set spinner timeout
   spinnerTimeout = setTimeout(() => {
     setTimerSpinner(event.clientX, event.clientY)
@@ -29,14 +32,19 @@ function handleMouseDown (data, event) {
 }
 
 function handleMouseUp (data, event) {
+  console.log('mouse ups', event)
   removeTimerSpinner()
   if (data.ready) {
     this.dispatchEvent(new CustomEvent('long-click'))
+    event.preventDefault()
+    event.stopImmediatePropagation()
+    event.stopPropagation()
   }
   clearTimeout(data.timeout)
 }
 
 function handleClick (data, event) {
+  console.log('click', event)
   if (!data.ready) {
     this.dispatchEvent(new CustomEvent('normal-click'))
   }

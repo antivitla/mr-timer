@@ -9,8 +9,8 @@
       v-esc-outside="stopTaskEditing"
       v-click-outside="stopTaskEditing")
       span.name
-        span.non-editable(
-          v-if="entry.type !== 'task' || isTrackingEntry") {{ name }}
+        span.non-editable(v-if="entry.type !== 'task' || isTrackingEntry")
+          item-name(:entry="entry")
         list-input(
           v-else
           :focus="editingFocus === 'details'"
@@ -28,30 +28,40 @@
           @input="updateDuration($event)"
           @keyup.enter="submitTask()")
       span.actions
-        //- a.icon-button.filter
-        //-   i.material-icons filter_list
-        a.icon-button.delete(@click="removeTask()")
+        a.icon-button.filter(
+          :title="filterByThisLabel"
+          @click="filterTask()")
+          i.material-icons search
+        a.icon-button.delete(
+          :title="deleteLabel"
+          @click="removeTask()")
           i.material-icons delete
-        a.icon-button.cancel(@click="stopTaskEditing()")
+        a.icon-button.cancel(
+          :title="cancelLabel"
+          @click="stopTaskEditing()")
           i.material-icons block
 
-    .item(
+    .item.read(
       v-else
       :class="{ 'active': isTrackingEntry }")
-      span.name(v-once :color="colorCode")
+      span.name(:color="colorCode")
         span(
-          v-if="entry.type === 'task'"
           v-long-click="500"
-          @long-click="startEdit('details')"
-          @normal-click="startTask()") {{ name }}
-        span(
-          v-else) {{ name }}
+          @long-click="startEdit('details')")
+          item-name(:entry="entry")
       span.duration(
         v-long-click="500"
         @long-click="startEdit('duration')") {{ duration }}
       span.cost(
         v-if="price") {{ cost }}
-
+      //- span.actions
+      //-   //- a.icon-button.filter
+      //-   //-   i.material-icons filter_list
+      //-   a.icon-button.delete(@click="removeTask()")
+      //-     i.material-icons delete
+      //-   span.icon-button.select(v-if="entry.type === 'task'")
+      //-     input(
+      //-       type="checkbox")
 
     group-item(
       v-if="child.type"
@@ -63,7 +73,7 @@
 <script>
   import { mapGetters, mapMutations, mapActions } from 'vuex'
   import { durationHuman, durationEditable } from '@/utils/duration'
-  import itemName from '@/utils/item-name'
+  import moment from 'moment'
   import { extractEntries } from '@/utils/group'
   import { translate } from '@/store/i18n'
   import longClick from '@/directives/long-click'
@@ -71,11 +81,13 @@
   import escOutside from '@/directives/esc-outside'
   import { focusAndSelectAll } from '@/directives/focus'
   import listInput from '@/components/list-input'
+  import itemName from '@/components/item-name'
   import bus from '@/event-bus'
   import Entry from '@/models/entry'
   import Group from '@/models/group'
   import funny from 'mr-funny'
   import funnyTemplates from '@/funny/templates'
+  import capitalize from 'lodash/capitalize'
 
   function funnyTask (locale) {
     return funny.phrase(funnyTemplates[locale].base)
@@ -101,9 +113,9 @@
     },
 
     computed: {
-      name () {
-        return itemName[this.entry.type](this.entry, this.locale)
-      },
+      // name () {
+      //   return itemName[this.entry.type](this.entry, this.locale)
+      // },
       duration () {
         const d = translate[this.locale].duration
         return durationHuman(
@@ -142,6 +154,15 @@
         return this.timerActive &&
           this.activeEntry.uid() === this.timerEntry.uid()
       },
+      filterByThisLabel () {
+        return capitalize(translate[this.locale].filterByThisLabel)
+      },
+      deleteLabel () {
+        return capitalize(translate[this.locale].delete)
+      },
+      cancelLabel () {
+        return capitalize(translate[this.locale].cancel)
+      },
       ...mapGetters([
         'locale',
         'price',
@@ -173,6 +194,7 @@
         this.edit.duration = null
       },
       startEdit (field) {
+        console.log(field)
         this.clearEdit()
         this.stopTaskEditing()
         let payload = {
@@ -220,6 +242,37 @@
           entries: extractEntries(this.entry)
         })
       },
+      filterTask () {
+        let filter = []
+        // let parent = this.entry.parent
+        if (this.entry.type === 'task') {
+          filter = this.entry.details()
+            .concat(filter)
+        } else if (this.entry.type === 'month') {
+          filter = [moment(this.entry.start).format('MM.YYYY')]
+            .concat(filter)
+        } else if (this.entry.type === 'day') {
+          filter = [moment(this.entry.start).format('DD.MM.YYYY')]
+            .concat(filter)
+        }
+        if (this.entry.type === 'task') {
+          let parent = this.entry.parent
+          while (parent && parent.type === 'task') {
+            parent = parent.parent
+          }
+          if (parent.type === 'month') {
+            filter = [moment(parent.start).format('MM.YYYY')]
+              .concat(filter)
+          }
+          if (parent.type === 'day') {
+            filter = [moment(parent.start).format('DD.MM.YYYY')]
+              .concat(filter)
+          }
+        }
+        bus.$emit('filter-entries', {
+          filter
+        })
+      },
       ...mapMutations([
         'startTaskEditing',
         'stopTaskEditing'
@@ -238,7 +291,8 @@
     },
 
     components: {
-      listInput
+      listInput,
+      itemName
     }
   }
 </script>
@@ -379,10 +433,6 @@
         position absolute
         right 0px
         bottom 0px
-      .icon-button
-        font-size 140%
-      .icon-button + .icon-button
-        margin-left 0.375em
 
       @media (min-width 768px)
         flex-direction row
@@ -397,12 +447,30 @@
           margin-left auto
           position static
 
+    .icon-button
+      font-size 140%
+      cursor pointer
+      input[type="checkbox"]
+        margin-left 0.2em
+    .icon-button + .icon-button
+      margin-left 0.375em
+
     .item.active
       color tttc-red
       .duration
         color tttc-red
 
-
+    .item.read
+      display flex
+      .actions
+        display none
+      .actions
+        display flex
+        position absolute
+        right 0px
+        top 0px
+        padding-top 4px
+        padding-bottom 4px
 
   .view > .group-item.has-children > .item
     font-size 32px

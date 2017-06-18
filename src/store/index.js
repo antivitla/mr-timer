@@ -8,6 +8,7 @@ import timer from './timer'
 import ui from './ui'
 import edit from './edit'
 import money from './money'
+import selection from './selection'
 import { DaysPlugin } from './groups/days'
 import { MonthsPlugin } from './groups/months'
 import { TasksPlugin } from './groups/tasks'
@@ -21,10 +22,11 @@ export default new Vuex.Store({
     storage,
     user,
     i18n,
-    edit,
     timer,
+    ui,
+    edit,
     money,
-    ui
+    selection
   },
   plugins: [
     DaysPlugin,

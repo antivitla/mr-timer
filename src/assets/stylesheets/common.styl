@@ -117,7 +117,8 @@ button
     background-color darken(tttc-back-gray, 3%)
 
 .icon-button
-  display inline-block
+  display inline-flex
+  align-items center
   i.material-icons
     font-size inherit
     line-height inherit
@@ -128,3 +129,9 @@ button
     height 24px
     line-height 24px
     text-align center
+  input[type="checkbox"]
+    cursor pointer
+    height 1em
+    width 1em
+    margin: 0
+    display block
