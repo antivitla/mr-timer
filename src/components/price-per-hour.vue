@@ -83,12 +83,12 @@
   .price-per-hour
     font-size 14px
     line-height 24px
-    color tttc-text-muted
+    color titamota-color-text-muted
 
     &.active
       .symbol-before
       .symbol-after
-        color tttc-text
+        color titamota-color-text
 
     .symbol-before
       display none
@@ -114,7 +114,7 @@
       text-align right
       font-weight 500;
       &::placeholder
-        color lighten(tttc-text-muted, 20%)
+        color lighten(titamota-color-text-muted, 20%)
 
   [is-currency-symbol-before="true"]
     .price-per-hour

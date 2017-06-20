@@ -48,6 +48,9 @@ export const mutations = {
   },
   setTimerEntry (state, payload) {
     state.entry = payload.entry
+  },
+  setTimerStart (state, payload) {
+    state.entry.start = payload.start
   }
 }
 

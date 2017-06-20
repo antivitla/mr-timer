@@ -1,5 +1,6 @@
 import funny from 'mr-funny'
 import funnyTemplates from '../funny/templates'
+import uuid from 'uuid/v1'
 
 const locale = 'ru'
 
@@ -28,6 +29,7 @@ export default class Entry {
     this.start = new Date(start).getTime()
     this.stop = new Date(stop).getTime()
     this.details = parseDetails(details)
+    this.uuid = uuid()
   }
 
   duration () {
@@ -35,6 +37,6 @@ export default class Entry {
   }
 
   uid () {
-    return this.details.join('/') + this.start
+    return this.uuid
   }
 }

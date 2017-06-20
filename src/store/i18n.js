@@ -68,7 +68,7 @@ const ru = ({
   or: 'или',
   cancel: 'отменить',
   filter: 'фильтр',
-  filterPlaceholder: 'разделяй через "/"',
+  filterPlaceholder: 'разделяй через «/»',
   noResultsLabel: 'Не найдено',
   filterByThisLabel: 'найти в истории'
 })

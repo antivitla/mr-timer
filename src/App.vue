@@ -144,6 +144,13 @@
           this.filter = []
         }
       })
+      // Clear selection on view switch
+      this.$store.subscribe(mutation => {
+        if (mutation.type === 'setCurrentView' &&
+          mutation.type !== this.currentView) {
+          this.selectionClear()
+        }
+      })
     },
 
     watch: {
@@ -247,7 +254,8 @@
         'setUserKey',
         'setLocale',
         'setCurrency',
-        'setCurrentView'
+        'setCurrentView',
+        'selectionClear'
       ]),
       ...mapActions([
         'loadEntries',
@@ -281,7 +289,7 @@
   body
     margin 0
     padding 0
-    background-color tttc-back-light
+    background-color titamota-color-back-light
     position relative
 
   .app > .scrollable
@@ -292,7 +300,7 @@
     position relative
 
   .page
-    background-color tttc-back-light
+    background-color titamota-color-back-light
     padding-top 60px
     padding-bottom 20px
     padding-left 20px
@@ -319,7 +327,7 @@
     display flex
     flex-direction column
     align-items center
-    border-bottom solid 1px tttc-line
+    border-bottom solid 1px titamota-color-line
 
     .price-per-hour
       margin-bottom 20px
@@ -349,7 +357,7 @@
           content ' '
         &.active:after
           content ' '
-          background-color tttc-text
+          background-color titamota-color-text
 
     @media (min-width 768px)
       flex-direction row
@@ -368,7 +376,6 @@
     flex-direction column
     text-align center
     .label
-      color tttc-text-muted
       margin-right 0.5em
     textarea
       font-size inherit
@@ -385,9 +392,9 @@
       text-align center
       &::placeholder
         font-weight 400
-        color lighten(tttc-text-muted, 20%)
+        color lighten(titamota-color-text-muted, 20%)
   .no-results
-    color tttc-text-muted
+    color titamota-color-text-muted
     text-align center
   .view-menu
     .filter-entries

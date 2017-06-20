@@ -50,14 +50,14 @@
   .modal-wrapper:not([inline="true"])
     position fixed
     overflow auto
-    background-color alpha(tttc-back-dark, 10%)
+    background-color alpha(titamota-color-back-dark, 10%)
     .modal-container
       position absolute
       left 50%
       top 50%
       transform translateX(-50%) translateY(-50%)
-      background-color tttc-back-light
-      box-shadow 0px 0px 20px alpha(tttc-text, 10%)
+      background-color titamota-color-back-light
+      box-shadow 0px 0px 20px alpha(titamota-color-text, 10%)
       border-radius 5px
       padding 20px 0px
 

@@ -3,13 +3,19 @@ import Petrov from '@/petrov'
 import sortedIndexBy from 'lodash/sortedIndexBy'
 import async from 'async'
 import appName from './app-name'
+import { extractEntries } from '@/utils/group'
 
 export const Storage = ({
-  entries: []
+  entries: [],
+  context: null
 })
 
 const state = {
   localStorageKey: appName + '-entries'
+}
+
+const getters = {
+  storageContext: () => Storage.context
 }
 
 export const mutations = {
@@ -30,30 +36,26 @@ export const mutations = {
 
   clearEntries (state, payload) {
     Storage.entries = []
+  },
+
+  setContext (state, payload) {
+    Storage.context = payload.context
+  },
+
+  clearContext (state) {
+    Storage.context = null
   }
 }
 
-let addEntryTimeout
-
-function delayedAddEntries (entries, commit) {
-  async.eachSeries(entries, (entry, next) => {
-    commit('addEntry', {
-      entry: new Entry(entry)
-    })
-    addEntryTimeout = setTimeout(next, 5)
-  }, error => {
-    if (error) {
-      console.warn(error)
-    }
-  })
-}
+// function withinContext (entry, context) {
+//   // console.log(entry, context)
+//   return true
+// }
 
 let lockedBatchOperations = false
 
 export const actions = ({
-  loadEntries ({ state, commit, getters }) {
-    // Очищаем предыдущий запрос
-    clearTimeout(addEntryTimeout)
+  loadEntries ({ state, commit, getters, dispatch }, payload) {
     // Грузиться с удалённого аккаунта?
     if (getters['userKey'] !== 'local') {
       Petrov.get(getters['userKey'])
@@ -74,7 +76,10 @@ export const actions = ({
               throw new Error('Error parsing remote data ' + error)
             }
             // Добавляем записи с задержкой
-            delayedAddEntries(entries, commit)
+            dispatch('batchAddEntries', {
+              entries,
+              context: payload ? payload.context : null
+            })
           }
         })
         .catch(error => {
@@ -93,7 +98,10 @@ export const actions = ({
           console.warn('Error parsing localStorage', error)
         }
         // Добавляем записи с задержкой
-        delayedAddEntries(entries, commit)
+        dispatch('batchAddEntries', {
+          entries,
+          context: payload ? payload.context : null
+        })
       }
     }
   },
@@ -188,11 +196,37 @@ export const actions = ({
         context.dispatch('saveEntries')
       })
     }
+  },
+
+  batchAddEntries (context, payload) {
+    if (!lockedBatchOperations) {
+      lockedBatchOperations = true
+      async.eachSeries(payload.entries, (item, next) => {
+        const entry = item instanceof Entry ? item : new Entry(item)
+        context.commit('addEntry', { entry })
+        setTimeout(next, 5)
+      }, error => {
+        if (error) {
+          console.warn(error)
+        }
+        lockedBatchOperations = false
+        // context.dispatch('saveEntries')
+      })
+    }
+  },
+
+  setContext (context, payload) {
+    context.commit('clearEntries')
+    context.commit('clearContext')
+    context.commit('setContext', payload)
+    let entries = extractEntries(payload.context)
+    context.dispatch('batchAddEntries', { entries })
   }
 })
 
 export default {
   state,
+  getters,
   mutations,
   actions
 }

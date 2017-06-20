@@ -99,7 +99,7 @@
         color silver
       &.error
         text-align center
-        box-shadow 0px 1px 0px 0px tttc-red
+        box-shadow 0px 1px 0px 0px titamota-color-red
 
     .send
       align-items flex-start
@@ -124,20 +124,20 @@
 
       &:hover
       &.active
-        background-color tttc-red
+        background-color titamota-color-red
         color white
-        border-color tttc-red
+        border-color titamota-color-red
       &:active
-        background-color tttc-red
+        background-color titamota-color-red
         color white
         border-bottom none
-        border-top solid 3px tttc-red
+        border-top solid 3px titamota-color-red
 
     .response
       overflow-x hidden
       margin 40px 0px
       &.error
-        color tttc-red
+        color titamota-color-red
       pre
         margin 0
 </style>

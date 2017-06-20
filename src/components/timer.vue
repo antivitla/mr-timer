@@ -13,7 +13,7 @@
       span.ms {{ ms }}
     list-input(
       v-model="details"
-      :debounce="1000"
+      :debounce="500"
       :on-submit="toggle"
       :focus="timerActive"
       :reset-focus-on="resetFocusOnEvent"
@@ -175,13 +175,13 @@
       width 100%
       text-align center
       outline none
-      border-bottom solid 4px tttc-border
-      background-color tttc-back-gray
+      border-bottom solid 4px titamota-color-border
+      background-color titamota-color-back-gray
       position relative
       &:active
         border-bottom-width 0px
-        border-top solid 4px darken(tttc-red, 20%)
-        background-color tttc-red
+        border-top solid 4px darken(titamota-color-red, 20%)
+        background-color titamota-color-red
         color white
 
       .main
@@ -232,23 +232,23 @@
       text-align center
       resize none
       background-color white
-      border solid 1px tttc-border
+      border solid 1px titamota-color-border
       font-size 24px
       line-height 30px
       &::placeholder
-        color lighten(tttc-text-muted, 20%)
+        color lighten(titamota-color-text-muted, 20%)
 
     &.active
       button
         border-bottom-width 0px
-        border-top solid 4px darken(tttc-red, 20%)
-        background-color tttc-red
+        border-top solid 4px darken(titamota-color-red, 20%)
+        background-color titamota-color-red
         color white
 
       textarea
-        background-color lighten(tttc-back-dark, 10%)
-        color tttc-text-invert-highlight
-        border-color tttc-back-dark
+        background-color lighten(titamota-color-back-dark, 10%)
+        color titamota-color-text-invert-highlight
+        border-color titamota-color-back-dark
         border-bottom-width 1px
 
     @media (min-width 768px)

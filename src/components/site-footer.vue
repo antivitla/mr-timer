@@ -25,8 +25,8 @@
     text-align: center;
     padding-top: 40px;
     padding-bottom: 40px;
-    box-shadow: 0 -1px 0 0 tttc-line;
+    box-shadow: 0 -1px 0 0 titamota-color-line;
     a[href]
       text-decoration none
-      color tttc-text
+      color titamota-color-text
 </style>

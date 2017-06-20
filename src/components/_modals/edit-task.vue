@@ -55,7 +55,7 @@
     min-height 20px
     font-size 14px
     line-height 20px
-    background-color tttc-back-light
+    background-color titamota-color-back-light
     display flex
     margin-left -10px
     font-weight 400
@@ -66,8 +66,8 @@
       padding 0px 10px
       font-size inherit
       line-height inherit
-      background-color tttc-back-light
-      color tttc-text
+      background-color titamota-color-back-light
+      color titamota-color-text
       border 0px
       resize none
       outline none

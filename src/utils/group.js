@@ -31,3 +31,14 @@ export function extractEntries (item) {
   })
   return entries
 }
+
+export function parentOfDifferentType (item) {
+  let parent = item
+  const type = item.type
+  while (parent && parent.type === type) {
+    parent = parent.parent
+  }
+  if (parent !== item) {
+    return parent
+  }
+}

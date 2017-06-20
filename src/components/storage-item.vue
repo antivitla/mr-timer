@@ -203,28 +203,33 @@
           .parse(this.edit.start)
         this.edit.duration = durationEditable
           .stringify(this.entry.stop - start)
+        console.log(start)
+        this.setTimerStart({ start })
       },
       submit () {
-        const start = timeEditable
-          .parse(this.edit.start)
-        const duration = durationEditable
-          .parse(this.edit.duration)
-        const stop = start + duration
-        const details = this.edit.details.split('/').map(d => d.trim())
-        const payload = {
-          entry: this.entry,
-          update: { start, stop, details }
-        }
         this.cancelEdit()
-        this.updateEntry(payload)
-        this.selectionClear()
+        if (!this.timerActive) {
+          const start = timeEditable
+            .parse(this.edit.start)
+          const duration = durationEditable
+            .parse(this.edit.duration)
+          const stop = start + duration
+          const details = this.edit.details.split('/').map(d => d.trim())
+          const payload = {
+            entry: this.entry,
+            update: { start, stop, details }
+          }
+          this.updateEntry(payload)
+          this.selectionClear()
+        }
       },
       ...mapMutations([
         'stopTaskEditing',
         'startTaskEditing',
         'selectionAdd',
         'selectionRemove',
-        'selectionClear'
+        'selectionClear',
+        'setTimerStart'
       ]),
       ...mapActions([
         'updateEntry',
@@ -271,7 +276,7 @@
       .start
         cursor pointer
         display block
-        color tttc-text-muted
+        color titamota-color-text-muted
         font-size 14px
         font-family PT Mono
         white-space nowrap
@@ -291,7 +296,7 @@
       .duration
         cursor pointer
         display block
-        color tttc-text-muted
+        color titamota-color-text-muted
         font-family PT Mono
         font-size 14px
         width 100px
@@ -326,7 +331,7 @@
         line-height inherit
         margin-bottom 0.5em
         display block
-        color tttc-text-muted
+        color titamota-color-text-muted
         font-size 14px
         font-family PT Mono
         white-space nowrap
@@ -344,10 +349,10 @@
           border-radius 5px
           resize none
           background-color white
-          color tttc-text
+          color titamota-color-text
           &:focus
-            background-color tttc-back-dark
-            color tttc-text-invert-highlight
+            background-color titamota-color-back-dark
+            color titamota-color-text-invert-highlight
       .details
         width calc(100% + 8px)
         margin 0 0 0.5em -8px
@@ -364,10 +369,10 @@
           line-height inherit
           display block
           background-color white
-          color tttc-text
+          color titamota-color-text
           &:focus
-            background-color tttc-back-dark
-            color tttc-text-invert-highlight
+            background-color titamota-color-back-dark
+            color titamota-color-text-invert-highlight
         .non-editable
           padding-top 4px
           padding-bottom 4px
@@ -397,11 +402,11 @@
           border-radius 5px
           resize none
           background-color white
-          color tttc-text
+          color titamota-color-text
           font-family inherit
           &:focus
-            background-color tttc-back-dark
-            color tttc-text-invert-highlight
+            background-color titamota-color-back-dark
+            color titamota-color-text-invert-highlight
         .non-editable
           padding-top 4px
           padding-bottom 4px
@@ -441,19 +446,19 @@
 
   .timer-active
     .storage-item.active
-      color tttc-red
+      color titamota-color-red
       .start
       .duration
         font-weight 700
-        color tttc-red
+        color titamota-color-red
       .details
         font-weight 500
       .start input
       .details textarea
       .duration input
-        color tttc-red
+        color titamota-color-red
         &:focus
-          color lighten(tttc-red, 10%)
+          color lighten(titamota-color-red, 10%)
       .start input
       .duration input
         font-weight bold

@@ -65,7 +65,7 @@
     font-size 14px
     line-height 24px
     .label
-      color tttc-text-muted
+      color titamota-color-text-muted
     .icon-button
       cursor pointer
       margin-right 0.375em

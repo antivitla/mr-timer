@@ -44,8 +44,17 @@
     .item.read(
       v-else
       :class="{ 'active': isTrackingEntry }")
-      span.name(:color="colorCode")
+      span.name(
+        :color="colorCode"
+        @wheel="setEntryAsContext($event)")
         span(
+          v-if="entry.type === 'task'"
+          v-long-click="500"
+          @long-click="startEdit('details')"
+          @normal-click="startTask()")
+          item-name(:entry="entry")
+        span(
+          v-else
           v-long-click="500"
           @long-click="startEdit('details')")
           item-name(:entry="entry")
@@ -74,7 +83,7 @@
   import { mapGetters, mapMutations, mapActions } from 'vuex'
   import { durationHuman, durationEditable } from '@/utils/duration'
   import moment from 'moment'
-  import { extractEntries } from '@/utils/group'
+  import { extractEntries, parentOfDifferentType } from '@/utils/group'
   import { translate } from '@/store/i18n'
   import longClick from '@/directives/long-click'
   import clickOutside from '@/directives/click-outside'
@@ -88,6 +97,8 @@
   import funny from 'mr-funny'
   import funnyTemplates from '@/funny/templates'
   import capitalize from 'lodash/capitalize'
+  // import cloneDeep from 'lodash/cloneDeep'
+  import debounce from '@/utils/debounce'
 
   function funnyTask (locale) {
     return funny.phrase(funnyTemplates[locale].base)
@@ -103,7 +114,8 @@
         edit: {
           details: null,
           duration: null
-        }
+        },
+        debounceWheel: debounce()
       }
     },
 
@@ -256,10 +268,7 @@
             .concat(filter)
         }
         if (this.entry.type === 'task') {
-          let parent = this.entry.parent
-          while (parent && parent.type === 'task') {
-            parent = parent.parent
-          }
+          const parent = parentOfDifferentType(this.entry.type)
           if (parent.type === 'month') {
             filter = [moment(parent.start).format('MM.YYYY')]
               .concat(filter)
@@ -273,13 +282,20 @@
           filter
         })
       },
+      setEntryAsContext (event) {
+        event.preventDefault()
+        this.debounceWheel(() => {
+          this.setContext({ context: this.entry })
+        }, 200)
+      },
       ...mapMutations([
         'startTaskEditing',
         'stopTaskEditing'
       ]),
       ...mapActions([
         'batchRemoveEntries',
-        'batchUpdateEntries'
+        'batchUpdateEntries',
+        'setContext'
       ])
     },
 
@@ -327,7 +343,7 @@
 
     .cost
       font-size 80%
-      color tttc-text
+      color titamota-color-text
       margin-left 0.375em
       position relative
       padding-left 1em
@@ -338,7 +354,7 @@
         margin-right 0.375
         position absolute
         display block
-        color tttc-text-muted
+        color titamota-color-text-muted
         left 0px
         top 0px
       &:before
@@ -347,7 +363,7 @@
 
     .duration
       font-size 80%
-      color tttc-text-muted
+      color titamota-color-text-muted
       display inline-block
       cursor pointer
 
@@ -389,10 +405,10 @@
           line-height inherit
           display block
           background-color white
-          color tttc-text
+          color titamota-color-text
           &:focus
-            background-color tttc-back-dark
-            color tttc-text-invert-highlight
+            background-color titamota-color-back-dark
+            color titamota-color-text-invert-highlight
       .duration
         width 6.5em
         margin 0 0 0 -8px
@@ -420,10 +436,10 @@
           border-radius 5px
           resize none
           background-color white
-          color tttc-text
+          color titamota-color-text
           &:focus
-            background-color tttc-back-dark
-            color tttc-text-invert-highlight
+            background-color titamota-color-back-dark
+            color titamota-color-text-invert-highlight
       .actions
         display flex
         padding-top 4px
@@ -456,9 +472,9 @@
       margin-left 0.375em
 
     .item.active
-      color tttc-red
+      color titamota-color-red
       .duration
-        color tttc-red
+        color titamota-color-red
 
     .item.read
       display flex
