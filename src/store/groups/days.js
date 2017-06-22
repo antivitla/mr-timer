@@ -1,6 +1,8 @@
 import Group from '@/models/group'
 import Day from '@/models/day'
 import Task from '@/models/task'
+import { Storage } from '@/store/storage'
+import { rootDetails } from '@/utils/group'
 
 // Format to YYYY-MM-DD
 function format (ms) {
@@ -23,7 +25,15 @@ export const Days = (new Group({
 export function DaysPlugin (store) {
   store.subscribe((mutation, state) => {
     if (mutation.type === 'addEntry') {
-      Days.addEntry(mutation.payload.entry)
+      let resolvePath
+      if (Storage.context) {
+        let contextRootPath = rootDetails(Storage.context)
+        resolvePath = function (entry) {
+          return [format(entry.start)]
+            .concat(entry.details.slice(contextRootPath.length))
+        }
+      }
+      Days.addEntry(mutation.payload.entry, 0, resolvePath)
     }
     if (mutation.type === 'removeEntry') {
       Days.removeEntry(mutation.payload.entry)

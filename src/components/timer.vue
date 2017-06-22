@@ -1,6 +1,6 @@
 <template lang="pug">
   .timer(
-    :class="{ active: timerActive }")
+    :class="{ active: timerActive, 'with-context': Storage.context }")
     button(@click="toggle")
       span.main
         span.hrs(
@@ -18,16 +18,23 @@
       :focus="timerActive"
       :reset-focus-on="resetFocusOnEvent"
       :placeholder="placeholder")
+    task-context(
+      v-if="Storage.context"
+      :context="Storage.context")
 </template>
 
 <script>
+  import uuid from 'uuid/v1'
   import { mapGetters, mapActions, mapMutations } from 'vuex'
   import listInput from './list-input'
+  import taskContext from './task-context'
   import funny from 'mr-funny'
   import funnyTemplates from '@/funny/templates'
   import capitalize from 'lodash/capitalize'
   import Entry from '@/models/entry'
+  import { Storage } from '@/store/storage'
   import { duration, durationFraction } from '@/utils/duration'
+  import { rootDetails } from '@/utils/group'
   import bus from '@/event-bus'
 
   function funnyTask (locale) {
@@ -42,7 +49,8 @@
         details: [],
         placeholder: '',
         ms: '000',
-        resetFocusOnEvent: 'start-task'
+        resetFocusOnEvent: 'start-task',
+        Storage: Storage
       }
     },
 
@@ -121,11 +129,19 @@
           this.details = details
         }
         const entry = newEntry || new Entry({ details })
+        entry._uid = uuid()
         this.startTimer({ entry })
         // Start ms tick
         this.tick()
         // Add new entry
-        this.addEntry({ entry })
+        const storageEntry = new Entry(entry)
+        if (Storage.context) {
+          storageEntry.details = rootDetails(Storage.context)
+            .concat(entry.details)
+        }
+        this.addEntry({
+          entry: storageEntry
+        })
         this.placeholder = capitalize(funnyTask(this.locale))
       },
       stop () {
@@ -155,7 +171,10 @@
       ])
     },
 
-    components: { listInput }
+    components: {
+      listInput,
+      taskContext
+    }
   }
 </script>
 
@@ -266,4 +285,15 @@
         padding-left 220px
         text-align left
         margin-top 0px
+
+    &.with-context
+      textarea
+        padding-top 34px
+
+    .task-context
+      position absolute
+      top 10px
+      left 222px
+      font-size 12px
+      z-index 10
 </style>

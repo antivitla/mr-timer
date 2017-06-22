@@ -45,6 +45,14 @@
       bus.$on(this.resetFocusOn, () => {
         this.focusedOnce = false
       })
+      this.$store.subscribe(mutation => {
+        let t = mutation.type
+        if (t === 'setContext' || t === 'clearContext') {
+          setTimeout(() => {
+            autosize.update(this.$el)
+          }, 10)
+        }
+      })
     },
 
     watch: {

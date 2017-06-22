@@ -74,7 +74,7 @@
 
     group-item(
       v-if="child.type"
-      v-for="child in entry.children"
+      v-for="child in filterGroupChildren(entry.children)"
       :key="child.name"
       :entry="child")
 </template>
@@ -83,7 +83,11 @@
   import { mapGetters, mapMutations, mapActions } from 'vuex'
   import { durationHuman, durationEditable } from '@/utils/duration'
   import moment from 'moment'
-  import { extractEntries, parentOfDifferentType } from '@/utils/group'
+  import {
+    extractEntries,
+    parentOfDifferentType,
+    filterGroupChildren
+  } from '@/utils/group'
   import { translate } from '@/store/i18n'
   import longClick from '@/directives/long-click'
   import clickOutside from '@/directives/click-outside'
@@ -115,7 +119,8 @@
           details: null,
           duration: null
         },
-        debounceWheel: debounce()
+        debounceWheel: debounce(),
+        filterGroupChildren
       }
     },
 
@@ -124,10 +129,17 @@
       this.$options.components.groupItem = require('./group-item.vue')
     },
 
+    mounted () {
+      bus.$on('tick-timer', () => {
+        if (this.isTrackingEntry) {
+          this.entry.children
+            .find(child => child instanceof Entry)
+            .stop = this.timerEntry.stop
+        }
+      })
+    },
+
     computed: {
-      // name () {
-      //   return itemName[this.entry.type](this.entry, this.locale)
-      // },
       duration () {
         const d = translate[this.locale].duration
         return durationHuman(
@@ -153,9 +165,10 @@
         return this.entry.path().length - 1
       },
       hasChildren () {
-        return this.entry.children[0] instanceof Group
+        return this.entry.children
+          .some(item => item instanceof Group)
       },
-      activeEntry () {
+      getStorageEntry () {
         let child = this.entry
         while (child.children && child.children.length) {
           child = child.children[0]
@@ -163,8 +176,12 @@
         return child
       },
       isTrackingEntry () {
-        return this.timerActive &&
-          this.activeEntry.uid() === this.timerEntry.uid()
+        if (this.timerActive) {
+          const entry = this.entry.children
+            .find(item => item instanceof Entry)
+          return entry && entry.uid() === this.timerEntry.uid()
+        }
+        return false
       },
       filterByThisLabel () {
         return capitalize(translate[this.locale].filterByThisLabel)
@@ -283,10 +300,13 @@
         })
       },
       setEntryAsContext (event) {
-        event.preventDefault()
-        this.debounceWheel(() => {
-          this.setContext({ context: this.entry })
-        }, 200)
+        if (this.entry.children[0] instanceof Group) {
+          event.preventDefault()
+          this.debounceWheel(() => {
+            bus.$emit('set-context')
+            this.setContext({ context: this.entry })
+          }, 200)
+        }
       },
       ...mapMutations([
         'startTaskEditing',
@@ -473,8 +493,10 @@
 
     .item.active
       color titamota-color-red
+      font-weight 500
       .duration
         color titamota-color-red
+        font-weight 400
 
     .item.read
       display flex

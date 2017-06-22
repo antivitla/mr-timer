@@ -1,6 +1,8 @@
 import moment from 'moment'
 import Entry from '@/models/entry'
 import Group from '@/models/group'
+import Task from '@/models/task'
+// import _ from 'lodash'
 
 export function parseStartMoment (name, start, formats) {
   const supportedTypes = ['string', 'number', 'function']
@@ -41,4 +43,30 @@ export function parentOfDifferentType (item) {
   if (parent !== item) {
     return parent
   }
+}
+
+export function getTaskDepth (item) {
+  let depth = 0
+  let parent = item
+  while (parent.parent) {
+    depth = depth + 1
+    parent = parent.parent
+  }
+  return depth
+}
+
+export function filterGroupChildren (children) {
+  return children.filter(child => child instanceof Group)
+}
+
+export function rootDetails (group) {
+  let descendantsPath = []
+  let child = group.children[0]
+  while (child instanceof Task) {
+    descendantsPath.push(child.name)
+    child = child.children[0]
+  }
+  const details = child.details
+  const rootDetails = details.slice(0, -1 * descendantsPath.length)
+  return rootDetails
 }

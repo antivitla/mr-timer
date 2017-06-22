@@ -23,13 +23,13 @@ export default class Entry {
   constructor ({
     start = new Date().getTime(),
     stop = new Date().getTime(),
-    details = [funny.phrase(
-      funnyTemplates[locale].base)]
+    details = [funny.phrase(funnyTemplates[locale].base)],
+    _uid = uuid()
   } = {}) {
     this.start = new Date(start).getTime()
     this.stop = new Date(stop).getTime()
     this.details = parseDetails(details)
-    this.uuid = uuid()
+    this._uid = _uid
   }
 
   duration () {
@@ -37,6 +37,6 @@ export default class Entry {
   }
 
   uid () {
-    return this.uuid
+    return this._uid
   }
 }

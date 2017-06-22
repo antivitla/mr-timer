@@ -9,6 +9,16 @@
     v-body-scrolltop-on="scrollTopEvents")
     .page
       main
+        //- Context
+        nav.app-menu
+          div.left
+          div.right
+            div.toggle-sidebar
+              span.account(v-if="userKey !== 'local'")
+                | {{ userKey }}
+              span.icon-button
+                i.material-icons menu
+
         //- Timer control
         timer
 
@@ -37,21 +47,21 @@
         //- Tasks view
         section.tasks.view(v-if="currentView === 'tasks'")
           group-item(
-            v-for="task in Tasks.children"
+            v-for="task in filterGroupChildren(Tasks.children)"
             :key="task.name"
             :entry="task")
 
         //- Months view
         section.months.view(v-if="currentView === 'months'")
           group-item(
-            v-for="month in Months.children"
+            v-for="month in filterGroupChildren(Months.children)"
             :key="month.name"
             :entry="month")
 
         //- Days view
         section.days.view(v-if="currentView === 'days'")
           group-item(
-            v-for="day in Days.children"
+            v-for="day in filterGroupChildren(Days.children)"
             :key="day.name"
             :entry="day")
 
@@ -94,6 +104,7 @@
   import siteFooter from '@/components/site-footer'
   import batchActions from '@/components/batch-actions'
   import listInput from '@/components/list-input'
+  import taskContext from '@/components/task-context'
   // import modal from '@/components/modal'
   // import editTaskModal from '@/components/modals/edit-task-modal'
   import { Tasks } from '@/store/groups/tasks'
@@ -103,6 +114,7 @@
   import { translate, languages, currencies } from '@/store/i18n'
   import capitalize from 'lodash/capitalize'
   import { timeEditable } from '@/utils/time'
+  import { filterGroupChildren } from '@/utils/group'
   import bus from '@/event-bus'
   import bodyScrolltopOn from '@/directives/body-scrolltop-on'
 
@@ -113,15 +125,11 @@
         Months,
         Days,
         Storage,
-        // modal: {
-        //   active: false,
-        //   id: null,
-        //   data: null,
-        //   position: undefined
-        // },
+        filterGroupChildren,
         scrollTopEvents: [
           'start-task',
-          'filter-entries'
+          'filter-entries',
+          'set-context'
         ],
         filter: []
       }
@@ -275,7 +283,8 @@
       storageItem,
       siteFooter,
       batchActions,
-      listInput
+      listInput,
+      taskContext
       // modal
     }
   }
@@ -429,4 +438,29 @@
     margin-bottom 60px
     @media (min-width 768px)
       margin-bottom 90px
+
+  .app-menu
+    position absolute
+    left 50%
+    width calc(100% - 50px)
+    padding 0 20px
+    max-width 990px
+    transform: translateX(-50%)
+    top 20px
+    display flex
+    align-items center
+    justify-content space-between
+    line-height 40px
+    .right
+      margin-left auto
+    .toggle-sidebar
+      display flex
+      .account
+        font-size 14px
+        margin-right 10px
+    @media (min-width 480px)
+      width calc(100% - 70px)
+    @media (min-width 768px)
+      top 40px
+      width calc(100% - 130px)
 </style>

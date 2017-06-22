@@ -87,9 +87,9 @@ export default class Group {
   }
 
   // Добавляем запись (оборачивая в узел)
-  addEntry (entry, depth = 0) {
+  addEntry (entry, depth = 0, resolvePath) {
     // Нужно получить путь записи
-    const path = this.resolvePath(entry)
+    const path = resolvePath ? resolvePath(entry) : this.resolvePath(entry)
     // Айди последнего добавленного
     let lastInsertedId
     // Пытаемся вставить в уже существующего ребёнка
@@ -101,7 +101,7 @@ export default class Group {
       })
     if (childIndex > -1) {
       this.children[childIndex]
-        .addEntry(entry, depth + 1)
+        .addEntry(entry, depth + 1, resolvePath)
     } else if (path.length > depth) {
       // Более глубокое залегание,
       // создаём прокси-узел
@@ -114,7 +114,7 @@ export default class Group {
         parent: this,
         constructors: this.constructors
       })
-      proxy.addEntry(entry, depth + 1) // 1
+      proxy.addEntry(entry, depth + 1, resolvePath) // 1
       lastInsertedId = this.addChild(proxy) // 2
     } else {
       // Финальное добавление с сортировкой

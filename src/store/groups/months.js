@@ -1,6 +1,8 @@
 import Group from '@/models/group'
 import Task from '@/models/task'
 import Month from '@/models/month'
+import { Storage } from '@/store/storage'
+import { rootDetails } from '@/utils/group'
 
 // Format to YYYY-MM
 function format (ms) {
@@ -21,7 +23,15 @@ export const Months = (new Group({
 export function MonthsPlugin (store) {
   store.subscribe((mutation, state) => {
     if (mutation.type === 'addEntry') {
-      Months.addEntry(mutation.payload.entry)
+      let resolvePath
+      if (Storage.context) {
+        let contextRootPath = rootDetails(Storage.context)
+        resolvePath = function (entry) {
+          return [format(entry.start)]
+            .concat(entry.details.slice(contextRootPath.length))
+        }
+      }
+      Months.addEntry(mutation.payload.entry, 0, resolvePath)
     }
     if (mutation.type === 'removeEntry') {
       Months.removeEntry(mutation.payload.entry)

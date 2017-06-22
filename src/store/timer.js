@@ -1,4 +1,5 @@
 import Entry from '@/models/entry'
+import bus from '@/event-bus'
 
 let timerTimeout
 const saveDelay = 60000
@@ -6,6 +7,7 @@ let lastSaveTime = new Date().getTime()
 
 function tick (context) {
   context.commit('tickTimer')
+  bus.$emit('tick-timer')
   if (new Date().getTime() - lastSaveTime > saveDelay) {
     context.dispatch('saveEntries')
     lastSaveTime = new Date().getTime()
@@ -39,7 +41,8 @@ export const mutations = {
     state.entry = new Entry({
       start: state.entry.start,
       stop: state.entry.stop,
-      details: state.entry.details.slice(0)
+      details: state.entry.details.slice(0),
+      _uid: state.entry._uid
     })
     state.active = false
   },

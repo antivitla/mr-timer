@@ -3,11 +3,15 @@ import Petrov from '@/petrov'
 import sortedIndexBy from 'lodash/sortedIndexBy'
 import async from 'async'
 import appName from './app-name'
-import { extractEntries } from '@/utils/group'
+import { extractEntries, parentOfDifferentType } from '@/utils/group'
 
 export const Storage = ({
   entries: [],
-  context: null
+  context: null,
+  period: null,
+  project: null,
+  client: null,
+  phase: null
 })
 
 const state = {
@@ -40,10 +44,31 @@ export const mutations = {
 
   setContext (state, payload) {
     Storage.context = payload.context
+    const t = payload.context.type
+    if (t === 'month' || t === 'day' || t === 'year') {
+      Storage.period = {
+        type: payload.context.type,
+        value: payload.context.start
+      }
+    } else {
+      const parent = parentOfDifferentType(payload.context)
+      if (parent) {
+        const t = parent.type
+        if (t === 'month' || t === 'day' || t === 'year') {
+          Storage.period = {
+            type: parent.type,
+            value: parent.start
+          }
+        }
+      } else {
+        Storage.period = null
+      }
+    }
   },
 
   clearContext (state) {
     Storage.context = null
+    Storage.period = null
   }
 }
 
@@ -107,16 +132,20 @@ export const actions = ({
   },
 
   saveEntries ({ state, getters }) {
-    const raw = JSON.stringify({
-      entries: Storage.entries
-    })
-    let key = state.localStorageKey
-    if (getters['userKey'] !== 'local') {
-      key = key + '-' + getters['userKey']
-      // Save remote
-      Petrov.put(getters['userKey'], { entries: Storage.entries })
-    }
-    localStorage.setItem(key, raw)
+    // const raw = JSON.stringify({
+    //   entries: Storage.entries,
+    //   context: cloneWithourParents(Storage.context)
+    // })
+    // let key = state.localStorageKey
+    // if (getters['userKey'] !== 'local') {
+    //   key = key + '-' + getters['userKey']
+    //   // Save remote
+    //   Petrov.put(getters['userKey'], {
+    //     entries: Storage.entries,
+    //     context: Storage.context
+    //   })
+    // }
+    // localStorage.setItem(key, raw)
   },
 
   addEntry (context, payload) {
@@ -217,10 +246,15 @@ export const actions = ({
 
   setContext (context, payload) {
     context.commit('clearEntries')
-    context.commit('clearContext')
     context.commit('setContext', payload)
-    let entries = extractEntries(payload.context)
+    const entries = extractEntries(payload.context)
     context.dispatch('batchAddEntries', { entries })
+  },
+
+  clearContext (context) {
+    context.commit('clearEntries')
+    context.commit('clearContext')
+    context.dispatch('loadEntries')
   }
 })
 

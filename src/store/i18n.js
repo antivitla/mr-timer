@@ -70,7 +70,8 @@ const ru = ({
   filter: 'фильтр',
   filterPlaceholder: 'разделяй через «/»',
   noResultsLabel: 'Не найдено',
-  filterByThisLabel: 'найти в истории'
+  filterByThisLabel: 'найти в истории',
+  clearContext: 'очистить контекст'
 })
 
 const en = ({
@@ -111,7 +112,8 @@ const en = ({
   filter: 'filter',
   filterPlaceholder: 'separate by "/"',
   noResultsLabel: 'No results',
-  filterByThisLabel: 'find in history'
+  filterByThisLabel: 'find in history',
+  clearContext: 'clear context'
 })
 
 export const translate = ({

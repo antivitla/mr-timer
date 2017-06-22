@@ -93,6 +93,12 @@
           this.selected = false
         }
       })
+
+      bus.$on('tick-timer', () => {
+        if (this.entry.uid() === this.timerEntry.uid()) {
+          this.entry.stop = this.timerEntry.stop
+        }
+      })
     },
 
     watch: {
@@ -111,7 +117,7 @@
       },
       duration () {
         const d = duration(this.entry.duration())
-        if (this.entry === this.timerEntry) {
+        if (this.entry.uid() === this.timerEntry.uid()) {
           return d.format('HH:mm:ss')
         } else {
           return d.format('HH:mm')
@@ -208,6 +214,7 @@
       },
       submit () {
         this.cancelEdit()
+        this.selectionClear()
         if (!this.timerActive) {
           const start = timeEditable
             .parse(this.edit.start)
@@ -220,7 +227,6 @@
             update: { start, stop, details }
           }
           this.updateEntry(payload)
-          this.selectionClear()
         }
       },
       ...mapMutations([
