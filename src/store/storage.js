@@ -164,11 +164,9 @@ export const actions = ({
   },
 
   saveEntries ({ state, getters }) {
-    console.log(Storage.all.length, Storage.entries.length)
     let key = state.localStorageKey
     if (getters['userKey'] !== 'local') {
       key = key + '-' + getters['userKey']
-      // Save remote
       Petrov.put(getters['userKey'], {
         entries: Storage.all
       })
@@ -177,29 +175,6 @@ export const actions = ({
       entries: Storage.all
     })
     localStorage.setItem(key, raw)
-
-    // const raw = JSON.stringify({
-    //   entries: Storage.entries
-    // })
-    // let key = state.localStorageKey
-    // if (getters['userKey'] !== 'local') {
-    //   key = key + '-' + getters['userKey']
-    //   // Save remote
-    //   Petrov.get(getters['userKey']).then(res => {
-    //     if (res.data && res.data.trim()) {
-    //       let entries = []
-    //       try {
-    //         entries = JSON.parse(raw).entries
-    //       } catch (error) {
-    //         console.warn('Error parsing localStorage', error)
-    //       }
-    //     }
-    //   })
-    //   // Petrov.put(getters['userKey'], {
-    //   //   entries: Storage.entries
-    //   // })
-    //   // localStorage.setItem(key, raw)
-    // }
   },
 
   addEntry (context, payload) {

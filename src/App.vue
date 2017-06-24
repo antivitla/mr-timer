@@ -74,7 +74,7 @@
             :placeholder="filterPlaceholderLabel")
 
         //- Storage view
-        section.storage.view(v-if="currentView === 'storage'")
+        section.storage.view(v-if="currentView === 'storage' && Storage.entries.length")
           p.no-results(
             v-if="!filteredEntries.length") {{ noResultsLabel }}
           storage-item(
@@ -83,8 +83,17 @@
             :key="entry.uid()"
             :entry="entry")
 
+      //- Хелп
+      help-article(v-if="!Storage.entries.length")
+
       //- Footer
       site-footer(v-if="Storage.entries.length")
+
+      //- Хелп
+      help-article(v-if="Storage.entries.length")
+
+    //- Настройки
+    sidebar
 
     //- modal(
     //-   v-if="modal.active && modal.position"
@@ -105,6 +114,8 @@
   import batchActions from '@/components/batch-actions'
   import listInput from '@/components/list-input'
   import taskContext from '@/components/task-context'
+  import helpArticle from '@/components/help-article'
+  import sidebar from '@/components/sidebar'
   // import modal from '@/components/modal'
   // import editTaskModal from '@/components/modals/edit-task-modal'
   import { Tasks } from '@/store/groups/tasks'
@@ -285,7 +296,9 @@
       siteFooter,
       batchActions,
       listInput,
-      taskContext
+      taskContext,
+      helpArticle,
+      sidebar
       // modal
     }
   }

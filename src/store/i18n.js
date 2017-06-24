@@ -69,7 +69,7 @@ const ru = ({
   cancel: 'отменить',
   filter: 'фильтр',
   filterPlaceholder: 'разделяй через «/»',
-  noResultsLabel: 'Не найдено',
+  noResultsLabel: 'записей не найдено',
   filterByThisLabel: 'найти в истории',
   clearContext: 'очистить контекст'
 })
@@ -111,7 +111,7 @@ const en = ({
   cancel: 'cancel',
   filter: 'filter',
   filterPlaceholder: 'separate by "/"',
-  noResultsLabel: 'No results',
+  noResultsLabel: 'no time records found',
   filterByThisLabel: 'find in history',
   clearContext: 'clear context'
 })

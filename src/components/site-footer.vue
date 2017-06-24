@@ -1,7 +1,11 @@
 <template lang="pug">
   footer
     //- Чиби-йоби
-    img(src="../assets/images/chibi-07.png" style="margin: 0px auto; display: block; margin-bottom: 100px; margin-top: 50px; max-width: 100%")
+    img(
+      class="chibi"
+      :class="{ active: timerActive }"
+      src="../assets/images/chibi-07.png"
+      style="margin: 0px auto; display: block; margin-bottom: 100px; margin-top: 50px; max-width: 100%")
     //- Копирайты мои
     a(
       href="http://github.com/antivitla/mr-timer"
@@ -12,6 +16,17 @@
         | сделано на&nbsp;левом берегу ™
       img(style="display: block; margin: 25px auto 0px auto" src="../assets/images/cat-preloader.gif")
 </template>
+
+<script>
+  import { mapGetters } from 'vuex'
+  export default {
+    computed: {
+      ...mapGetters([
+        'timerActive'
+      ])
+    }
+  }
+</script>
 
 <style lang="stylus">
   @import '../assets/stylesheets/variables'
@@ -29,4 +44,12 @@
     a[href]
       text-decoration none
       color titamota-color-text
+
+    // img.chibi
+    //   filter blur(50px) grayscale(100%)
+    //   opacity 0
+    //   transition all 0.3s ease-out
+    //   &.active
+    //     filter blur(0px) grayscale(0%)
+    //     opacity 1
 </style>
