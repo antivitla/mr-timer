@@ -4,6 +4,7 @@ import sortedIndexBy from 'lodash/sortedIndexBy'
 import async from 'async'
 import appName from './app-name'
 import { extractEntries, parentOfDifferentType } from '@/utils/group'
+import bus from '@/event-bus'
 
 export const Storage = ({
   entries: [],
@@ -11,7 +12,8 @@ export const Storage = ({
   period: null,
   project: null,
   client: null,
-  phase: null
+  phase: null,
+  all: []
 })
 
 const state = {
@@ -29,12 +31,44 @@ export const mutations = {
       payload.entry,
       item => -item.stop)
     Storage.entries.splice(id, 0, payload.entry)
+    // all
+    // if have already
+    const found = Storage.all.find(entry => {
+      return entry.uid() === payload.entry.uid()
+    })
+    if (found) {
+      found.start = payload.entry.start
+      found.stop = payload.entry.stop
+      found.details = payload.entry.details.slice(0)
+      found._uid = payload.entry._uid
+    } else {
+      const allid = sortedIndexBy(
+        Storage.all,
+        payload.entry,
+        item => -item.stop)
+      Storage.all.splice(allid, 0, payload.entry)
+    }
   },
 
   removeEntry (state, payload) {
-    const id = Storage.entries.indexOf(payload.entry)
+    let id = Storage.entries.indexOf(payload.entry)
+    if (id < 0) {
+      id = Storage.entries.findIndex(entry => {
+        return entry.uid() === payload.entry.uid()
+      })
+    }
     if (id > -1) {
       Storage.entries.splice(id, 1)
+    }
+    // all
+    let allid = Storage.all.indexOf(payload.entry)
+    if (allid < 0) {
+      allid = Storage.all.findIndex(entry => {
+        return entry.uid() === payload.entry.uid()
+      })
+    }
+    if (allid > -1) {
+      Storage.all.splice(allid, 1)
     }
   },
 
@@ -72,15 +106,13 @@ export const mutations = {
   }
 }
 
-// function withinContext (entry, context) {
-//   // console.log(entry, context)
-//   return true
-// }
-
 let lockedBatchOperations = false
 
 export const actions = ({
   loadEntries ({ state, commit, getters, dispatch }, payload) {
+    // Clear non-context all collection
+    // (REMOVE WHEN BACKEND READY)
+    Storage.all = []
     // Грузиться с удалённого аккаунта?
     if (getters['userKey'] !== 'local') {
       Petrov.get(getters['userKey'])
@@ -132,20 +164,42 @@ export const actions = ({
   },
 
   saveEntries ({ state, getters }) {
+    console.log(Storage.all.length, Storage.entries.length)
+    let key = state.localStorageKey
+    if (getters['userKey'] !== 'local') {
+      key = key + '-' + getters['userKey']
+      // Save remote
+      Petrov.put(getters['userKey'], {
+        entries: Storage.all
+      })
+    }
+    const raw = JSON.stringify({
+      entries: Storage.all
+    })
+    localStorage.setItem(key, raw)
+
     // const raw = JSON.stringify({
-    //   entries: Storage.entries,
-    //   context: cloneWithourParents(Storage.context)
+    //   entries: Storage.entries
     // })
     // let key = state.localStorageKey
     // if (getters['userKey'] !== 'local') {
     //   key = key + '-' + getters['userKey']
     //   // Save remote
-    //   Petrov.put(getters['userKey'], {
-    //     entries: Storage.entries,
-    //     context: Storage.context
+    //   Petrov.get(getters['userKey']).then(res => {
+    //     if (res.data && res.data.trim()) {
+    //       let entries = []
+    //       try {
+    //         entries = JSON.parse(raw).entries
+    //       } catch (error) {
+    //         console.warn('Error parsing localStorage', error)
+    //       }
+    //     }
     //   })
+    //   // Petrov.put(getters['userKey'], {
+    //   //   entries: Storage.entries
+    //   // })
+    //   // localStorage.setItem(key, raw)
     // }
-    // localStorage.setItem(key, raw)
   },
 
   addEntry (context, payload) {
@@ -167,6 +221,10 @@ export const actions = ({
     context.commit('addEntry', {
       entry: updatedEntry
     })
+    bus.$emit('update-entry', {
+      entry: payload.entry,
+      updatedEntry
+    })
     context.dispatch('saveEntries')
     return updatedEntry
   },
@@ -178,12 +236,14 @@ export const actions = ({
         // Переименование
         let details = entry.details.slice(0)
         if (payload.update.details) {
-          const source = payload.update.details.source.join('/')
-          const target = payload.update.details.target.join('/')
+          let source = payload.update.details.source.join('/')
+          let target = payload.update.details.target.join('/')
           details = entry.details.join('/')
             .replace(new RegExp('^' + source), target)
             .split('/')
+            .filter(d => d)
             .map(d => d.trim())
+            .filter(d => d)
         }
         // Изменение длительностей
         let stop = entry.stop
@@ -197,7 +257,8 @@ export const actions = ({
           entry: new Entry({
             start: entry.start,
             stop,
-            details
+            details,
+            _uid: entry._uid
           })
         })
         setTimeout(next, 5)
@@ -206,6 +267,7 @@ export const actions = ({
           console.warn(error)
         }
         lockedBatchOperations = false
+        bus.$emit('batch-update-entries', payload)
         context.dispatch('saveEntries')
       })
     }
@@ -239,12 +301,13 @@ export const actions = ({
           console.warn(error)
         }
         lockedBatchOperations = false
-        // context.dispatch('saveEntries')
+        context.dispatch('saveEntries')
       })
     }
   },
 
   setContext (context, payload) {
+    bus.$emit('set-context', payload)
     context.commit('clearEntries')
     context.commit('setContext', payload)
     const entries = extractEntries(payload.context)
@@ -252,6 +315,7 @@ export const actions = ({
   },
 
   clearContext (context) {
+    bus.$emit('clear-context')
     context.commit('clearEntries')
     context.commit('clearContext')
     context.dispatch('loadEntries')

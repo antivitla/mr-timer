@@ -30,14 +30,14 @@
           price-per-hour(
             v-if="currentView !== 'storage'")
           .filter-entries(
-            v-if="currentView === 'storage' && !selectionEntries.length")
+            v-if="currentView === 'storage' && !Selektion.entries.length")
             span.label {{ filterLabel }}
             list-input(
               v-model="filter"
               :debounce="50"
               :placeholder="filterPlaceholderLabel")
           batch-actions(
-            v-if="currentView === 'storage' && selectionEntries.length")
+            v-if="currentView === 'storage' && Selektion.entries.length")
           div.view-switch
             a(
               v-for="view in ['tasks', 'months', 'days', 'storage']"
@@ -49,24 +49,24 @@
           group-item(
             v-for="task in filterGroupChildren(Tasks.children)"
             :key="task.name"
-            :entry="task")
+            :group="task")
 
         //- Months view
         section.months.view(v-if="currentView === 'months'")
           group-item(
             v-for="month in filterGroupChildren(Months.children)"
             :key="month.name"
-            :entry="month")
+            :group="month")
 
         //- Days view
         section.days.view(v-if="currentView === 'days'")
           group-item(
             v-for="day in filterGroupChildren(Days.children)"
             :key="day.name"
-            :entry="day")
+            :group="day")
 
         .filter-entries(
-          v-if="currentView === 'storage' && !selectionEntries.length && Storage.entries.length")
+          v-if="currentView === 'storage' && !Selektion.entries.length && Storage.entries.length")
           span.label {{ filterLabel }}
           list-input(
             v-model="filter"
@@ -111,6 +111,7 @@
   import { Months } from '@/store/groups/months'
   import { Days } from '@/store/groups/days'
   import { Storage } from '@/store/storage'
+  import { Selektion } from '@/store/selection'
   import { translate, languages, currencies } from '@/store/i18n'
   import capitalize from 'lodash/capitalize'
   import { timeEditable } from '@/utils/time'
@@ -125,6 +126,7 @@
         Months,
         Days,
         Storage,
+        Selektion,
         filterGroupChildren,
         scrollTopEvents: [
           'start-task',
@@ -204,8 +206,7 @@
         'currency',
         'isCurrencySymbolBefore',
         'currentView',
-        'timerActive',
-        'selectionEntries'
+        'timerActive'
       ])
     },
 

@@ -8,20 +8,20 @@
   import capitalize from 'lodash/capitalize'
 
   export default {
-    props: ['entry'],
+    props: ['group'],
 
     computed: {
       displayName () {
-        return this[this.entry.type]
+        return this[this.group.type]
       },
       task () {
-        return this.entry.name
+        return this.group.name
       },
       year () {
-        return this.entry.name
+        return this.group.name
       },
       month () {
-        const d = moment(this.entry.start)
+        const d = moment(this.group.start)
         let label = capitalize(d.format('MMMM YYYY'))
         if (d.year() === (new Date()).getFullYear()) {
           label = label.split(' ')[0]
@@ -29,7 +29,7 @@
         return label
       },
       day () {
-        const d = moment(this.entry.start)
+        const d = moment(this.group.start)
         let label = d.format('LL')
         if (this.locale === 'ru') {
           label = label.replace('г.', '').trim()
@@ -50,6 +50,6 @@
 </script>
 
 <style lang="stylus">
-  .item-name
+  .group-name
     font-weight 700
 </style>

@@ -2,9 +2,9 @@
   .batch-actions
     span.icon-button.delete(
       :title="deleteLabel"
-      @click="batchRemove(selectionEntries)")
+      @click="batchRemove()")
       i.material-icons delete
-    span.label {{ selectedLabel(selectionEntries.length) }}
+    span.label {{ selectedLabel(Selektion.entries.length) }}
     span.icon-button.delete(
       :title="cancelLabel"
       @click="selectionClear()")
@@ -16,8 +16,15 @@
   import pluralize from '@/utils/pluralize'
   import capitalize from 'lodash/capitalize'
   import { translate } from '@/store/i18n'
+  import { Selektion } from '@/store/selection'
 
   export default {
+    data () {
+      return {
+        Selektion
+      }
+    },
+
     computed: {
       deleteLabel () {
         return capitalize(translate[this.locale].delete)
@@ -26,8 +33,7 @@
         return capitalize(translate[this.locale].cancel)
       },
       ...mapGetters([
-        'locale',
-        'selectionEntries'
+        'locale'
       ])
     },
 
@@ -43,9 +49,9 @@
         const or = t.or
         return q + ' ' + entries + ' ' + or
       },
-      batchRemove (entries) {
+      batchRemove () {
         this.batchRemoveEntries({
-          entries: this.selectionEntries
+          entries: this.Selektion.entries
         })
         this.selectionClear()
       },

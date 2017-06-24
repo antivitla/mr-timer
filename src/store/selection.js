@@ -1,32 +1,28 @@
-const state = {
+export const Selektion = {
   entries: []
-}
-
-const getters = {
-  selectionEntries: state => state.entries
 }
 
 const mutations = {
   selectionAdd (state, payload) {
-    if (state.entries.indexOf(payload.entry) < 0) {
-      state.entries.push(payload.entry)
+    if (Selektion.entries.indexOf(payload.entry) < 0) {
+      Selektion.entries.push(payload.entry)
     }
   },
 
   selectionRemove (state, payload) {
-    const id = state.entries.indexOf(payload.entry)
+    const id = Selektion.entries.indexOf(payload.entry)
     if (id > -1) {
-      state.entries.splice(id, 1)
+      Selektion.entries.splice(id, 1)
     }
   },
 
   selectionClear (state, payload) {
-    state.entries = []
+    Selektion.entries = []
   }
 }
 
 export default {
-  state,
-  getters,
+  // state,
+  // getters,
   mutations
 }

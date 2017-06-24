@@ -3,14 +3,14 @@
     :depth="depth"
     :class="{ 'has-children': hasChildren }")
     .item.edit(
-      :class="{ 'active': isTrackingEntry }"
-      v-if="isEditingTask && editingTaskUid === entry.uid()"
+      :class="{ 'active': trackingEntry }"
+      v-if="isEditingTask && editingTaskUid === group.uid()"
       @keyup.esc="stopTaskEditing()"
       v-esc-outside="stopTaskEditing"
       v-click-outside="stopTaskEditing")
       span.name
-        span.non-editable(v-if="entry.type !== 'task' || isTrackingEntry")
-          item-name(:entry="entry")
+        span.non-editable(v-if="group.type !== 'task'")
+          group-name(:group="group")
         list-input(
           v-else
           :focus="editingFocus === 'details'"
@@ -19,7 +19,7 @@
           :on-submit="submitTask")
       span.duration
         span.non-editable(
-          v-if="isTrackingEntry") {{ duration }}
+          v-if="trackingEntry") {{ duration }}
         input(
           v-else
           type="text"
@@ -43,21 +43,21 @@
 
     .item.read(
       v-else
-      :class="{ 'active': isTrackingEntry }")
+      :class="{ 'active': trackingEntry }")
       span.name(
         :color="colorCode"
         @wheel="setEntryAsContext($event)")
         span(
-          v-if="entry.type === 'task'"
+          v-if="group.type === 'task'"
           v-long-click="500"
           @long-click="startEdit('details')"
           @normal-click="startTask()")
-          item-name(:entry="entry")
+          group-name(:group="group")
         span(
           v-else
           v-long-click="500"
           @long-click="startEdit('details')")
-          item-name(:entry="entry")
+          group-name(:group="group")
       span.duration(
         v-long-click="500"
         @long-click="startEdit('duration')") {{ duration }}
@@ -68,15 +68,15 @@
       //-   //-   i.material-icons filter_list
       //-   a.icon-button.delete(@click="removeTask()")
       //-     i.material-icons delete
-      //-   span.icon-button.select(v-if="entry.type === 'task'")
+      //-   span.icon-button.select(v-if="group.type === 'task'")
       //-     input(
       //-       type="checkbox")
 
     group-item(
       v-if="child.type"
-      v-for="child in filterGroupChildren(entry.children)"
+      v-for="child in filterGroupChildren(group.children)"
       :key="child.name"
-      :entry="child")
+      :group="child")
 </template>
 
 <script>
@@ -86,22 +86,22 @@
   import {
     extractEntries,
     parentOfDifferentType,
-    filterGroupChildren
-  } from '@/utils/group'
+    filterGroupChildren,
+    wrapContextDetails } from '@/utils/group'
   import { translate } from '@/store/i18n'
+  import { Storage } from '@/store/storage'
   import longClick from '@/directives/long-click'
   import clickOutside from '@/directives/click-outside'
   import escOutside from '@/directives/esc-outside'
   import { focusAndSelectAll } from '@/directives/focus'
   import listInput from '@/components/list-input'
-  import itemName from '@/components/item-name'
+  import groupName from '@/components/group-name'
   import bus from '@/event-bus'
   import Entry from '@/models/entry'
   import Group from '@/models/group'
   import funny from 'mr-funny'
   import funnyTemplates from '@/funny/templates'
   import capitalize from 'lodash/capitalize'
-  // import cloneDeep from 'lodash/cloneDeep'
   import debounce from '@/utils/debounce'
 
   function funnyTask (locale) {
@@ -110,7 +110,7 @@
 
   export default {
     props: [
-      'entry'
+      'group'
     ],
 
     data () {
@@ -131,10 +131,9 @@
 
     mounted () {
       bus.$on('tick-timer', () => {
-        if (this.isTrackingEntry) {
-          this.entry.children
-            .find(child => child instanceof Entry)
-            .stop = this.timerEntry.stop
+        const entry = this.trackingEntry
+        if (entry) {
+          entry.stop = this.timerEntry.stop
         }
       })
     },
@@ -143,16 +142,16 @@
       duration () {
         const d = translate[this.locale].duration
         return durationHuman(
-          this.entry.duration(), d.hr, d.min, d.sec)
+          this.group.duration(), d.hr, d.min, d.sec)
       },
       colorCode () {
-        if (this.entry.type === 'month' || this.entry.type === 'day') {
-          return new Date(this.entry.start).getMonth()
+        if (this.group.type === 'month' || this.group.type === 'day') {
+          return new Date(this.group.start).getMonth()
         }
       },
       cost () {
         const c = parseInt(
-          this.entry.duration() * this.price / 3600000, 10)
+          this.group.duration() * this.price / 3600000, 10)
         let part = '' + c
         let result = ''
         while (part.length) {
@@ -162,26 +161,27 @@
         return result.trim()
       },
       depth () {
-        return this.entry.path().length - 1
+        return this.group.path().length - 1
       },
       hasChildren () {
-        return this.entry.children
+        return this.group.children
           .some(item => item instanceof Group)
       },
       getStorageEntry () {
-        let child = this.entry
+        let child = this.group
         while (child.children && child.children.length) {
           child = child.children[0]
         }
         return child
       },
-      isTrackingEntry () {
+      trackingEntry () {
         if (this.timerActive) {
-          const entry = this.entry.children
-            .find(item => item instanceof Entry)
-          return entry && entry.uid() === this.timerEntry.uid()
+          const entry = this.group.children
+            .find(entry => entry instanceof Entry)
+          if (entry && entry.uid() === this.timerEntry.uid()) {
+            return entry
+          }
         }
-        return false
       },
       filterByThisLabel () {
         return capitalize(translate[this.locale].filterByThisLabel)
@@ -206,15 +206,19 @@
 
     methods: {
       startTask () {
-        let details = this.entry.details()
-        if (this.entry.children[0] instanceof Group) {
+        let details = this.group.details()
+        if (this.group.children[0] instanceof Group) {
           details = details.concat(funnyTask(this.locale))
+        }
+        if (Storage.context) {
+          details = wrapContextDetails(
+            Storage.context, details)
         }
         bus.$emit('start-task', {
           entry: new Entry({
             start: new Date().getTime(),
             stop: new Date().getTime(),
-            details
+            details: details.slice(0)
           })
         })
       },
@@ -223,19 +227,18 @@
         this.edit.duration = null
       },
       startEdit (field) {
-        console.log(field)
         this.clearEdit()
         this.stopTaskEditing()
         let payload = {
           focus: field,
           edit: {},
-          uid: this.entry.uid()
+          uid: this.group.uid()
         }
-        if (this.entry.type === 'task') {
-          payload.edit.details = this.entry.details()
+        if (this.group.type === 'task') {
+          payload.edit.details = this.group.details()
           this.edit.details = payload.edit.details.join(' / ')
         }
-        payload.edit.duration = this.entry.duration()
+        payload.edit.duration = this.group.duration()
         this.edit.duration = durationEditable
           .stringify(payload.edit.duration)
         this.startTaskEditing(payload)
@@ -247,16 +250,25 @@
         this.edit.duration = event.target.value
       },
       submitTask () {
-        const entries = extractEntries(this.entry)
+        const entries = extractEntries(this.group)
         const update = {}
-        if (this.edit.details !== null) {
-          update.details = {
-            source: this.editingTaskFields.details,
-            target: this.edit.details.split('/').map(d => d.trim())
+        if (this.edit.details) {
+          let source = this.editingTaskFields.details
+          let target = this.edit.details
+              .split('/')
+              .filter(i => i)
+              .map(d => d.trim())
+              .filter(i => i)
+          if (Storage.context) {
+            source = wrapContextDetails(
+              Storage.context, source)
+            target = wrapContextDetails(
+              Storage.context, target)
           }
+          update.details = { source, target }
         }
-        if (this.edit.duration !== null) {
-          const dOld = this.entry.duration()
+        if (this.edit.duration) {
+          const dOld = this.group.duration()
           const dNew = durationEditable
             .parse(this.edit.duration)
           const add = (dNew + entries.length - dOld) / entries.length
@@ -268,29 +280,29 @@
       removeTask () {
         this.stopTaskEditing()
         this.batchRemoveEntries({
-          entries: extractEntries(this.entry)
+          entries: extractEntries(this.group)
         })
       },
       filterTask () {
         let filter = []
-        // let parent = this.entry.parent
-        if (this.entry.type === 'task') {
-          filter = this.entry.details()
+        // let parent = this.group.parent
+        if (this.group.type === 'task') {
+          filter = this.group.details()
             .concat(filter)
-        } else if (this.entry.type === 'month') {
-          filter = [moment(this.entry.start).format('MM.YYYY')]
+        } else if (this.group.type === 'month') {
+          filter = [moment(this.group.start).format('MM.YYYY')]
             .concat(filter)
-        } else if (this.entry.type === 'day') {
-          filter = [moment(this.entry.start).format('DD.MM.YYYY')]
+        } else if (this.group.type === 'day') {
+          filter = [moment(this.group.start).format('DD.MM.YYYY')]
             .concat(filter)
         }
-        if (this.entry.type === 'task') {
-          const parent = parentOfDifferentType(this.entry.type)
-          if (parent.type === 'month') {
+        if (this.group.type === 'task') {
+          const parent = parentOfDifferentType(this.group)
+          if (parent && parent.type === 'month') {
             filter = [moment(parent.start).format('MM.YYYY')]
               .concat(filter)
           }
-          if (parent.type === 'day') {
+          if (parent && parent.type === 'day') {
             filter = [moment(parent.start).format('DD.MM.YYYY')]
               .concat(filter)
           }
@@ -300,11 +312,10 @@
         })
       },
       setEntryAsContext (event) {
-        if (this.entry.children[0] instanceof Group) {
+        if (this.group.children[0] instanceof Group) {
           event.preventDefault()
           this.debounceWheel(() => {
-            bus.$emit('set-context')
-            this.setContext({ context: this.entry })
+            this.setContext({ context: this.group })
           }, 200)
         }
       },
@@ -328,7 +339,7 @@
 
     components: {
       listInput,
-      itemName
+      groupName
     }
   }
 </script>

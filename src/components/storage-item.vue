@@ -1,6 +1,6 @@
 <template lang="pug">
   div.storage-item(
-    :class="{ 'active': timerEntry.uid() === uid }")
+    :class="{ 'active': isTrackingEntry }")
     span.edit(
       v-if="isEditingTask && editingTaskUid === uid"
       @keyup.esc="cancelEdit()"
@@ -14,17 +14,14 @@
           @input="updateStart($event)"
           @keyup.enter="submit()")
       span.details
-        span.non-editable(
-          v-if="timerActive && timerEntry.uid() === uid") {{ details }}
         list-input(
-          v-else
           :focus="editingFocus === 'details'"
           :value="edit.details"
           @input-original-event="updateDetails($event)"
           :on-submit="submit")
       span.duration
         span.non-editable(
-          v-if="timerActive && timerEntry.uid() === uid") {{ duration }}
+          v-if="isTrackingEntry") {{ duration }}
         input(
           v-else
           type="text"
@@ -45,24 +42,23 @@
       :class="{ 'selected': selected }"
       @click="toggleSelectEntry()")
       span.start(
-        v-once
         v-long-click="500"
         @long-click="startEdit('start')") {{ start }}
       span.details(
-        v-once
         v-long-click="500"
         @long-click="startEdit('details')") {{ details }}
       span.duration(
         v-long-click="500"
         @long-click="startEdit('duration')") {{ duration }}
       span.actions
-        span.icon-button.select(v-if="selectionEntries.length")
+        span.icon-button.select(v-if="Selektion.entries.length")
           input(type="checkbox" v-model="selected")
 </template>
 
 <script>
   import { mapGetters, mapMutations, mapActions } from 'vuex'
   import { translate } from '@/store/i18n'
+  import { Selektion } from '@/store/selection'
   import { duration, durationEditable } from '@/utils/duration'
   import { timeEditable } from '@/utils/time'
   import longClick from '@/directives/long-click'
@@ -83,7 +79,8 @@
           duration: null,
           start: null
         },
-        selected: false
+        selected: false,
+        Selektion
       }
     },
 
@@ -131,7 +128,12 @@
         return this.entry.uid()
       },
       isSelected () {
-        return this.selectionEntries.indexOf(this.entry) > -1
+        return this.Selektion.entries.indexOf(this.entry) > -1
+      },
+      isTrackingEntry () {
+        const isTimerActive = this.timerActive
+        const isEntryInTimer = this.timerEntry.uid() === this.uid
+        return isTimerActive && isEntryInTimer
       },
       ...mapGetters([
         'timerEntry',
@@ -140,8 +142,7 @@
         'isEditingTask',
         'editingTaskUid',
         'editingTaskFields',
-        'editingFocus',
-        'selectionEntries'
+        'editingFocus'
       ])
     },
 
@@ -170,12 +171,11 @@
         this.cancelEdit()
         // Сочиняем объект редактирования,
         // используется как память с чем сравнивать
-        // ну и вообще
         let payload = {
           focus: field,
           edit: {
             start: this.entry.start,
-            details: this.entry.details,
+            details: this.entry.details.slice(0),
             duration: this.entry.duration()
           },
           uid: this.entry.uid()
@@ -191,11 +191,13 @@
         this.startTaskEditing(payload)
         // Кстати, выбранная запись как будто стала выбрана
         // в пакетное редактирование
-        // this.selected = true
+        this.selected = true
       },
       cancelEdit () {
         this.stopTaskEditing()
-        // this.selectionClear()
+        if (this.Selektion.entries.length < 2) {
+          this.selectionClear()
+        }
       },
       updateDetails (event) {
         this.edit.details = event.target.value
@@ -209,29 +211,28 @@
           .parse(this.edit.start)
         this.edit.duration = durationEditable
           .stringify(this.entry.stop - start)
-        console.log(start)
         this.setTimerStart({ start })
       },
       submit () {
         this.cancelEdit()
         this.selectionClear()
-        if (!this.timerActive) {
-          const start = timeEditable
-            .parse(this.edit.start)
-          const duration = durationEditable
-            .parse(this.edit.duration)
-          const stop = start + duration
-          const details = this.edit.details.split('/').map(d => d.trim())
-          const payload = {
-            entry: this.entry,
-            update: { start, stop, details }
-          }
-          this.updateEntry(payload)
+        const start = timeEditable
+          .parse(this.edit.start)
+        const duration = durationEditable
+          .parse(this.edit.duration)
+        const stop = start + duration
+        const details = this.edit.details.split('/').map(d => d.trim())
+        const _uid = this.entry._uid
+        const payload = {
+          entry: this.entry,
+          update: { start, stop, details, _uid }
         }
+        this.updateEntry(payload)
       },
       ...mapMutations([
         'stopTaskEditing',
         'startTaskEditing',
+        'setTimerEntry',
         'selectionAdd',
         'selectionRemove',
         'selectionClear',

@@ -70,3 +70,18 @@ export function rootDetails (group) {
   const rootDetails = details.slice(0, -1 * descendantsPath.length)
   return rootDetails
 }
+
+export function wrapContextDetails (contextItem, details) {
+  const rd = rootDetails(contextItem)
+  return rd.concat(details)
+}
+
+export function unwrapContextDetails (contextItem, details) {
+  const rd = rootDetails(contextItem)
+  return details.join('/')
+    .replace(new RegExp('^' + rd.join('/')), '')
+    .split('/')
+    .filter(d => d)
+    .map(d => d.trim())
+    .filter(d => d)
+}

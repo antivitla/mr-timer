@@ -12,8 +12,9 @@
       span.sec {{ sec }}
       span.ms {{ ms }}
     list-input(
-      v-model="details"
-      :debounce="500"
+      :value="details"
+      @input="updateDetails($event)"
+      :debounce="300"
       :on-submit="toggle"
       :focus="timerActive"
       :reset-focus-on="resetFocusOnEvent"
@@ -24,7 +25,7 @@
 </template>
 
 <script>
-  import uuid from 'uuid/v1'
+  // import uuid from 'uuid/v1'
   import { mapGetters, mapActions, mapMutations } from 'vuex'
   import listInput from './list-input'
   import taskContext from './task-context'
@@ -34,7 +35,9 @@
   import Entry from '@/models/entry'
   import { Storage } from '@/store/storage'
   import { duration, durationFraction } from '@/utils/duration'
-  import { rootDetails } from '@/utils/group'
+  import {
+    wrapContextDetails,
+    unwrapContextDetails } from '@/utils/group'
   import bus from '@/event-bus'
 
   function funnyTask (locale) {
@@ -56,36 +59,83 @@
 
     created () {
       this.placeholder = capitalize(funnyTask(this.locale))
+
       bus.$on('start-task', payload => {
         this.start(payload.entry)
         this.$emit(this.resetFocusOnEvent)
       })
-    },
 
-    watch: {
-      details (details, prev) {
-        // If timer running, changes to task name
-        // will replace active entry's details
-        if (this.timerActive) {
-          // Guarantee to have some details,
-          // event if user deleted them
-          if (!details.length) {
-            this.details = [capitalize(funnyTask(this.locale))]
+      bus.$on('update-entry', payload => {
+        const entry = payload.entry
+        if (entry.uid() === this.timerEntry.uid()) {
+          let details = payload.updatedEntry.details
+          if (Storage.context) {
+            this.details = unwrapContextDetails(
+              Storage.context, details)
           }
-          // Do not trigger on change, that comes
-          // when we start timer with empty details
-          // (we will start that task little later in 'toggle').
-          // We can detect this by absense of previous details
-          if (prev.length) {
-            const entry = this.timerEntry
-            const update = { details: this.details }
-            this.updateEntry({ entry, update })
-              .then(updatedEntry => {
-                this.setTimerEntry({ entry: updatedEntry })
-              })
+          this.setTimerEntry({
+            entry: new Entry(payload.updatedEntry)
+          })
+        }
+      })
+
+      bus.$on('batch-update-entries', payload => {
+        let entry = payload.entries.find(entry => {
+          return entry.uid() === this.timerEntry.uid()
+        })
+        if (entry) {
+          const source = payload.update.details.source.join('/')
+          const target = payload.update.details.target.join('/')
+          const details = this.timerEntry.details.join('/')
+            .replace(new RegExp('^' + source), target)
+            .split('/')
+            .filter(i => i)
+            .map(i => i.trim())
+            .filter(i => i)
+          const timerEntry = new Entry(Object.assign(
+            {},
+            this.timerEntry,
+            { details }))
+          this.setTimerEntry({ entry: timerEntry })
+          if (Storage.context) {
+            this.details = unwrapContextDetails(
+              Storage.context, details)
+          } else {
+            this.details = details.slice(0)
           }
         }
-      }
+      })
+
+      bus.$on('set-context', payload => {
+        const storageEntry = Storage.entries.find(entry => {
+          return entry.uid() === this.timerEntry.uid()
+        })
+        if (!storageEntry) {
+          console.warn('Произошел рассинхрон таймера с хранилищем',
+            this.timerEntry, 'не найден в хранилище. Но возможно и пофиг, особенно если таймер не бежит.')
+          return
+        }
+        this.details = unwrapContextDetails(
+          payload.context, storageEntry.details)
+      })
+
+      bus.$on('clear-context', payload => {
+        const storageEntry = Storage.entries.find(entry => {
+          return entry.uid() === this.timerEntry.uid()
+        })
+        if (!storageEntry) {
+          console.warn('Произошел рассинхрон таймера с хранилищем',
+            this.timerEntry, 'не найден в хранилище. Но возможно и пофиг, особенно если таймер не бежит.')
+          return
+        }
+        const details = storageEntry.details.slice(0)
+        const timerEntry = new Entry(Object.assign(
+          {},
+          this.timerEntry,
+          details))
+        this.setTimerEntry({ entry: timerEntry })
+        this.details = details.slice(0)
+      })
     },
 
     computed: {
@@ -120,29 +170,68 @@
       start (newEntry) {
         this.stop()
         // Start timer with guaranteed details
-        let details = [this.placeholder]
-        if (newEntry) {
-          this.details = newEntry.details.slice(0)
-        } else if (this.details.length) {
-          details = this.details.slice(0)
+        let details
+        if (newEntry && newEntry.details && newEntry.details.length) {
+          details = newEntry.details.slice(0)
         } else {
-          this.details = details
+          if (!this.details.length) {
+            details = [this.placeholder]
+          } else {
+            details = this.details.slice(0)
+          }
+          // Если мы самостоятально генерим имя записи,
+          // не забыть цепануть контекст
+          if (Storage.context) {
+            details = wrapContextDetails(
+              Storage.context, details)
+          }
         }
-        const entry = newEntry || new Entry({ details })
-        entry._uid = uuid()
-        this.startTimer({ entry })
-        // Start ms tick
-        this.tick()
-        // Add new entry
-        const storageEntry = new Entry(entry)
+        // Сохраняем себе копию деталей для инпута
+        // с учётом контекста
         if (Storage.context) {
-          storageEntry.details = rootDetails(Storage.context)
-            .concat(entry.details)
+          this.details = unwrapContextDetails(
+            Storage.context, details)
+        } else {
+          this.details = details.slice(0)
         }
-        this.addEntry({
-          entry: storageEntry
-        })
+        // Создаём запись для таймера и хранилища
+        const entry = new Entry(Object.assign(
+          {},
+          newEntry,
+          { details }))
+        // Стартуем таймер
+        this.startTimer({ entry })
+        // Стартуем тик миллисекунд
+        this.tick()
+        // Добавляем запись в хранилище
+        this.addEntry({ entry })
+        // Генерим новый плейсхолдер-заглушку задачи
         this.placeholder = capitalize(funnyTask(this.locale))
+      },
+      updateDetails (event) {
+        let details = event
+        this.details = details
+        // If timer running, changes to task name
+        // will replace active entry's details
+        if (this.timerActive) {
+          if (!details || !details.length) {
+            details = [capitalize(funnyTask(this.locale))]
+          }
+          if (Storage.context) {
+            details = wrapContextDetails(
+              Storage.context, details)
+          }
+          // Нужно создать новую запись чтоб получить
+          // новый uid
+          const update = new Entry(Object.assign(
+            {},
+            this.timerEntry,
+            { details }))
+          this.updateEntry({
+            entry: this.timerEntry,
+            update
+          })
+        }
       },
       stop () {
         // Stop
