@@ -2,7 +2,7 @@
   //- .app(
   //-     :class="{ 'timer-active': timerActive, 'modal-active': modal.active }"
   .app(
-    :class="{ 'timer-active': timerActive }"
+    :class="{ 'timer-active': timerActive, 'sidebar-active': sidebarActive }"
     :lang="locale"
     :currency="currency"
     :is-currency-symbol-before="isCurrencySymbolBefore"
@@ -13,9 +13,8 @@
         nav.app-menu
           div.left
           div.right
-            div.toggle-sidebar
-              span.account(v-if="userKey !== 'local'")
-                | {{ userKey }}
+            div.toggle-sidebar(@click.stop.prevent="toggleSidebar")
+              span.account(v-if="userKey !== 'local'") {{ userKey }}
               span.icon-button
                 i.material-icons menu
 
@@ -123,7 +122,7 @@
   import { Days } from '@/store/groups/days'
   import { Storage } from '@/store/storage'
   import { Selektion } from '@/store/selection'
-  import { translate, languages, currencies } from '@/store/i18n'
+  import { translate, locales, currencies } from '@/store/i18n'
   import capitalize from 'lodash/capitalize'
   import { timeEditable } from '@/utils/time'
   import { filterGroupChildren } from '@/utils/group'
@@ -144,7 +143,9 @@
           'filter-entries',
           'set-context'
         ],
-        filter: []
+        filter: [],
+        locales,
+        currencies
       }
     },
 
@@ -217,7 +218,8 @@
         'currency',
         'isCurrencySymbolBefore',
         'currentView',
-        'timerActive'
+        'timerActive',
+        'sidebarActive'
       ])
     },
 
@@ -230,14 +232,14 @@
         }
       },
       detectLocale () {
-        const l = Object.keys(languages).find(lang => {
-          return this.$route.query[lang] !== undefined
+        const l = Object.keys(locales).find(code => {
+          return this.$route.query.locale === code
         })
         return l || this.locale || 'ru'
       },
       detectCurrency () {
         const c = Object.keys(currencies).find(code => {
-          return this.$route.query[code] !== undefined
+          return this.$route.query.currency === code
         })
         return c || this.currency || 'rub'
       },
@@ -275,7 +277,8 @@
         'setLocale',
         'setCurrency',
         'setCurrentView',
-        'selectionClear'
+        'selectionClear',
+        'toggleSidebar'
       ]),
       ...mapActions([
         'loadEntries',
@@ -469,6 +472,9 @@
       margin-left auto
     .toggle-sidebar
       display flex
+      cursor pointer
+      .material-icons
+        font-size 18px
       .account
         font-size 14px
         margin-right 10px
@@ -477,4 +483,15 @@
     @media (min-width 768px)
       top 40px
       width calc(100% - 130px)
+
+  .app
+    .page
+      transform translateX(0px)
+      // filter blur(0px)
+    &.sidebar-active .page
+      transform translateX(-400px)
+      // filter blur(0px)
+      pointer-events none
+      .toggle-sidebar
+        display none
 </style>

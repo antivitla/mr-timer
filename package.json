@@ -1,7 +1,7 @@
 {
-  "name": "titata",
+  "name": "titamota",
   "version": "1.0.0",
-  "description": "Time Task Track",
+  "description": "Time Task & Money Tracking",
   "author": "Виталий Кулешин <antivitla@gmail.com>",
   "private": true,
   "scripts": {

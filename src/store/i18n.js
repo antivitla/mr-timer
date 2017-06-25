@@ -1,4 +1,4 @@
-export const languages = ({
+export const locales = ({
   ru: {
     code: 'ru',
     label: 'русский'
@@ -66,12 +66,27 @@ const ru = ({
   selected: 'выбрано',
   delete: 'удалить',
   or: 'или',
+  and: 'и',
   cancel: 'отменить',
   filter: 'фильтр',
   filterPlaceholder: 'разделяй через «/»',
   noResultsLabel: 'записей не найдено',
   filterByThisLabel: 'найти в истории',
-  clearContext: 'очистить контекст'
+  clearContext: 'очистить контекст',
+  sidebar: {
+    icons: 'иконки',
+    from: 'от',
+    girls: 'девчушки',
+    l10n: 'локализация'
+  },
+  currency: {
+    rub: 'рубль',
+    usd: 'доллар',
+    eur: 'евро',
+    cny: 'юань'
+  },
+  import: 'импорт',
+  export: 'экспорт'
 })
 
 const en = ({
@@ -108,12 +123,27 @@ const en = ({
   selected: 'selected',
   delete: 'delete',
   or: 'or',
+  and: 'and',
   cancel: 'cancel',
   filter: 'filter',
   filterPlaceholder: 'separate by "/"',
   noResultsLabel: 'no time records found',
   filterByThisLabel: 'find in history',
-  clearContext: 'clear context'
+  clearContext: 'clear context',
+  sidebar: {
+    icons: 'icons',
+    from: 'from',
+    girls: 'girls',
+    l10n: 'localization'
+  },
+  currency: {
+    rub: 'ruble',
+    usd: 'dollar',
+    eur: 'euro',
+    cny: 'yuan'
+  },
+  import: 'import',
+  export: 'export'
 })
 
 export const translate = ({
@@ -127,12 +157,12 @@ export function interpolate (str, value, locale) {
 }
 
 const state = {
-  language: 'ru',
+  locale: 'ru',
   currency: 'rub'
 }
 
 const getters = {
-  locale: state => state.language,
+  locale: state => state.locale,
   currency: state => state.currency,
   isCurrencySymbolBefore: state => {
     return currencies[state.currency].isBefore
@@ -141,7 +171,7 @@ const getters = {
 
 const mutations = {
   setLocale (state, payload) {
-    state.language = payload.locale
+    state.locale = payload.locale
   },
   setCurrency (state, payload) {
     state.currency = payload.currency
