@@ -23,8 +23,7 @@ const mutations = {
     state.mode = payload.mode
   },
   setUserAvatar (state, payload) {
-    // load from localStorage
-    // or randomize from available
+    state.avatar = payload.avatar
   },
   clearUser (state) {
     state.key = ''

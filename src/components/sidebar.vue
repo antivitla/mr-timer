@@ -11,7 +11,8 @@
     //- Profile
     .profile
       img.avatar(
-        src="../assets/images/050-piranha.svg")
+        @click.stop.prevent="modal('chooseAvatar')"
+        :src="userAvatar")
       .name {{ userName }}
 
     //- Localization
@@ -35,8 +36,8 @@
         | Включить
 
     //- Import/Export
-    //- h4
-      a
+    h4
+      a(@click.stop.prevent="modal('importExport')")
         span {{ labelImportExport }}
         i.material-icons import_export
 
@@ -125,6 +126,7 @@
         'locale',
         'currency',
         'userKey',
+        'userAvatar',
         'sidebarActive'
       ])
     },
@@ -133,11 +135,16 @@
       labelCurrency (code) {
         return capitalize(translate[this.locale].currency[code])
       },
+      modal (name) {
+        this.openModal({ modal: name })
+        this.closeSidebar()
+      },
       ...mapMutations([
         'toggleSidebar',
         'closeSidebar',
         'setLocale',
-        'setCurrency'
+        'setCurrency',
+        'openModal'
       ])
     },
 
@@ -230,6 +237,7 @@
       .avatar
         height 60px
         display block
+        cursor pointer
       .name
         font-size 24px
         margin-left 15px

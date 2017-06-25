@@ -86,7 +86,9 @@ const ru = ({
     cny: 'юань'
   },
   import: 'импорт',
-  export: 'экспорт'
+  importFrom: 'импортировать записи из',
+  export: 'экспорт',
+  exportTo: 'экспортировать записи в'
 })
 
 const en = ({
@@ -143,7 +145,9 @@ const en = ({
     cny: 'yuan'
   },
   import: 'import',
-  export: 'export'
+  importFrom: 'import entries from',
+  export: 'export',
+  exportTo: 'export entries to'
 })
 
 export const translate = ({

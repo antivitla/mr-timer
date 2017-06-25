@@ -7,7 +7,7 @@
     :currency="currency"
     :is-currency-symbol-before="isCurrencySymbolBefore"
     v-body-scrolltop-on="scrollTopEvents")
-    .page
+    .page(:class="{ 'modal-active': modalActive }")
       main
         //- Context
         nav.app-menu
@@ -94,11 +94,8 @@
     //- Настройки
     sidebar
 
-    //- modal(
-    //-   v-if="modal.active && modal.position"
-    //-   :id="modal.id"
-    //-   :data="modal.data"
-    //-   :position="modal.position")
+    //- Попапы
+    modal(v-if="modalActive")
 </template>
 
 <script>
@@ -115,8 +112,7 @@
   import taskContext from '@/components/task-context'
   import helpArticle from '@/components/help-article'
   import sidebar from '@/components/sidebar'
-  // import modal from '@/components/modal'
-  // import editTaskModal from '@/components/modals/edit-task-modal'
+  import modal from '@/components/modal'
   import { Tasks } from '@/store/groups/tasks'
   import { Months } from '@/store/groups/months'
   import { Days } from '@/store/groups/days'
@@ -219,7 +215,8 @@
         'isCurrencySymbolBefore',
         'currentView',
         'timerActive',
-        'sidebarActive'
+        'sidebarActive',
+        'modalActive'
       ])
     },
 
@@ -245,7 +242,6 @@
       },
       refreshAppWithUserData (userKey) {
         this.clearEntries()
-        this.clearUser()
         this.setUserKey({ key: userKey })
         this.loadEntries()
       },
@@ -301,8 +297,8 @@
       listInput,
       taskContext,
       helpArticle,
-      sidebar
-      // modal
+      sidebar,
+      modal
     }
   }
 </script>
@@ -318,7 +314,7 @@
     background-color titamota-color-back-light
     position relative
 
-  .app > .scrollable
+  .app
     height 100vh
     overflow auto
 
@@ -336,7 +332,7 @@
     opacity 1
     transition all 0.3s ease-out
     &.modal-active
-      filter grayscale(50%)
+      filter grayscale(100%) blur(5px)
       opacity 0.25
     @media (min-width 480px)
       padding-left 30px
@@ -363,7 +359,6 @@
       line-height 24px
       display inline-flex
       text-align right
-
       a
         padding 0 3px
         margin-left 5px

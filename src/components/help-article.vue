@@ -1,5 +1,5 @@
 <template lang="pug">
-  article
+  article(chibi="3")
     h1 WTF &amp; How To
     p Таймер достаточно мощный, но его сложность раскроется постепенно
 
@@ -79,7 +79,7 @@
       h3 # Остальное
       p Есть ещё пакетное удаление в "истории", в сайдбаре можно аву себе сменить и чиби-девчушку, экспортировать и импортировать данные в JSON-формат, переключить язык и валюту (можно и в ссылке через `?ru&amp;rub` например). Ещё можно фильтровать историю, тоже скраешку слева под таймером появится полюшко-поле вводе.
 
-      p(style="text-align: center; margin-top: 80px;")
+      p(style="text-align: right; margin-top: 80px;")
         a(href="https://github.com/antivitla") @antivitla
 
 </template>
@@ -92,10 +92,21 @@
     // font-family Merriweather, serif
     font-size 18px
     line-height 1.5
-    padding-bottom 100px
+    padding-bottom 60vh
+    &[chibi="3"]:after
+      content ' '
+      display block
+      position absolute
+      bottom 0px
+      left 0px
+      right 0px
+      height 75vh
+      background-image url('../assets/images/chibi-03.png')
+      background-position center bottom
+      background-repeat no-repeat
+      background-size auto 100%
 
     h3
       color titamota-color-red
-
 
 </style>
