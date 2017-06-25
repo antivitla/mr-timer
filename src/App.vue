@@ -257,15 +257,6 @@
       viewLabel (view) {
         return capitalize(translate[this.locale].view[view])
       },
-      // openModal (modal) {
-      //   this.modal.active = true
-      //   this.modal.id = modal.id
-      //   this.modal.data = modal.data
-      //   this.modal.position = modal.position
-      // },
-      // closeModal () {
-      //   this.modal.active = false
-      // },
       ...mapMutations([
         'clearEntries',
         'clearUser',

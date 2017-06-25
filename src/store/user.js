@@ -2,7 +2,7 @@ const state = {
   key: 'local',
   guestKey: '',
   mode: '',
-  avatar: ''
+  avatar: 'static/img/040-ladybug.svg'
 }
 
 const getters = {
@@ -29,7 +29,7 @@ const mutations = {
     state.key = ''
     state.guestKey = ''
     state.mode = ''
-    state.avatar = ''
+    state.avatar = 'static/img/040-ladybug.svg'
   }
 }
 
