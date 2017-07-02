@@ -145,8 +145,8 @@ button
 article
   font-size 18px
   max-width 40em
-  margin-left auto
-  margin-right auto
+  // margin-left auto
+  // margin-right auto
 
 .switch-menu-wrapper
   display flex
@@ -183,3 +183,51 @@ article
     flex-direction row
     .switch-menu
       margin-bottom 0
+
+/* Forms */
+
+label
+  cursor pointer
+  // display flex
+  // align-items flex-start
+
+.custom-checkbox
+  display inline-block
+  vertical-align top
+  font-size 18px
+  position relative
+  input
+    display block
+    cursor pointer
+    opacity 0
+    position absolute
+    left 0px
+    top 0px
+    right 0px
+    bottom 0px
+    padding 0
+    margin 0
+    width 100%
+    height 100%
+    font-size 1em
+    z-index 2
+  .material-icons
+    display block
+    font-size 18px
+    margin 0
+    z-index 1
+    position relative
+  input:not(:checked) ~ .material-icons.on
+    display none
+  input:not(:checked) ~ .material-icons.off
+    display block
+  input:checked ~ .material-icons.on
+    display block
+  input:checked ~ .material-icons.off
+    display none
+  & + span
+    margin-left 0.5em
+    vertical-align top
+    display inline-block
+    position relative
+    top 1px

@@ -1,5 +1,5 @@
 {
-  "name": "titata",
+  "name": "titamota",
   "version": "1.0.0",
   "dependencies": {
     "@ava/babel-plugin-throws-helper": {
@@ -6730,6 +6730,11 @@
       "from": "table@>=3.7.8 <4.0.0",
       "resolved": "https://registry.npmjs.org/table/-/table-3.8.3.tgz",
       "dev": true
+    },
+    "taffydb": {
+      "version": "2.7.3",
+      "from": "taffydb@latest",
+      "resolved": "https://registry.npmjs.org/taffydb/-/taffydb-2.7.3.tgz"
     },
     "tapable": {
       "version": "0.2.6",

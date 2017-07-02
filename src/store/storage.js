@@ -5,15 +5,14 @@ import async from 'async'
 import appName from './app-name'
 import { extractEntries, parentOfDifferentType } from '@/utils/group'
 import bus from '@/event-bus'
+// import taffydb from 'taffydb'
 
 export const Storage = ({
   entries: [],
+  all: [],
   context: null,
-  period: null,
-  project: null,
-  client: null,
-  phase: null,
-  all: []
+  period: null
+  // db: taffydb.taffy()
 })
 
 const state = {
@@ -29,10 +28,9 @@ export const mutations = {
     const id = sortedIndexBy(
       Storage.entries,
       payload.entry,
-      item => -item.stop)
+      item => -item.start)
     Storage.entries.splice(id, 0, payload.entry)
     // all
-    // if have already
     const found = Storage.all.find(entry => {
       return entry.uid() === payload.entry.uid()
     })
@@ -45,7 +43,7 @@ export const mutations = {
       const allid = sortedIndexBy(
         Storage.all,
         payload.entry,
-        item => -item.stop)
+        item => -item.start)
       Storage.all.splice(allid, 0, payload.entry)
     }
   },
@@ -110,11 +108,9 @@ let lockedBatchOperations = false
 
 export const actions = ({
   loadEntries ({ state, commit, getters, dispatch }, payload) {
-    // Clear non-context all collection
-    // (REMOVE WHEN BACKEND READY)
-    Storage.all = []
     // Грузиться с удалённого аккаунта?
     if (getters['userKey'] !== 'local') {
+      // Storage.db.store('titamota-entries-' + getters['userKey'])
       Petrov.get(getters['userKey'])
         .catch(() => {
           // Если не найден аккаунт, создаём его
@@ -144,17 +140,19 @@ export const actions = ({
         })
     } else {
       // Или грузиться локально?
+      // Storage.db.store('titamota-entries-local')
+      // const entries = Storage.db().get()
       let entries = []
-      const key = state.localStorageKey
-      const raw = localStorage.getItem(key) ||
-        localStorage.getItem('Timerwood-Log')
-      if (raw) {
-        try {
-          entries = JSON.parse(raw).entries
-        } catch (error) {
-          console.warn('Error parsing localStorage', error)
+      try {
+        const key = state.localStorageKey + '-local'
+        const saved = localStorage[key]
+        if (saved) {
+          entries = JSON.parse(localStorage[key]).entries
         }
-        // Добавляем записи с задержкой
+      } catch (error) {
+        console.warn(error)
+      }
+      if (entries.length) {
         dispatch('batchAddEntries', {
           entries,
           context: payload ? payload.context : null
@@ -164,9 +162,8 @@ export const actions = ({
   },
 
   saveEntries ({ state, getters }) {
-    let key = state.localStorageKey
+    let key = state.localStorageKey + '-' + getters['userKey']
     if (getters['userKey'] !== 'local') {
-      key = key + '-' + getters['userKey']
       Petrov.put(getters['userKey'], {
         entries: Storage.all
       })
@@ -177,19 +174,18 @@ export const actions = ({
     localStorage.setItem(key, raw)
   },
 
-  addEntry (context, payload) {
-    context.commit('addEntry', payload)
-    context.dispatch('saveEntries')
-  },
-
-  removeEntry (context, payload) {
-    context.commit('removeEntry', payload)
+  createEntry (context, payload) {
+    const entry = new Entry(Object.assign(payload.entry))
+    context.commit('addEntry', { entry })
+    // Storage.db.insert(Object.assign({}, entry))
     context.dispatch('saveEntries')
   },
 
   updateEntry (context, payload) {
-    const updatedEntry = new Entry(
-      Object.assign({}, payload.entry, payload.update))
+    const updatedEntry = new Entry(Object.assign(
+        {},
+        payload.entry,
+        payload.update))
     context.commit('removeEntry', {
       entry: payload.entry
     })
@@ -200,8 +196,19 @@ export const actions = ({
       entry: payload.entry,
       updatedEntry
     })
+    // Storage
+    //   .db({ _uid: payload.entry._uid })
+    //   .update(payload.update)
     context.dispatch('saveEntries')
     return updatedEntry
+  },
+
+  removeEntry (context, payload) {
+    context.commit('removeEntry', payload)
+    // Storage
+    //   .db({ _uid: payload.entry._uid })
+    //   .remove()
+    context.dispatch('saveEntries')
   },
 
   batchUpdateEntries (context, payload) {
@@ -236,6 +243,11 @@ export const actions = ({
             _uid: entry._uid
           })
         })
+        // // Sync local
+        // Storage
+        //   .db({ _uid: entry._uid })
+        //   .update({ stop, details })
+        // Next
         setTimeout(next, 5)
       }, error => {
         if (error) {
@@ -253,6 +265,11 @@ export const actions = ({
       lockedBatchOperations = true
       async.eachSeries(payload.entries, (entry, next) => {
         context.commit('removeEntry', { entry })
+        // // Sync local
+        // Storage
+        //   .db({ _uid: entry._uid })
+        //   .remove()
+        // Next
         setTimeout(next, 5)
       }, error => {
         if (error) {
@@ -279,6 +296,49 @@ export const actions = ({
         context.dispatch('saveEntries')
       })
     }
+  },
+
+  importEntries (context, payload) {
+    let entries = []
+    // JSON
+    if (payload.format === 'json') {
+      let raw
+      try {
+        raw = JSON.parse(payload.raw)
+      } catch (error) {
+        console.warn(error)
+      }
+      if (Array.isArray(raw)) {
+        entries = raw
+      } else if (raw.entries && raw.entries.length) {
+        entries = raw.entries
+      } else {
+        console.log('Какой-то непонятный json')
+      }
+    }
+
+    // Create imported entries
+    if (entries.length) {
+      context.dispatch('batchAddEntries', {
+        entries
+      })
+    }
+    // if (entries.length && !lockedBatchOperations) {
+    //   if (payload.replace) {
+    //     Storage.db().remove()
+    //     context.commit('clearEntries')
+    //   }
+    //   lockedBatchOperations = true
+    //   async.eachSeries(entries, (entry, next) => {
+    //     context.dispatch('createEntry', { entry })
+    //     setTimeout(next, 5)
+    //   }, error => {
+    //     if (error) {
+    //       console.warn(error)
+    //     }
+    //     lockedBatchOperations = false
+    //   })
+    // }
   },
 
   setContext (context, payload) {

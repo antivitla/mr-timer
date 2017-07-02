@@ -34,11 +34,12 @@ export const currencies = ({
 
 const ru = ({
   view: {
-    storage: 'история',
+    history: 'история',
     tasks: 'задачи',
     months: 'месяцы',
     days: 'дни',
-    years: 'годы'
+    years: 'годы',
+    help: 'помощь'
   },
   time: {
     at: 'в'
@@ -77,7 +78,8 @@ const ru = ({
     icons: 'иконки',
     from: 'от',
     girls: 'девчушки',
-    l10n: 'локализация'
+    l10n: 'локализация',
+    turnOn: 'включить'
   },
   currency: {
     rub: 'рубль',
@@ -86,18 +88,19 @@ const ru = ({
     cny: 'юань'
   },
   import: 'импорт',
-  importFrom: 'импортировать записи из',
+  importFrom: 'импорт записей из',
   export: 'экспорт',
-  exportTo: 'экспортировать записи в'
+  exportTo: 'экспорт записей в'
 })
 
 const en = ({
   view: {
-    storage: 'history',
+    history: 'history',
     tasks: 'tasks',
     months: 'months',
     days: 'days',
-    years: 'years'
+    years: 'years',
+    help: 'help'
   },
   time: {
     at: 'at'
@@ -136,7 +139,8 @@ const en = ({
     icons: 'icons',
     from: 'from',
     girls: 'girls',
-    l10n: 'localization'
+    l10n: 'localization',
+    turnOn: 'turn on'
   },
   currency: {
     rub: 'ruble',

@@ -21,16 +21,16 @@
 
     //- Import
     div.import(v-if="view === 'import'")
-      p
+      p.info
         | {{ labelImportDescription }}&nbsp;
         strong {{ labelFormat(format) }}:
       p
         textarea(
           v-model="importData"
-          :placeholder="'Вставьте JSON записей, экспортированный ранее'"
+          :placeholder="'Вставьте ' + format +  ' записи'"
           spellcheck="false")
 
-      p.submit
+      p.submit(:disabled="!importData")
         a.button.merge(@click="importMerge()")
           | Merge with existing
         a.button.replace.hero(@click="importReplace()")
@@ -38,7 +38,7 @@
 
     //- Export
     div.export(v-if="view === 'export'")
-      p
+      p.info
         | {{ labelExportDescription }}&nbsp;
         strong {{ labelFormat(format) }}:
       p
@@ -48,7 +48,7 @@
 </template>
 
 <script>
-  import { mapGetters } from 'vuex'
+  import { mapGetters, mapMutations, mapActions } from 'vuex'
   import { Storage } from '@/store/storage'
   import { translate } from '@/store/i18n'
   import capitalize from 'lodash/capitalize'
@@ -56,7 +56,7 @@
   export default {
     data () {
       return {
-        view: 'export',
+        view: 'import',
         format: 'json',
         importData: '',
         capitalize: capitalize
@@ -88,14 +88,30 @@
 
     methods: {
       importMerge () {
-        console.log('import & merge')
+        this.importEntries({
+          replace: false,
+          raw: this.importData,
+          format: this.format
+        })
+        this.closeModal()
       },
       importReplace () {
-        console.log('import & replace')
+        this.importEntries({
+          replace: true,
+          raw: this.importData,
+          format: this.format
+        })
+        this.closeModal()
       },
       labelFormat (format) {
         return format.toUpperCase()
-      }
+      },
+      ...mapMutations([
+        'closeModal'
+      ]),
+      ...mapActions([
+        'importEntries'
+      ])
     }
   }
 </script>
@@ -119,6 +135,10 @@
       display flex
       justify-content space-between
       flex-direction column
+      &[disabled]
+        opacity 0.5
+        pointer-events none
+        cursor text
       .button
         margin-bottom 10px
         text-align center

@@ -15,31 +15,37 @@
         :src="userAvatar")
       .name {{ userName }}
 
-    //- Localization
-    h4 {{ labelL10n }}
-    p
-      select(v-model="selectedLocale")
-        option(
-          v-for="l in locales"
-          :value="l.code") {{ capitalize(l.label) }}
-    p
-      select(v-model="selectedCurrency")
-        option(
-          v-for="c in currencies"
-          :value="c.code") {{ labelCurrency(c.code) }}
+    .layout
+      //- Localization
+      .fieldset
+        h4 {{ labelL10n }}
+        p
+          select(v-model="selectedLocale")
+            option(
+              v-for="l in locales"
+              :value="l.code") {{ capitalize(l.label) }}
+        p
+          select(v-model="selectedCurrency")
+            option(
+              v-for="c in currencies"
+              :value="c.code") {{ labelCurrency(c.code) }}
 
-    //- Статистика
-    //- h4 Статистика
-    //- p
-      label
-        input(type="checkbox")
-        | Включить
+      //- Виды
+      .fieldset
+        h4 {{ labelTurnOn }}
+        p(v-for="(value, view) in views")
+          label(:disabled="isOnlyOne(view)")
+            span.custom-checkbox
+              input(
+                type="checkbox"
+                v-model="views[view]"
+                @change="toggleView(view, $event)")
+              i.material-icons.on check_box
+              i.material-icons.off check_box_outline_blank
+            span {{ labelView(view) }}
 
-    //- Import/Export
-    h4
-      a(@click.stop.prevent="modal('importExport')")
-        span {{ labelImportExport }}
-        i.material-icons import_export
+    //- Import / Export
+    import-export
 
     //- Copyrights
     .copyrights
@@ -63,6 +69,7 @@
     currencies } from '@/store/i18n'
   import clickOutside from '@/directives/click-outside'
   import escOutside from '@/directives/esc-outside'
+  import importExport from '@/components/modals/import-export'
 
   export default {
     data () {
@@ -71,13 +78,15 @@
         currencies,
         selectedLocale: null,
         selectedCurrency: null,
-        capitalize
+        capitalize,
+        views: {}
       }
     },
 
     created () {
       this.selectedLocale = this.locale
       this.selectedCurrency = this.currency
+      this.views = Object.assign({}, this.viewsAvailable)
     },
 
     watch: {
@@ -89,6 +98,7 @@
           const query = Object.assign({},
             this.$route.query, { locale })
           this.$router.push({ name, query })
+          this.closeSidebar()
         }
       },
       'selectedCurrency': function (currency) {
@@ -98,6 +108,7 @@
           const query = Object.assign({},
             this.$route.query, { currency })
           this.$router.push({ name, query })
+          this.closeSidebar()
         }
       }
     },
@@ -122,12 +133,16 @@
         const t = translate[this.locale]
         return `${capitalize(t.import)} ${t.and} ${t.export}`
       },
+      labelTurnOn () {
+        return capitalize(translate[this.locale].sidebar.turnOn)
+      },
       ...mapGetters([
         'locale',
         'currency',
         'userKey',
         'userAvatar',
-        'sidebarActive'
+        'sidebarActive',
+        'viewsAvailable'
       ])
     },
 
@@ -139,18 +154,34 @@
         this.openModal({ modal: name })
         this.closeSidebar()
       },
+      labelView (view) {
+        return capitalize(translate[this.locale].view[view])
+      },
+      toggleView (view) {
+        this.toggleAvailableView({ view })
+      },
+      isOnlyOne (view) {
+        return Object.keys(this.views)
+          .filter(v => this.views[v])
+          .length < 2 && this.views[view]
+      },
       ...mapMutations([
         'toggleSidebar',
         'closeSidebar',
         'setLocale',
         'setCurrency',
-        'openModal'
+        'openModal',
+        'toggleAvailableView'
       ])
     },
 
     directives: {
       clickOutside,
       escOutside
+    },
+
+    components: {
+      importExport
     }
   }
 </script>
@@ -164,36 +195,42 @@
     background-size auto 290px
     color titamota-color-text-invert
     position fixed
-    right 0px
     top 0px
+    right 0px
     bottom 0px
     overflow auto
     box-sizing border-box
-    padding 200px 40px 60px 40px
+    padding 180px 40px 60px 40px
     width 100%
-    max-width 400px
-    box-shadow inset 15px 0px 10px -10px rgba(0,0,0,0.5)
+    box-shadow inset 10px 0px 20px -10px rgba(0,0,0,0.5)
     transform translateX(100%)
     transition all 0.3s ease-out
     font-size 14px
+    opacity 0
+    pointer-events none
+    @media (min-width 768px)
+      max-width 50vw
     &.active
       transform translateX(0%)
+      opacity 1
+      pointer-events all
 
     .toggle-sidebar
       position absolute
       left 0px
       top 0px
       right 0px
-      height 200px
+      height 150px
       color titamota-color-text-invert
       cursor pointer
       .material-icons
         position absolute
-        left 40px
-        top 40px
+        right 20px
+        top 10px
         font-size 24px
         line-height 40px
-        display block
+        display none
+        color titamota-color-text-invert-highlight
 
     a
       color titamota-color-text-invert
@@ -203,7 +240,7 @@
       font-size 16px
       line-height 24px
       font-weight 300
-      margin 40px auto 10px auto
+      margin 50px auto 10px auto
       color titamota-color-text-invert-highlight
       a
         color inherit
@@ -217,13 +254,29 @@
       height 24px
       border 0px
       margin 0px
-      width 50%
+      width 75%
       cursor pointer
       color lighten(titamota-color-text-invert, 50%)
       background-color lighten(titamota-color-back-dark, 15%)
       &:focus
         background-color titamota-color-back-light
         color titamota-color-text
+
+
+    .layout
+      display flex
+      flex-direction column
+      .fieldset
+        width 100%
+      @media (min-width 480px)
+        flex-direction row
+        .fieldset
+          width 50%
+
+    label[disabled]
+      opacity 0.5
+      cursor text
+      pointer-events none
 
     .copyrights
       font-size 12px
@@ -233,13 +286,55 @@
 
     .profile
       display flex
-      align-items center
+      align-items flex-start
+      flex-direction column
       .avatar
         height 60px
         display block
         cursor pointer
       .name
         font-size 24px
-        margin-left 15px
+        margin-top 15px
         color titamota-color-text-invert-highlight
+
+    .import-export
+      margin-top 50px
+      width 100%
+      .info
+        display none
+      .switch-menu-wrapper
+        margin-bottom 20px
+        border-bottom-color alpha(titamota-color-line, 10%)
+        margin-left -5px
+        width calc(100% + 10px)
+      .switch-menu
+        &.type
+          a
+            font-size 16px
+            padding-left 5px
+            padding-right 5px
+        a
+          color alpha(titamota-color-text-invert, 50%)
+          &:hover:after
+            background-color alpha(titamota-color-text-invert, 50%)
+        a.active
+          color titamota-color-text-invert-highlight
+        a.active:after
+          background-color titamota-color-text-invert
+      textarea
+        background-color transparent
+        color titamota-color-text-invert
+        resize none
+        height 10em !important
+        padding 0px
+      .submit
+        justify-content flex-start
+        .button
+          font-size 12px
+          padding 5px 20px
+          font-weight 400
+        .button + .button
+          margin-left 10px
+        .merge
+          color titamota-color-text
 </style>

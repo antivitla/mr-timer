@@ -2,7 +2,7 @@
   .task-context
     span.name {{ name }}
     span.icon-button.clear(
-      v-if="!timerActive"
+      :class="{ 'active': !timerActive }"
       @click="clearContext()"
       :title="clearContextLabel"
     )
@@ -71,6 +71,12 @@
       color titamota-color-text-muted
       text-overflow ellipsis
     .clear
+      pointer-events none
+      opacity 0
       cursor pointer
       margin-left 5px
+      transition all 0.3s
+      &.active
+        pointer-events all
+        opacity 1
 </style>

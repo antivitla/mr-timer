@@ -50,7 +50,7 @@
     bottom 0px
     position fixed
     overflow auto
-    background-color alpha(titamota-color-back-dark, 10%)
+    background-color alpha(titamota-color-back-dark, 0%)
     .modal-container
       position absolute
       left 50%

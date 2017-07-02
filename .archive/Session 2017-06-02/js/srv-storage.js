@@ -6,8 +6,8 @@
 angular.module("TimerwoodApp.services")
 	.factory("Storage", ["$rootScope", "$timeout", "PetrovStorage", "$q", function($rootScope, $timeout, PetrovStorage, $q) {
 
-		// Хранилище записей таймера - последняя правда. 
-		// Хранится обычным списком. 
+		// Хранилище записей таймера - последняя правда.
+		// Хранится обычным списком.
 		// Служит источником евентов
 		// Тип данных - сортированный список, всегда поддерживается сортированность по ключу "временя старта"
 
@@ -38,7 +38,7 @@ angular.module("TimerwoodApp.services")
 		// есть умное добавление (сразу с сортировкой) - например некий апдейт удалённо пришел или ещё откуда-то
 		// при этом нужно разослать сообщение о добавлении
 		Storage.prototype.addEntry = function(obj, dir, nosave) {
-			
+
 			// не генерим новый объект если уже дают готовый, просто вставить значит
 			var entry = (obj.constructor.name == "StorageEntry" ? obj : new StorageEntry(obj));
 			// по умолчанию добавляем "умно" - что сохранялось сортированность "по умолчанию" (свежие первые)
@@ -58,10 +58,10 @@ angular.module("TimerwoodApp.services")
 				} else {
 					this.entries.push(entry);
 				}
-			} 
+			}
 			// либо добавляем в конец (например парсинг большого списка)
 			else { this.entries.push(entry); }
-			// оповещаем о событии		
+			// оповещаем о событии
 			$rootScope.$broadcast("storage-add-entry", entry);
 			// временно - сохраняем
 			if(!nosave) this.save();
@@ -72,8 +72,8 @@ angular.module("TimerwoodApp.services")
 		// Удалить запись
 		Storage.prototype.removeEntry = function(entry, nosave) {
 			var id = this.entries.indexOf(entry);
-			if(id > -1) { 
-				this.entries.splice(id, 1); 
+			if(id > -1) {
+				this.entries.splice(id, 1);
 				$rootScope.$broadcast("storage-remove-entry", entry);
 				// временно - сохраняем
 				if(!nosave) this.save();
@@ -166,7 +166,7 @@ angular.module("TimerwoodApp.services")
 				if(changes.detailsNewPart && changes.detailsStopDepth) {
 					// нужно заменить начиная с нуля до detailsStopDepth на detailsNewPart
 					pack[i].details = changes.detailsNewPart.slice(0).concat(pack[i].details.slice(changes.detailsStopDepth));
-				} 
+				}
 				// переименование простое
 				else if(changes.details) {
 					pack[i].details = angular.copy(changes.details);
@@ -186,7 +186,7 @@ angular.module("TimerwoodApp.services")
 
 
 
-		// 
+		//
 		// ТУДУ
 		//
 
@@ -200,7 +200,7 @@ angular.module("TimerwoodApp.services")
 		// Сохранить все в локальном хранилище
 		Storage.prototype.save = function() {
 			var storageEntriesJson = angular.toJson({ entries: this.entries.slice(0) });
-			// сохраняем в локальный бэкап 
+			// сохраняем в локальный бэкап
 			localStorage.setItem("Timerwood-Log"+PetrovStorage.account, storageEntriesJson);
 			// и удалённо?
 			if(PetrovStorage.account) PetrovStorage.update(PetrovStorage.account, storageEntriesJson);
@@ -208,7 +208,7 @@ angular.module("TimerwoodApp.services")
 
 		Storage.prototype.saveLocal = function(account) {
 			var storageEntriesJson = angular.toJson({ entries: this.entries.slice(0) });
-			// сохраняем в локальный бэкап 
+			// сохраняем в локальный бэкап
 			localStorage.setItem("Timerwood-Log"+account, storageEntriesJson);
 		}
 
@@ -228,7 +228,7 @@ angular.module("TimerwoodApp.services")
 			$rootScope.loadingAccount = true;
 			var self = this;
 			// сначала грузимся с локального бэкапа данного аккаунта
-			// так как это синхронная операция, 
+			// так как это синхронная операция,
 			// то к моменту включения задач и дней, они уже будут иметь список записей
 			// так что врубать события не надо
 			this.loadLocal(PetrovStorage.account);
@@ -265,7 +265,7 @@ angular.module("TimerwoodApp.services")
 						$rootScope.$broadcast("storage-batch-add", self.entries.slice(0));
 					}
 					deferred.resolve();
-				}, 
+				},
 				function(error) {
 					console.log("storage remote load error", error);
 					deferred.reject(error);

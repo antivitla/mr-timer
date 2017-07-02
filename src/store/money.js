@@ -67,7 +67,7 @@ const actions = {
       .join(',')
       .toUpperCase()
     axios
-      .get('http://api.fixer.io/latest?base=RUB&symbols=' + symbols)
+      .get(location.protocol + '//api.fixer.io/latest?base=RUB&symbols=' + symbols)
       .then(result => {
         const rates = {}
         Object.keys(result.data.rates)

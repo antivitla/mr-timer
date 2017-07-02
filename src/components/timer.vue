@@ -204,7 +204,7 @@
         // Стартуем тик миллисекунд
         this.tick()
         // Добавляем запись в хранилище
-        this.addEntry({ entry })
+        this.createEntry({ entry })
         // Генерим новый плейсхолдер-заглушку задачи
         this.placeholder = capitalize(funnyTask(this.locale))
       },
@@ -221,8 +221,6 @@
             details = wrapContextDetails(
               Storage.context, details)
           }
-          // Нужно создать новую запись чтоб получить
-          // новый uid
           const update = new Entry(Object.assign(
             {},
             this.timerEntry,
@@ -254,9 +252,9 @@
       ...mapActions([
         'startTimer',
         'stopTimer',
-        'addEntry',
-        'removeEntry',
-        'updateEntry'
+        'createEntry',
+        'updateEntry',
+        'removeEntry'
       ])
     },
 
@@ -329,7 +327,7 @@
         opacity 0.5
 
     textarea
-      margin-top 20px
+      margin-top 10px
       height 60px
       border-radius 10px
       display block
@@ -378,11 +376,19 @@
     &.with-context
       textarea
         padding-top 34px
+        @media (min-width 768px)
+          padding-top 14px
 
     .task-context
       position absolute
-      top 10px
-      left 222px
+      top 80px
+      left 50%
+      transform translateX(-50%)
       font-size 12px
       z-index 10
+      @media (min-width 768px)
+        display none
+        top 10px
+        left 222px
+        transform none
 </style>

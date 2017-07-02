@@ -1,5 +1,14 @@
 const state = {
-  currentView: 'tasks',
+  view: {
+    current: 'tasks',
+    available: {
+      help: true,
+      tasks: true,
+      months: true,
+      days: true,
+      history: true
+    }
+  },
   recent: {
     tasks: 2,
     months: 2,
@@ -10,14 +19,15 @@ const state = {
 }
 
 const getters = {
-  currentView: state => state.currentView,
+  currentView: state => state.view.current,
   sidebarActive: state => state.sidebar,
-  modalActive: state => state.modal
+  modalActive: state => state.modal,
+  viewsAvailable: state => state.view.available
 }
 
 const mutations = {
   setCurrentView (state, payload) {
-    state.currentView = payload.view
+    state.view.current = payload.view
   },
   toggleSidebar (state, payload) {
     state.sidebar = !state.sidebar
@@ -26,11 +36,15 @@ const mutations = {
     state.sidebar = false
   },
   openModal (state, payload) {
-    console.log(state, payload)
     state.modal = payload.modal
   },
   closeModal (state) {
     state.modal = null
+  },
+  toggleAvailableView (state, payload) {
+    state.view
+      .available[payload.view] = !state.view
+        .available[payload.view]
   }
 }
 

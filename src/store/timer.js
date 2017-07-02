@@ -42,7 +42,7 @@ export const mutations = {
       start: state.entry.start,
       stop: state.entry.stop,
       details: state.entry.details.slice(0),
-      _uid: state.entry._uid
+      _uid: state.entry._uid // чтоб очистка контекста тоже зацепила
     })
     state.active = false
   },

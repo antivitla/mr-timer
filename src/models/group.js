@@ -17,7 +17,7 @@ function lastUpdated (groupOrEntry) {
   if (groupOrEntry instanceof Group) {
     updated = lastUpdated(groupOrEntry.children[0])
   } else if (groupOrEntry instanceof Entry) {
-    updated = groupOrEntry.stop
+    updated = groupOrEntry.start
   } else {
     updated = new Date().getTime()
   }

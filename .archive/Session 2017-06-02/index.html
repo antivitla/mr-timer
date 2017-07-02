@@ -37,6 +37,7 @@
 	<script src="js/ctrl-monthview.js"></script>
 	<script src="js/ctrl-taskview.js"></script>
 	<script src="js/ctrl-menu.js"></script>
+	<script src="js/ctrl-export.js"></script>
 	<script src="js/filters.js"></script>
 	<!--script src="js/services.js"></script-->
 	<script src="js/directives.js"></script>
@@ -236,6 +237,7 @@
 				дерева подзадач (<strong>задачи</strong>).
 			</help>
 
+			<a ng-click="currentView = 'export'" title="">экспорт</a>
 			<a ng-click="currentView = 'task'" title="">задачи</a>
 			<a ng-click="currentView = 'month'" title="">месяцы</a>
 			<a ng-click="currentView = 'date'" title="">дни</a>
@@ -244,7 +246,9 @@
 		</nav>
 
 
-
+		<div ng-controller="ExportCtrl" class="view" ng-class="{show: currentView == 'export' }">
+			<textarea ng-model="entries" style="width: 100%; box-sizing: border-box; height: 50vh; padding: 10px; font-family: monospace; font-size: 12px; line-height: 15px;"></textarea>
+		</div>
 
 
 		<div ng-controller="TasksViewCtrl" class="view" ng-class="{show: currentView == 'task', price: price.hour}" ng-init="recentTasks = false">
@@ -553,6 +557,7 @@
 	</script>
 
 </page>
+
 
 </body>
 </html>

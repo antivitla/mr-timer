@@ -1,20 +1,20 @@
 <template lang="pug">
-  //- .app(
-  //-     :class="{ 'timer-active': timerActive, 'modal-active': modal.active }"
   .app(
-    :class="{ 'timer-active': timerActive, 'sidebar-active': sidebarActive }"
+    :class="{ 'timer-active': timerActive, 'sidebar-active': sidebarActive, 'modal-active': modalActive }"
     :lang="locale"
     :currency="currency"
     :is-currency-symbol-before="isCurrencySymbolBefore"
     v-body-scrolltop-on="scrollTopEvents")
     .page(:class="{ 'modal-active': modalActive }")
       main
-        //- Context
-        nav.app-menu
+        nav.app-menu(:class="{ 'with-context': Storage.context }")
           div.left
+            task-context(
+              v-if="Storage.context"
+              :context="Storage.context")
           div.right
             div.toggle-sidebar(@click.stop.prevent="toggleSidebar")
-              span.account(v-if="userKey !== 'local'") {{ userKey }}
+              span.account {{ userKey }}
               span.icon-button
                 i.material-icons menu
 
@@ -25,23 +25,26 @@
         //- petrov
 
         //- View navigation
-        nav.view-menu(v-if="Storage.entries.length")
+        nav.view-menu
           price-per-hour(
-            v-if="currentView !== 'storage'")
+            v-if="currentView !== 'history' && isEntries")
           .filter-entries(
-            v-if="currentView === 'storage' && !Selektion.entries.length")
+            v-if="currentView === 'history' && !isSelectedEntries")
             span.label {{ filterLabel }}
             list-input(
               v-model="filter"
               :debounce="50"
               :placeholder="filterPlaceholderLabel")
           batch-actions(
-            v-if="currentView === 'storage' && Selektion.entries.length")
+            v-if="currentView === 'history' && isSelectedEntries")
           div.view-switch
             a(
-              v-for="view in ['tasks', 'months', 'days', 'storage']"
+              v-for="view in getViewsAvailable()"
               :class="{ active: currentView === view }"
               @click="setCurrentView({ view })") {{ viewLabel(view) }}
+
+        section.help.view(v-if="currentView === 'help'")
+          help-article
 
         //- Tasks view
         section.tasks.view(v-if="currentView === 'tasks'")
@@ -65,7 +68,7 @@
             :group="day")
 
         .filter-entries(
-          v-if="currentView === 'storage' && !Selektion.entries.length && Storage.entries.length")
+          v-if="currentView === 'history' && !isSelectedEntries && isEntries")
           span.label {{ filterLabel }}
           list-input(
             v-model="filter"
@@ -73,7 +76,7 @@
             :placeholder="filterPlaceholderLabel")
 
         //- Storage view
-        section.storage.view(v-if="currentView === 'storage' && Storage.entries.length")
+        section.storage.view(v-if="currentView === 'history'")
           p.no-results(
             v-if="!filteredEntries.length") {{ noResultsLabel }}
           storage-item(
@@ -82,14 +85,8 @@
             :key="entry.uid()"
             :entry="entry")
 
-      //- Хелп
-      help-article(v-if="!Storage.entries.length")
-
       //- Footer
-      site-footer(v-if="Storage.entries.length")
-
-      //- Хелп
-      help-article(v-if="Storage.entries.length")
+      site-footer(v-if="isEntries")
 
     //- Настройки
     sidebar
@@ -113,6 +110,7 @@
   import helpArticle from '@/components/help-article'
   import sidebar from '@/components/sidebar'
   import modal from '@/components/modal'
+  import Group from '@/models/group'
   import { Tasks } from '@/store/groups/tasks'
   import { Months } from '@/store/groups/months'
   import { Days } from '@/store/groups/days'
@@ -173,7 +171,10 @@
 
     watch: {
       '$route' (to, from) {
-        this.refreshAppWithUserData(this.detectUserKey())
+        if (to.params.user !== from.params.user) {
+          const user = to.params.user ? to.params.user : 'local'
+          this.refreshAppWithUserData(user)
+        }
         this.refreshLocale()
         this.refreshCurrency()
       }
@@ -206,6 +207,26 @@
       noResultsLabel () {
         return capitalize(translate[this.locale].noResultsLabel)
       },
+      isEntries () {
+        return Storage.entries.length
+      },
+      isSelectedEntries () {
+        return Selektion.entries.length
+      },
+      isDays () {
+        return Days.children.length > 1
+      },
+      isMonths () {
+        return Months.children.length > 1
+      },
+      isTasks () {
+        return Storage.entries.length > 1
+      },
+      isNestedTasks () {
+        return Tasks.children.find(child => {
+          return child.children.find(g => g instanceof Group)
+        })
+      },
       ...mapGetters([
         'userKey',
         'userMode',
@@ -216,7 +237,8 @@
         'currentView',
         'timerActive',
         'sidebarActive',
-        'modalActive'
+        'modalActive',
+        'viewsAvailable'
       ])
     },
 
@@ -256,6 +278,38 @@
       },
       viewLabel (view) {
         return capitalize(translate[this.locale].view[view])
+      },
+      getViewsAvailable () {
+        let views = Object
+          .keys(this.viewsAvailable)
+          .filter(key => this.viewsAvailable[key])
+        // check days
+        let id = views.indexOf('days')
+        if (id > -1 && !this.isDays) {
+          views.splice(id, 1)
+        }
+        // check months
+        id = views.indexOf('months')
+        if (id > -1 && !this.isMonths) {
+          views.splice(id, 1)
+        }
+        // check tasks
+        id = views.indexOf('tasks')
+        if (id > -1 && !this.isTasks) {
+          views.splice(id, 1)
+        }
+        // check history
+        id = views.indexOf('history')
+        if (id > -1 && !this.isEntries) {
+          views.splice(id, 1)
+        }
+        // check current view
+        if (views.indexOf(this.currentView) < 0) {
+          this.setCurrentView({
+            view: views.slice(-1)[0]
+          })
+        }
+        return views
       },
       ...mapMutations([
         'clearEntries',
@@ -305,31 +359,27 @@
     background-color titamota-color-back-light
     position relative
 
-  .app
-    height 100vh
-    overflow auto
+  // .app
+  //   height 100vh
+  //   overflow auto
 
   .page-wrapper
     position relative
 
   .page
     background-color titamota-color-back-light
-    padding-top 60px
+    padding-top 20px
     padding-bottom 20px
     padding-left 20px
     padding-right 20px
     box-sizing border-box
-    filter grayscale(0%)
     opacity 1
     transition all 0.3s ease-out
-    &.modal-active
-      filter grayscale(100%) blur(5px)
-      opacity 0.25
     @media (min-width 480px)
       padding-left 30px
       padding-right 30px
     @media (min-width 768px)
-      padding-top 110px
+      padding-top 60px
       padding-left 60px
       padding-right 60px
     @media (min-width 1366px)
@@ -439,21 +489,47 @@
 
   .timer
     margin-bottom 60px
+    margin-left -5px
+    width calc(100% + 10px)
     @media (min-width 768px)
       margin-bottom 90px
 
   .app-menu
-    position absolute
-    left 50%
-    width calc(100% - 50px)
-    padding 0 20px
-    max-width 990px
-    transform: translateX(-50%)
-    top 20px
+    // position absolute
+    box-sizing border-box
+    // left 50%
+    // width 100%
+    margin-bottom 20px
+    // padding 0 20px
+    // max-width 990px
+    // transform: translateX(-50%)
+    // top 10px
     display flex
     align-items center
     justify-content space-between
     line-height 40px
+    &.with-context
+      @media (min-width 768px)
+        margin-bottom 80px
+    .left
+      .task-context
+        display none
+        font-size 48px
+        line-height 1.125
+        margin-left calc(-48px - 0.25em)
+        .clear
+          order 0
+          margin-left 0px
+          margin-right 0.25em
+          color titamota-color-text-muted
+        .name
+          order 1
+          color titamota-color-text
+          font-weight 300
+          white-space normal
+          padding-right 1em
+        @media (min-width 768px)
+          display flex
     .right
       margin-left auto
     .toggle-sidebar
@@ -465,19 +541,26 @@
         font-size 14px
         margin-right 10px
     @media (min-width 480px)
-      width calc(100% - 70px)
+      // width calc(100% - 20px)
     @media (min-width 768px)
-      top 40px
-      width calc(100% - 130px)
+      // top 40px
+      // width calc(100% - 80px)
+      max-width 1040px
 
   .app
     .page
       transform translateX(0px)
-      // filter blur(0px)
+      filter blur(0px) grayscale(0%)
+      opacity 1
     &.sidebar-active .page
-      transform translateX(-400px)
-      // filter blur(0px)
+      transform translateX(-50vw)
+      // filter blur(10px) grayscale(100%)
+      // opacity 0.25
       pointer-events none
       .toggle-sidebar
-        display none
+        visibility hidden
+    &.modal-active .page
+      filter blur(10px) grayscale(100%)
+      opacity 0.25
+      pointer-events none
 </style>

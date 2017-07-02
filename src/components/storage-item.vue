@@ -211,7 +211,9 @@
           .parse(this.edit.start)
         this.edit.duration = durationEditable
           .stringify(this.entry.stop - start)
-        this.setTimerStart({ start })
+        if (this.entry.uid() === this.timerEntry.uid()) {
+          this.setTimerStart({ start })
+        }
       },
       submit () {
         this.cancelEdit()
