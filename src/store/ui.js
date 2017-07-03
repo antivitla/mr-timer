@@ -1,3 +1,5 @@
+export const taskDelimiter = ' / '
+
 const state = {
   view: {
     current: 'tasks',
@@ -15,14 +17,16 @@ const state = {
     days: 2
   },
   sidebar: false,
-  modal: null
+  modal: null,
+  taskDelimiter
 }
 
 const getters = {
   currentView: state => state.view.current,
   sidebarActive: state => state.sidebar,
   modalActive: state => state.modal,
-  viewsAvailable: state => state.view.available
+  viewsAvailable: state => state.view.available,
+  taskDelimiter: state => state.taskDelimiter
 }
 
 const mutations = {

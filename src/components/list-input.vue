@@ -15,9 +15,10 @@
   import debounce from '@/utils/debounce'
   import { focusAndSelectRange } from '@/directives/focus'
   import bus from '@/event-bus'
+  import { taskDelimiter } from '@/store/ui'
 
   function parseList (list) {
-    return (typeof list === 'string' ? list.split('/') : list)
+    return (typeof list === 'string' ? list.split(taskDelimiter) : list)
       .map(item => item.replace(/\n/g, '').trim())
       .filter(item => item)
   }
@@ -72,7 +73,8 @@
       joinedList () {
         let jl = ''
         if (Array.isArray(this.value)) {
-          jl = this.value.join(' / ')
+          jl = this.value
+            .join(taskDelimiter)
         } else if (this.value) {
           jl = String(this.value)
         }
@@ -85,8 +87,8 @@
         if (!this.focusedOnce) {
           this.focusedOnce = true
           let start = 0
-          if (this.joinedList.match('/')) {
-            start = this.joinedList.lastIndexOf('/ ') + 2
+          if (this.joinedList.match(taskDelimiter)) {
+            start = this.joinedList.lastIndexOf(taskDelimiter) + 3
           }
           return {
             focus: this.focus,
@@ -110,7 +112,7 @@
         // Return list if changed
         const list = parseList($event.target.value)
         const prev = parseList(this.value)
-        if (list.join('/') !== prev.join('/')) {
+        if (list.join(taskDelimiter) !== prev.join(taskDelimiter)) {
           // Use delayed update..
           if (this.delay) {
             this.debounceUpdate(() => {

@@ -3,6 +3,7 @@ import Entry from '@/models/entry'
 import Group from '@/models/group'
 import Task from '@/models/task'
 // import _ from 'lodash'
+import { taskDelimiter } from '@/store/ui'
 
 export function parseStartMoment (name, start, formats) {
   const supportedTypes = ['string', 'number', 'function']
@@ -78,9 +79,9 @@ export function wrapContextDetails (contextItem, details) {
 
 export function unwrapContextDetails (contextItem, details) {
   const rd = rootDetails(contextItem)
-  return details.join('/')
-    .replace(new RegExp('^' + rd.join('/')), '')
-    .split('/')
+  return details.join(taskDelimiter)
+    .replace(new RegExp('^' + rd.join(taskDelimiter)), '')
+    .split(taskDelimiter)
     .filter(d => d)
     .map(d => d.trim())
     .filter(d => d)

@@ -16,6 +16,7 @@
   import capitalize from 'lodash/capitalize'
   import { translate } from '@/store/i18n'
   import { Storage } from '@/store/storage'
+  import { taskDelimiter } from '@/store/ui'
 
   export default {
     props: [
@@ -30,7 +31,8 @@
 
     computed: {
       name () {
-        let details = rootDetails(this.context).join(' / ')
+        let details = rootDetails(this.context)
+          .join(taskDelimiter)
         const period = Storage.period
         if (period && period.type === 'month') {
           details = `(${capitalize(moment(Storage.period.value)

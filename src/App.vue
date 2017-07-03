@@ -120,6 +120,7 @@
   import capitalize from 'lodash/capitalize'
   import { timeEditable } from '@/utils/time'
   import { filterGroupChildren } from '@/utils/group'
+  import debounce from '@/utils/debounce'
   import bus from '@/event-bus'
   import bodyScrolltopOn from '@/directives/body-scrolltop-on'
 
@@ -139,7 +140,8 @@
         ],
         filter: [],
         locales,
-        currencies
+        currencies,
+        debounceRefreshView: debounce()
       }
     },
 
@@ -304,11 +306,13 @@
           views.splice(id, 1)
         }
         // check current view
-        if (views.indexOf(this.currentView) < 0) {
-          this.setCurrentView({
-            view: views.slice(-1)[0]
-          })
-        }
+        this.debounceRefreshView(() => {
+          if (views.indexOf(this.currentView) < 0) {
+            this.setCurrentView({
+              view: views.slice(-1)[0]
+            })
+          }
+        }, 500)
         return views
       },
       ...mapMutations([

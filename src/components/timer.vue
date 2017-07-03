@@ -12,9 +12,9 @@
       span.sec {{ sec }}
       span.ms {{ ms }}
     list-input(
-      :value="details"
-      @input="updateDetails($event)"
-      :debounce="300"
+      :value="edit.details"
+      @input-original-event="updateDetails($event)"
+      :debounce="50"
       :on-submit="toggle"
       :focus="timerActive"
       :reset-focus-on="resetFocusOnEvent"
@@ -34,6 +34,7 @@
   import capitalize from 'lodash/capitalize'
   import Entry from '@/models/entry'
   import { Storage } from '@/store/storage'
+  import { taskDelimiter } from '@/store/ui'
   import { duration, durationFraction } from '@/utils/duration'
   import {
     wrapContextDetails,
@@ -44,12 +45,21 @@
     return funny.phrase(funnyTemplates[locale].base)
   }
 
+  function parseList (list) {
+    return (typeof list === 'string' ? list.split(taskDelimiter) : list)
+      .map(item => item.replace(/\n/g, '').trim())
+      .filter(item => item)
+  }
+
   let tickTimeout
 
   export default {
     data () {
       return {
         details: [],
+        edit: {
+          details: ''
+        },
         placeholder: '',
         ms: '000',
         resetFocusOnEvent: 'start-task',
@@ -84,11 +94,14 @@
           return entry.uid() === this.timerEntry.uid()
         })
         if (entry) {
-          const source = payload.update.details.source.join('/')
-          const target = payload.update.details.target.join('/')
-          const details = this.timerEntry.details.join('/')
+          const source = payload.update.details
+            .source.join(taskDelimiter)
+          const target = payload.update.details
+            .target.join(taskDelimiter)
+          const details = this.timerEntry.details
+            .join(taskDelimiter)
             .replace(new RegExp('^' + source), target)
-            .split('/')
+            .split(taskDelimiter)
             .filter(i => i)
             .map(i => i.trim())
             .filter(i => i)
@@ -100,8 +113,12 @@
           if (Storage.context) {
             this.details = unwrapContextDetails(
               Storage.context, details)
+            this.edit.details = this.details
+              .join(taskDelimiter)
           } else {
             this.details = details.slice(0)
+            this.edit.details = this.details
+              .join(taskDelimiter)
           }
         }
       })
@@ -117,6 +134,8 @@
         }
         this.details = unwrapContextDetails(
           payload.context, storageEntry.details)
+        this.edit.details = this.details
+          .join(taskDelimiter)
       })
 
       bus.$on('clear-context', payload => {
@@ -135,6 +154,8 @@
           details))
         this.setTimerEntry({ entry: timerEntry })
         this.details = details.slice(0)
+        this.edit.details = this.details
+          .join(taskDelimiter)
       })
     },
 
@@ -194,6 +215,8 @@
         } else {
           this.details = details.slice(0)
         }
+        this.edit.details = this.details
+          .join(taskDelimiter)
         // Создаём запись для таймера и хранилища
         const entry = new Entry(Object.assign(
           {},
@@ -209,8 +232,10 @@
         this.placeholder = capitalize(funnyTask(this.locale))
       },
       updateDetails (event) {
-        let details = event
+        let details = parseList(event.target.value)
+        this.edit.details = event.target.value
         this.details = details
+
         // If timer running, changes to task name
         // will replace active entry's details
         if (this.timerActive) {

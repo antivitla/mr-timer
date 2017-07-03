@@ -327,6 +327,8 @@
         resize none
         height 10em !important
         padding 0px
+        margin-top 20px
+        margin-bottom 20px
       .submit
         justify-content flex-start
         .button

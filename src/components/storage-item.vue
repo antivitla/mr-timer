@@ -59,6 +59,7 @@
   import { mapGetters, mapMutations, mapActions } from 'vuex'
   import { translate } from '@/store/i18n'
   import { Selektion } from '@/store/selection'
+  import { taskDelimiter } from '@/store/ui'
   import { duration, durationEditable } from '@/utils/duration'
   import { timeEditable } from '@/utils/time'
   import longClick from '@/directives/long-click'
@@ -110,7 +111,8 @@
 
     computed: {
       details () {
-        return this.entry.details.join(' / ')
+        return this.entry.details
+          .join(taskDelimiter)
       },
       duration () {
         const d = duration(this.entry.duration())
@@ -184,7 +186,8 @@
         // в человекочитаемое
         this.edit.start = timeEditable
           .stringify(this.entry.start, translate[this.locale].time.at)
-        this.edit.details = this.entry.details.join(' / ')
+        this.edit.details = this.entry.details
+          .join(taskDelimiter)
         this.edit.duration = durationEditable
           .stringify(this.entry.duration())
         // Го редактировать
@@ -223,7 +226,7 @@
         const duration = durationEditable
           .parse(this.edit.duration)
         const stop = start + duration
-        const details = this.edit.details.split('/').map(d => d.trim())
+        const details = this.edit.details.split(taskDelimiter).map(d => d.trim())
         const _uid = this.entry._uid
         const payload = {
           entry: this.entry,

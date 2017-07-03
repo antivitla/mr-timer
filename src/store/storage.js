@@ -6,6 +6,7 @@ import appName from './app-name'
 import { extractEntries, parentOfDifferentType } from '@/utils/group'
 import bus from '@/event-bus'
 // import taffydb from 'taffydb'
+import { taskDelimiter } from '@/store/ui'
 
 export const Storage = ({
   entries: [],
@@ -218,11 +219,14 @@ export const actions = ({
         // Переименование
         let details = entry.details.slice(0)
         if (payload.update.details) {
-          let source = payload.update.details.source.join('/')
-          let target = payload.update.details.target.join('/')
-          details = entry.details.join('/')
+          let source = payload.update.details
+            .source.join(taskDelimiter)
+          let target = payload.update.details
+            .target.join(taskDelimiter)
+          details = entry.details
+            .join(taskDelimiter)
             .replace(new RegExp('^' + source), target)
-            .split('/')
+            .split(taskDelimiter)
             .filter(d => d)
             .map(d => d.trim())
             .filter(d => d)

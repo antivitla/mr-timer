@@ -89,6 +89,7 @@
     filterGroupChildren,
     wrapContextDetails } from '@/utils/group'
   import { translate } from '@/store/i18n'
+  import { taskDelimiter } from '@/store/ui'
   import { Storage } from '@/store/storage'
   import longClick from '@/directives/long-click'
   import clickOutside from '@/directives/click-outside'
@@ -200,7 +201,8 @@
         'isEditingTask',
         'editingTaskUid',
         'editingTaskFields',
-        'editingFocus'
+        'editingFocus',
+        'taskDelimiter'
       ])
     },
 
@@ -236,7 +238,8 @@
         }
         if (this.group.type === 'task') {
           payload.edit.details = this.group.details()
-          this.edit.details = payload.edit.details.join(' / ')
+          this.edit.details = payload.edit.details
+            .join(taskDelimiter)
         }
         payload.edit.duration = this.group.duration()
         this.edit.duration = durationEditable
@@ -255,7 +258,7 @@
         if (this.edit.details) {
           let source = this.editingTaskFields.details
           let target = this.edit.details
-              .split('/')
+              .split(taskDelimiter)
               .filter(i => i)
               .map(d => d.trim())
               .filter(i => i)

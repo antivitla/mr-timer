@@ -1,6 +1,7 @@
 import sortedIndexBy from 'lodash/sortedIndexBy'
 import uuid from 'uuid/v1'
 import Entry from './entry'
+import { taskDelimiter } from '@/store/ui'
 
 function safeGetAtIndex (id, array) {
   if (array.length > id) {
@@ -79,7 +80,7 @@ export default class Group {
 
   // Путь и есть уникальный id
   uid () {
-    return this.path().join('/')
+    return this.path().join(taskDelimiter)
   }
 
   batch (action, children) {
