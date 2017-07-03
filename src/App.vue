@@ -285,26 +285,26 @@
         let views = Object
           .keys(this.viewsAvailable)
           .filter(key => this.viewsAvailable[key])
-        // check days
-        let id = views.indexOf('days')
-        if (id > -1 && !this.isDays) {
-          views.splice(id, 1)
-        }
-        // check months
-        id = views.indexOf('months')
-        if (id > -1 && !this.isMonths) {
-          views.splice(id, 1)
-        }
-        // check tasks
-        id = views.indexOf('tasks')
-        if (id > -1 && !this.isTasks) {
-          views.splice(id, 1)
-        }
-        // check history
-        id = views.indexOf('history')
-        if (id > -1 && !this.isEntries) {
-          views.splice(id, 1)
-        }
+        // // check days
+        // let id = views.indexOf('days')
+        // if (id > -1 && !this.isDays) {
+        //   views.splice(id, 1)
+        // }
+        // // check months
+        // id = views.indexOf('months')
+        // if (id > -1 && !this.isMonths) {
+        //   views.splice(id, 1)
+        // }
+        // // check tasks
+        // id = views.indexOf('tasks')
+        // if (id > -1 && !this.isTasks) {
+        //   views.splice(id, 1)
+        // }
+        // // check history
+        // id = views.indexOf('history')
+        // if (id > -1 && !this.isEntries) {
+        //   views.splice(id, 1)
+        // }
         // check current view
         this.debounceRefreshView(() => {
           if (views.indexOf(this.currentView) < 0) {
