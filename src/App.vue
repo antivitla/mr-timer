@@ -27,9 +27,11 @@
         //- View navigation
         nav.view-menu
           price-per-hour(
-            v-if="currentView !== 'history' && isEntries")
+            v-if="currentView !== 'history' && currentView !== 'help' && isEntries"
+          )
           .filter-entries(
-            v-if="currentView === 'history' && !isSelectedEntries")
+            v-if="currentView === 'history' && !isSelectedEntries && isEntries"
+          )
             span.label {{ filterLabel }}
             list-input(
               v-model="filter"
@@ -48,6 +50,8 @@
 
         //- Tasks view
         section.tasks.view(v-if="currentView === 'tasks'")
+          p.no-tasks(v-if="!isEntries && !isThinking") {{ noTasksLabel }}
+          thinking-preloader(v-if="isThinking")
           group-item(
             v-for="task in filterGroupChildren(Tasks.children)"
             :key="task.name"
@@ -55,6 +59,8 @@
 
         //- Months view
         section.months.view(v-if="currentView === 'months'")
+          p.no-tasks(v-if="!isEntries && !isThinking") {{ noTasksLabel }}
+          thinking-preloader(v-if="isThinking")
           group-item(
             v-for="month in filterGroupChildren(Months.children)"
             :key="month.name"
@@ -62,13 +68,16 @@
 
         //- Days view
         section.days.view(v-if="currentView === 'days'")
+          p.no-tasks(v-if="!isEntries && !isThinking") {{ noTasksLabel }}
+          thinking-preloader(v-if="isThinking")
           group-item(
             v-for="day in filterGroupChildren(Days.children)"
             :key="day.name"
             :group="day")
 
         .filter-entries(
-          v-if="currentView === 'history' && !isSelectedEntries && isEntries")
+          v-if="currentView === 'history' && !isSelectedEntries && isEntries"
+        )
           span.label {{ filterLabel }}
           list-input(
             v-model="filter"
@@ -78,7 +87,9 @@
         //- Storage view
         section.storage.view(v-if="currentView === 'history'")
           p.no-results(
-            v-if="!filteredEntries.length") {{ noResultsLabel }}
+            v-if="!filteredEntries.length && !isThinking"
+          ) {{ noResultsLabel }}
+          thinking-preloader(v-if="isThinking")
           storage-item(
             v-else
             v-for="entry in filteredEntries"
@@ -110,6 +121,7 @@
   import helpArticle from '@/components/help-article'
   import sidebar from '@/components/sidebar'
   import modal from '@/components/modal'
+  import thinkingPreloader from '@/components/thinking-preloader'
   import Group from '@/models/group'
   import { Tasks } from '@/store/groups/tasks'
   import { Months } from '@/store/groups/months'
@@ -141,7 +153,8 @@
         filter: [],
         locales,
         currencies,
-        debounceRefreshView: debounce()
+        debounceRefreshView: debounce(),
+        isThinking: false
       }
     },
 
@@ -168,6 +181,19 @@
           mutation.type !== this.currentView) {
           this.selectionClear()
         }
+      })
+      // Thinking toggle
+      bus.$on('batch-thinking-start', () => {
+        this.isThinking = true
+      })
+      bus.$on('batch-thinking-done', () => {
+        this.isThinking = false
+      })
+      bus.$on('load-entries-start', () => {
+        this.isThinking = true
+      })
+      bus.$on('load-entries-done', () => {
+        this.isThinking = false
       })
     },
 
@@ -208,6 +234,9 @@
       },
       noResultsLabel () {
         return capitalize(translate[this.locale].noResultsLabel)
+      },
+      noTasksLabel () {
+        return capitalize(translate[this.locale].noTasksLabel)
       },
       isEntries () {
         return Storage.entries.length
@@ -287,17 +316,17 @@
           .filter(key => this.viewsAvailable[key])
         // // check days
         // let id = views.indexOf('days')
-        // if (id > -1 && !this.isDays) {
+        // if (id > -1 && !this.isEntries) {
         //   views.splice(id, 1)
         // }
         // // check months
         // id = views.indexOf('months')
-        // if (id > -1 && !this.isMonths) {
+        // if (id > -1 && !this.isEntries) {
         //   views.splice(id, 1)
         // }
         // // check tasks
         // id = views.indexOf('tasks')
-        // if (id > -1 && !this.isTasks) {
+        // if (id > -1 && !this.isEntries) {
         //   views.splice(id, 1)
         // }
         // // check history
@@ -347,7 +376,8 @@
       taskContext,
       helpArticle,
       sidebar,
-      modal
+      modal,
+      thinkingPreloader
     }
   }
 </script>
@@ -460,6 +490,7 @@
         font-weight 400
         color lighten(titamota-color-text-muted, 20%)
   .no-results
+  .no-tasks
     color titamota-color-text-muted
     text-align center
   .view-menu

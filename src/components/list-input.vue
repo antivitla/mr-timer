@@ -4,6 +4,7 @@
     rows="1"
     ref="textarea"
     @input="updateValue($event)"
+    @keydown.enter="keepValue($event)"
     @keyup.enter="onSubmit"
     :value="joinedList"
     v-focus-and-select-range="focusSelectionRangeOptions"
@@ -28,7 +29,9 @@
       return {
         debounceUpdate: debounce(),
         focusOnActive: false,
-        focusedOnce: false
+        focusedOnce: false,
+        doNotUpdate: false,
+        cachedEnter: ''
       }
     },
 
@@ -109,6 +112,11 @@
       updateValue ($event) {
         // Clear from linebreaks
         this.$el.value = this.$el.value.replace(/\n/g, '')
+        // Do not update if was selected
+        if (this.doNotUpdate) {
+          this.doNotUpdate = false
+          return
+        }
         // Return list if changed
         const list = parseList($event.target.value)
         const prev = parseList(this.value)
@@ -124,6 +132,15 @@
             this.$emit('input', list)
             this.$emit('input-original-event', $event)
           }
+        }
+      },
+
+      keepValue (event) {
+        this.doNotUpdate = true
+        if (event.target.value) {
+          this.cachedEnter = event.target.value
+        } else {
+          event.target.value = this.cachedEnter
         }
       }
     },

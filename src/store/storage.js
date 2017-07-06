@@ -26,12 +26,14 @@ const getters = {
 
 export const mutations = {
   addEntry (state, payload) {
+    // current (context) entries
     const id = sortedIndexBy(
       Storage.entries,
       payload.entry,
       item => -item.start)
     Storage.entries.splice(id, 0, payload.entry)
-    // all
+
+    // all entries
     const found = Storage.all.find(entry => {
       return entry.uid() === payload.entry.uid()
     })
@@ -50,6 +52,7 @@ export const mutations = {
   },
 
   removeEntry (state, payload) {
+    // current (context) entries
     let id = Storage.entries.indexOf(payload.entry)
     if (id < 0) {
       id = Storage.entries.findIndex(entry => {
@@ -59,7 +62,8 @@ export const mutations = {
     if (id > -1) {
       Storage.entries.splice(id, 1)
     }
-    // all
+
+    // all entries
     let allid = Storage.all.indexOf(payload.entry)
     if (allid < 0) {
       allid = Storage.all.findIndex(entry => {
@@ -105,13 +109,11 @@ export const mutations = {
   }
 }
 
-// let lockedBatchOperations = false
-
 export const actions = ({
   loadEntries ({ state, commit, getters, dispatch }, payload) {
+    bus.$emit('load-entries-start')
     // Грузиться с удалённого аккаунта?
     if (getters['userKey'] !== 'local') {
-      // Storage.db.store('titamota-entries-' + getters['userKey'])
       Petrov.get(getters['userKey'])
         .catch(() => {
           // Если не найден аккаунт, создаём его
@@ -135,14 +137,18 @@ export const actions = ({
               context: payload ? payload.context : null
             })
           }
+          setTimeout(() => {
+            bus.$emit('load-entries-done')
+          }, 10)
         })
         .catch(error => {
           console.error(error)
+          setTimeout(() => {
+            bus.$emit('load-entries-done')
+          }, 10)
         })
     } else {
       // Или грузиться локально?
-      // Storage.db.store('titamota-entries-local')
-      // const entries = Storage.db().get()
       let entries = []
       try {
         const key = state.localStorageKey + '-local'
@@ -159,6 +165,9 @@ export const actions = ({
           context: payload ? payload.context : null
         })
       }
+      setTimeout(() => {
+        bus.$emit('load-entries-done')
+      }, 10)
     }
   },
 
@@ -178,7 +187,6 @@ export const actions = ({
   createEntry (context, payload) {
     const entry = new Entry(Object.assign(payload.entry))
     context.commit('addEntry', { entry })
-    // Storage.db.insert(Object.assign({}, entry))
     context.dispatch('saveEntries')
   },
 
@@ -197,18 +205,12 @@ export const actions = ({
       entry: payload.entry,
       updatedEntry
     })
-    // Storage
-    //   .db({ _uid: payload.entry._uid })
-    //   .update(payload.update)
     context.dispatch('saveEntries')
     return updatedEntry
   },
 
   removeEntry (context, payload) {
     context.commit('removeEntry', payload)
-    // Storage
-    //   .db({ _uid: payload.entry._uid })
-    //   .remove()
     context.dispatch('saveEntries')
   },
 
@@ -263,41 +265,47 @@ export const actions = ({
     //   })
     // }
 
-    payload.entries.forEach(entry => {
-      // Переименование
-      let details = entry.details.slice(0)
-      if (payload.update.details) {
-        let source = payload.update.details
-          .source.join(taskDelimiter)
-        let target = payload.update.details
-          .target.join(taskDelimiter)
-        details = entry.details
-          .join(taskDelimiter)
-          .replace(new RegExp('^' + source), target)
-          .split(taskDelimiter)
-          .filter(d => d)
-          .map(d => d.trim())
-          .filter(d => d)
-      }
-      // Изменение длительностей
-      let stop = entry.stop
-      if (payload.update.stop) {
-        if (payload.update.stop.add) {
-          stop = entry.stop + payload.update.stop.add
+    bus.$emit('batch-thinking-start')
+    setTimeout(() => {
+      payload.entries.forEach(entry => {
+        // Переименование
+        let details = entry.details.slice(0)
+        if (payload.update.details) {
+          let source = payload.update.details
+            .source.join(taskDelimiter)
+          let target = payload.update.details
+            .target.join(taskDelimiter)
+          details = entry.details
+            .join(taskDelimiter)
+            .replace(new RegExp('^' + source), target)
+            .split(taskDelimiter)
+            .filter(d => d)
+            .map(d => d.trim())
+            .filter(d => d)
         }
-      }
-      context.commit('removeEntry', { entry })
-      context.commit('addEntry', {
-        entry: new Entry({
-          start: entry.start,
-          stop,
-          details,
-          _uid: entry._uid
+        // Изменение длительностей
+        let stop = entry.stop
+        if (payload.update.stop) {
+          if (payload.update.stop.add) {
+            stop = entry.stop + payload.update.stop.add
+          }
+        }
+        context.commit('removeEntry', { entry })
+        context.commit('addEntry', {
+          entry: new Entry({
+            start: entry.start,
+            stop,
+            details,
+            _uid: entry._uid
+          })
         })
       })
-    })
-    bus.$emit('batch-update-entries', payload)
-    context.dispatch('saveEntries')
+      context.dispatch('saveEntries')
+      setTimeout(() => {
+        bus.$emit('batch-update-entries', payload)
+        bus.$emit('batch-thinking-done')
+      }, 10)
+    }, 10)
   },
 
   batchRemoveEntries (context, payload) {
@@ -319,11 +327,18 @@ export const actions = ({
     //     context.dispatch('saveEntries')
     //   })
     // }
-    payload.entries.forEach(item => {
-      const entry = item instanceof Entry ? item : new Entry(item)
-      context.commit('removeEntry', { entry })
-    })
-    context.dispatch('saveEntries')
+
+    bus.$emit('batch-thinking-start')
+    setTimeout(() => {
+      payload.entries.forEach(item => {
+        const entry = item instanceof Entry ? item : new Entry(item)
+        context.commit('removeEntry', { entry })
+      })
+      context.dispatch('saveEntries')
+      setTimeout(() => {
+        bus.$emit('batch-thinking-done')
+      }, 10)
+    }, 10)
   },
 
   batchAddEntries (context, payload) {
@@ -342,11 +357,17 @@ export const actions = ({
     //   })
     // }
 
-    payload.entries.forEach(item => {
-      const entry = item instanceof Entry ? item : new Entry(item)
-      context.commit('addEntry', { entry })
-    })
-    context.dispatch('saveEntries')
+    bus.$emit('batch-thinking-start')
+    setTimeout(() => {
+      payload.entries.forEach(item => {
+        const entry = item instanceof Entry ? item : new Entry(item)
+        context.commit('addEntry', { entry })
+      })
+      context.dispatch('saveEntries')
+      setTimeout(() => {
+        bus.$emit('batch-thinking-done')
+      }, 10)
+    }, 10)
   },
 
   importEntries (context, payload) {
@@ -370,9 +391,7 @@ export const actions = ({
 
     // Create imported entries
     if (entries.length) {
-      context.dispatch('batchAddEntries', {
-        entries
-      })
+      context.dispatch('batchAddEntries', { entries })
     }
     // if (entries.length && !lockedBatchOperations) {
     //   if (payload.replace) {
@@ -396,17 +415,23 @@ export const actions = ({
     bus.$emit('set-context', payload)
     context.commit('clearEntries')
     context.commit('setContext', payload)
-    const entries = extractEntries(payload.context)
-    context.dispatch('batchAddEntries', { entries })
+    bus.$emit('batch-thinking-start')
+    setTimeout(() => {
+      const entries = extractEntries(payload.context)
+      context.dispatch('batchAddEntries', { entries })
+    }, 10)
   },
 
   clearContext (context) {
     bus.$emit('clear-context')
     context.commit('clearEntries')
     context.commit('clearContext')
-    context.dispatch('batchAddEntries', {
-      entries: Storage.all
-    })
+    bus.$emit('batch-thinking-start')
+    setTimeout(() => {
+      context.dispatch('batchAddEntries', {
+        entries: Storage.all
+      })
+    }, 10)
   }
 })
 
