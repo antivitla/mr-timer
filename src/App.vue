@@ -27,10 +27,10 @@
         //- View navigation
         nav.view-menu
           price-per-hour(
-            v-if="currentView !== 'history' && currentView !== 'help' && isEntries"
+            v-if="currentView !== 'storage' && currentView !== 'help' && isEntries"
           )
           .filter-entries(
-            v-if="currentView === 'history' && !isSelectedEntries && isEntries"
+            v-if="currentView === 'storage' && !isSelectedEntries && isEntries"
           )
             span.label {{ filterLabel }}
             list-input(
@@ -38,7 +38,7 @@
               :debounce="50"
               :placeholder="filterPlaceholderLabel")
           batch-actions(
-            v-if="currentView === 'history' && isSelectedEntries")
+            v-if="currentView === 'storage' && isSelectedEntries")
           div.view-switch
             a(
               v-for="view in getViewsAvailable()"
@@ -75,17 +75,8 @@
             :key="day.name"
             :group="day")
 
-        .filter-entries(
-          v-if="currentView === 'history' && !isSelectedEntries && isEntries"
-        )
-          span.label {{ filterLabel }}
-          list-input(
-            v-model="filter"
-            :debounce="50"
-            :placeholder="filterPlaceholderLabel")
-
         //- Storage view
-        section.storage.view(v-if="currentView === 'history'")
+        section.storage.view(v-if="currentView === 'storage'")
           p.no-results(
             v-if="!filteredEntries.length && !isThinking"
           ) {{ noResultsLabel }}
@@ -172,6 +163,7 @@
       // Clear filter on view switch
       this.$store.subscribe(mutation => {
         if (mutation.type === 'setCurrentView' && mutation.payload.view !== 'storage') {
+          console.log('clear filter')
           this.filter = []
         }
       })
@@ -329,8 +321,8 @@
         // if (id > -1 && !this.isEntries) {
         //   views.splice(id, 1)
         // }
-        // // check history
-        // id = views.indexOf('history')
+        // // check storage
+        // id = views.indexOf('storage')
         // if (id > -1 && !this.isEntries) {
         //   views.splice(id, 1)
         // }
@@ -552,17 +544,15 @@
         font-size 48px
         line-height 1.125
         margin-left calc(-48px - 0.25em)
-        .clear
-          order 0
-          margin-left 0px
-          margin-right 0.25em
-          color titamota-color-text-muted
         .name
-          order 1
           color titamota-color-text
           font-weight 300
           white-space normal
           padding-right 1em
+        .clear
+        .back
+          font-size 87.5%
+          color titamota-color-text-muted
         @media (min-width 768px)
           display flex
     .right

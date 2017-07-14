@@ -34,7 +34,7 @@ export const currencies = ({
 
 const ru = ({
   view: {
-    history: 'история',
+    storage: 'история',
     tasks: 'задачи',
     months: 'месяцы',
     days: 'дни',
@@ -73,8 +73,9 @@ const ru = ({
   filterPlaceholder: 'разделяй через « / »',
   noResultsLabel: 'записей не найдено',
   noTasksLabel: 'задач не найдено',
-  filterByThisLabel: 'найти в истории',
+  filterByThisLabel: 'найти все записи в истории',
   clearContext: 'очистить контекст',
+  upContext: 'выше контекст',
   standby: 'подождите немного',
   sidebar: {
     icons: 'иконки',
@@ -92,12 +93,15 @@ const ru = ({
   import: 'импорт',
   importFrom: 'импорт записей из',
   export: 'экспорт',
-  exportTo: 'экспорт записей в'
+  exportTo: 'экспорт записей в',
+  startTask: 'начать задачу',
+  startEdit: 'редактировать',
+  setContext: 'сделать контекстом'
 })
 
 const en = ({
   view: {
-    history: 'history',
+    storage: 'history',
     tasks: 'tasks',
     months: 'months',
     days: 'days',
@@ -136,8 +140,9 @@ const en = ({
   filterPlaceholder: 'separate by " / "',
   noResultsLabel: 'no time records found',
   noTasksLabel: 'tasks not found',
-  filterByThisLabel: 'find in history',
+  filterByThisLabel: 'find all entries in history',
   clearContext: 'clear context',
+  upContext: 'up context',
   standby: 'please stand by',
   sidebar: {
     icons: 'icons',
@@ -155,7 +160,10 @@ const en = ({
   import: 'import',
   importFrom: 'import entries from',
   export: 'export',
-  exportTo: 'export entries to'
+  exportTo: 'export entries to',
+  startTask: 'start task',
+  startEdit: 'edit',
+  setContext: 'set as context'
 })
 
 export const translate = ({

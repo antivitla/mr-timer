@@ -279,7 +279,7 @@
       &:hover
       &.selected
         cursor pointer
-        background-color whitesmoke
+        background-color titamota-color-back-light-darker
         cursor pointer
         position relative
       @media (min-width 768px)

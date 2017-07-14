@@ -3,9 +3,11 @@ import Petrov from '@/petrov'
 import sortedIndexBy from 'lodash/sortedIndexBy'
 // import async from 'async'
 import appName from './app-name'
-import { extractEntries, parentOfDifferentType } from '@/utils/group'
+import {
+  extractEntries,
+  parentOfDifferentType,
+  filterContext } from '@/utils/group'
 import bus from '@/event-bus'
-// import taffydb from 'taffydb'
 import { taskDelimiter } from '@/store/ui'
 
 export const Storage = ({
@@ -13,7 +15,6 @@ export const Storage = ({
   all: [],
   context: null,
   period: null
-  // db: taffydb.taffy()
 })
 
 const state = {
@@ -49,6 +50,11 @@ export const mutations = {
         item => -item.start)
       Storage.all.splice(allid, 0, payload.entry)
     }
+
+    // in context
+    if (Storage.context) {
+      // Storage.context.addEntry(payload.entry)
+    }
   },
 
   removeEntry (state, payload) {
@@ -72,6 +78,11 @@ export const mutations = {
     }
     if (allid > -1) {
       Storage.all.splice(allid, 1)
+    }
+
+    // in context
+    if (Storage.context) {
+      // Storage.context.removeEntry(payload.entry)
     }
   },
 
@@ -110,328 +121,331 @@ export const mutations = {
 }
 
 export const actions = ({
-  loadEntries ({ state, commit, getters, dispatch }, payload) {
-    bus.$emit('load-entries-start')
-    // Грузиться с удалённого аккаунта?
-    if (getters['userKey'] !== 'local') {
-      Petrov.get(getters['userKey'])
-        .catch(() => {
-          // Если не найден аккаунт, создаём его
-          return Petrov.post(getters['userKey'])
-        })
-        .then((res) => {
-          // Теперь точно есть аккаунт...
-          commit('setUserMode', { mode: res.mode })
-          commit('setUserGuestKey', { guestKey: res.guest_code })
-          // ...хоть с данными, хоть без
-          if (res.data && res.data.trim()) {
-            let entries
-            try {
-              entries = JSON.parse(res.data).entries
-            } catch (error) {
-              throw new Error('Error parsing remote data ' + error)
-            }
-            // Добавляем записи с задержкой
-            dispatch('batchAddEntries', {
-              entries,
-              context: payload ? payload.context : null
+  getEntries (context, payload) {
+    return new Promise((resolve, reject) => {
+      // Грузиться с удалённого аккаунта?
+      if (context.getters['userKey'] !== 'local') {
+        Petrov.get(context.getters['userKey'])
+          .catch(() => {
+            // Если на найден аккаунт, создаём его
+            return Petrov.post(context.getters['userKey'])
+          })
+          .then(res => {
+            // Теперь точно есть аккаунт
+            context.commit('setUserMode', {
+              mode: res.mode
             })
+            context.commit('setUserGuestKey', {
+              guestKey: res.guest_code
+            })
+            // ...хоть с данными хоть без
+            let entries = []
+            if (res.data && res.data.trim()) {
+              try {
+                entries = JSON.parse(res.data).entries
+              } catch (error) {
+                throw new Error('Error parsing remote data ' + error)
+              }
+            }
+            resolve({ entries })
+          })
+          .catch(error => {
+            reject(error)
+          })
+      } else {
+        // Или грузиться локально?
+        let entries = []
+        try {
+          const key = context.state.localStorageKey + '-local'
+          const saved = localStorage[key]
+          if (saved) {
+            entries = JSON.parse(localStorage[key]).entries
           }
-          setTimeout(() => {
-            bus.$emit('load-entries-done')
-          }, 10)
-        })
-        .catch(error => {
-          console.error(error)
-          setTimeout(() => {
-            bus.$emit('load-entries-done')
-          }, 10)
-        })
-    } else {
-      // Или грузиться локально?
-      let entries = []
-      try {
-        const key = state.localStorageKey + '-local'
-        const saved = localStorage[key]
-        if (saved) {
-          entries = JSON.parse(localStorage[key]).entries
+        } catch (error) {
+          reject(error)
         }
-      } catch (error) {
-        console.warn(error)
+        resolve({ entries })
       }
-      if (entries.length) {
-        dispatch('batchAddEntries', {
-          entries,
-          context: payload ? payload.context : null
-        })
-      }
-      setTimeout(() => {
-        bus.$emit('load-entries-done')
-      }, 10)
-    }
+    })
   },
 
-  saveEntries ({ state, getters }) {
-    let key = state.localStorageKey + '-' + getters['userKey']
-    if (getters['userKey'] !== 'local') {
-      Petrov.put(getters['userKey'], {
+  loadEntries (context, payload) {
+    bus.$emit('load-entries-start')
+    return context.dispatch('getEntries')
+      .then(res => {
+        context.dispatch('batchAddEntries', {
+          entries: res.entries,
+          context: payload ? payload.context : null
+        })
+        .then(() => {
+          bus.$emit('load-entries-done')
+        })
+      })
+  },
+
+  saveEntries (context) {
+    return new Promise((resolve, reject) => {
+      // local save
+      const lskey = context.state.localStorageKey
+      const ukey = context.getters['userKey']
+      const key = `${lskey}-${ukey}`
+      const raw = JSON.stringify({
         entries: Storage.all
       })
-    }
-    const raw = JSON.stringify({
-      entries: Storage.all
+      localStorage.setItem(key, raw)
+      // remote save
+      if (context.getters['userKey'] !== 'local') {
+        Petrov.put(context.getters['userKey'], {
+          entries: Storage.all
+        })
+        .then(() => {
+          resolve()
+        })
+        .catch(error => {
+          reject(error)
+        })
+      } else {
+        resolve()
+      }
     })
-    localStorage.setItem(key, raw)
   },
 
   createEntry (context, payload) {
     const entry = new Entry(Object.assign(payload.entry))
     context.commit('addEntry', { entry })
-    context.dispatch('saveEntries')
+    return context.dispatch('saveEntries')
   },
 
   updateEntry (context, payload) {
-    const updatedEntry = new Entry(Object.assign(
-        {},
-        payload.entry,
-        payload.update))
-    context.commit('removeEntry', {
-      entry: payload.entry
+    return new Promise((resolve, reject) => {
+      const updatedEntry = new Entry(Object.assign(
+          {},
+          payload.entry,
+          payload.update))
+      context.commit('removeEntry', {
+        entry: payload.entry
+      })
+      context.commit('addEntry', {
+        entry: updatedEntry
+      })
+      bus.$emit('update-entry', {
+        entry: payload.entry,
+        updatedEntry
+      })
+      context
+        .dispatch('saveEntries')
+        .then(() => {
+          resolve(updatedEntry)
+        })
+        .catch(error => {
+          reject(error)
+        })
     })
-    context.commit('addEntry', {
-      entry: updatedEntry
-    })
-    bus.$emit('update-entry', {
-      entry: payload.entry,
-      updatedEntry
-    })
-    context.dispatch('saveEntries')
-    return updatedEntry
   },
 
   removeEntry (context, payload) {
     context.commit('removeEntry', payload)
-    context.dispatch('saveEntries')
+    return context.dispatch('saveEntries')
   },
 
   batchUpdateEntries (context, payload) {
-    // if (!lockedBatchOperations) {
-    //   lockedBatchOperations = true
-    //   async.eachSeries(payload.entries, (entry, next) => {
-    //     // Переименование
-    //     let details = entry.details.slice(0)
-    //     if (payload.update.details) {
-    //       let source = payload.update.details
-    //         .source.join(taskDelimiter)
-    //       let target = payload.update.details
-    //         .target.join(taskDelimiter)
-    //       details = entry.details
-    //         .join(taskDelimiter)
-    //         .replace(new RegExp('^' + source), target)
-    //         .split(taskDelimiter)
-    //         .filter(d => d)
-    //         .map(d => d.trim())
-    //         .filter(d => d)
-    //     }
-    //     // Изменение длительностей
-    //     let stop = entry.stop
-    //     if (payload.update.stop) {
-    //       if (payload.update.stop.add) {
-    //         stop = entry.stop + payload.update.stop.add
-    //       }
-    //     }
-    //     context.commit('removeEntry', { entry })
-    //     context.commit('addEntry', {
-    //       entry: new Entry({
-    //         start: entry.start,
-    //         stop,
-    //         details,
-    //         _uid: entry._uid
-    //       })
-    //     })
-    //     // // Sync local
-    //     // Storage
-    //     //   .db({ _uid: entry._uid })
-    //     //   .update({ stop, details })
-    //     // Next
-    //     setTimeout(next, 5)
-    //   }, error => {
-    //     if (error) {
-    //       console.warn(error)
-    //     }
-    //     lockedBatchOperations = false
-    //     bus.$emit('batch-update-entries', payload)
-    //     context.dispatch('saveEntries')
-    //   })
-    // }
-
     bus.$emit('batch-thinking-start')
-    setTimeout(() => {
-      payload.entries.forEach(entry => {
-        // Переименование
-        let details = entry.details.slice(0)
-        if (payload.update.details) {
-          let source = payload.update.details
-            .source.join(taskDelimiter)
-          let target = payload.update.details
-            .target.join(taskDelimiter)
-          details = entry.details
-            .join(taskDelimiter)
-            .replace(new RegExp('^' + source), target)
-            .split(taskDelimiter)
-            .filter(d => d)
-            .map(d => d.trim())
-            .filter(d => d)
-        }
-        // Изменение длительностей
-        let stop = entry.stop
-        if (payload.update.stop) {
-          if (payload.update.stop.add) {
-            stop = entry.stop + payload.update.stop.add
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        payload.entries.forEach(entry => {
+          // Переименование
+          let details = entry.details.slice(0)
+          if (payload.update.details) {
+            let source = payload.update.details
+              .source.join(taskDelimiter)
+            let target = payload.update.details
+              .target.join(taskDelimiter)
+            details = entry.details
+              .join(taskDelimiter)
+              .replace(new RegExp('^' + source), target)
+              .split(taskDelimiter)
+              .filter(d => d)
+              .map(d => d.trim())
+              .filter(d => d)
           }
-        }
-        context.commit('removeEntry', { entry })
-        context.commit('addEntry', {
-          entry: new Entry({
-            start: entry.start,
-            stop,
-            details,
-            _uid: entry._uid
+          // Изменение длительностей
+          let stop = entry.stop
+          if (payload.update.stop) {
+            if (payload.update.stop.add) {
+              stop = entry.stop + payload.update.stop.add
+            }
+          }
+          context.commit('removeEntry', { entry })
+          context.commit('addEntry', {
+            entry: new Entry({
+              start: entry.start,
+              stop,
+              details,
+              _uid: entry._uid
+            })
           })
         })
-      })
-      context.dispatch('saveEntries')
-      setTimeout(() => {
-        bus.$emit('batch-update-entries', payload)
-        bus.$emit('batch-thinking-done')
+        context
+          .dispatch('saveEntries')
+          .then(() => {
+            bus.$emit('batch-update-entries', payload)
+            bus.$emit('batch-thinking-done')
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
       }, 10)
-    }, 10)
+    })
   },
 
   batchRemoveEntries (context, payload) {
-    // if (!lockedBatchOperations) {
-    //   lockedBatchOperations = true
-    //   async.eachSeries(payload.entries, (entry, next) => {
-    //     context.commit('removeEntry', { entry })
-    //     // // Sync local
-    //     // Storage
-    //     //   .db({ _uid: entry._uid })
-    //     //   .remove()
-    //     // Next
-    //     setTimeout(next, 5)
-    //   }, error => {
-    //     if (error) {
-    //       console.warn(error)
-    //     }
-    //     lockedBatchOperations = false
-    //     context.dispatch('saveEntries')
-    //   })
-    // }
-
     bus.$emit('batch-thinking-start')
-    setTimeout(() => {
-      payload.entries.forEach(item => {
-        const entry = item instanceof Entry ? item : new Entry(item)
-        context.commit('removeEntry', { entry })
-      })
-      context.dispatch('saveEntries')
+    return new Promise((resolve, reject) => {
       setTimeout(() => {
-        bus.$emit('batch-thinking-done')
+        payload.entries.forEach(item => {
+          const entry = item instanceof Entry ? item : new Entry(item)
+          context.commit('removeEntry', { entry })
+        })
+        context
+          .dispatch('saveEntries')
+          .then(() => {
+            bus.$emit('batch-thinking-done')
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
       }, 10)
-    }, 10)
+    })
   },
 
   batchAddEntries (context, payload) {
-    // if (!lockedBatchOperations) {
-    //   lockedBatchOperations = true
-    //   async.eachSeries(payload.entries, (item, next) => {
-    //     const entry = item instanceof Entry ? item : new Entry(item)
-    //     context.commit('addEntry', { entry })
-    //     setTimeout(next, 5)
-    //   }, error => {
-    //     if (error) {
-    //       console.warn(error)
-    //     }
-    //     lockedBatchOperations = false
-    //     context.dispatch('saveEntries')
-    //   })
-    // }
-
     bus.$emit('batch-thinking-start')
-    setTimeout(() => {
-      payload.entries.forEach(item => {
-        const entry = item instanceof Entry ? item : new Entry(item)
-        context.commit('addEntry', { entry })
-      })
-      context.dispatch('saveEntries')
+    return new Promise((resolve, reject) => {
       setTimeout(() => {
-        bus.$emit('batch-thinking-done')
+        payload.entries.forEach(item => {
+          const entry = item instanceof Entry ? item : new Entry(item)
+          context.commit('addEntry', { entry })
+        })
+        context
+          .dispatch('saveEntries')
+          .then(() => {
+            bus.$emit('batch-thinking-done')
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
       }, 10)
-    }, 10)
+    })
   },
 
   importEntries (context, payload) {
-    let entries = []
-    // JSON
-    if (payload.format === 'json') {
-      let raw
-      try {
-        raw = JSON.parse(payload.raw)
-      } catch (error) {
-        console.warn(error)
+    return new Promise((resolve, reject) => {
+      let entries = []
+      // JSON
+      if (payload.format === 'json') {
+        let raw
+        try {
+          raw = JSON.parse(payload.raw)
+        } catch (error) {
+          console.warn(error)
+          reject('Bad format in: ' + payload.raw)
+        }
+        if (Array.isArray(raw)) {
+          entries = raw
+        } else if (raw.entries && raw.entries.length) {
+          entries = raw.entries
+        } else {
+          console.log('Какой-то непонятный json')
+          reject('Wrong json object in: ' + payload.raw)
+        }
       }
-      if (Array.isArray(raw)) {
-        entries = raw
-      } else if (raw.entries && raw.entries.length) {
-        entries = raw.entries
-      } else {
-        console.log('Какой-то непонятный json')
-      }
-    }
 
-    // Create imported entries
-    if (entries.length) {
-      context.dispatch('batchAddEntries', { entries })
-    }
-    // if (entries.length && !lockedBatchOperations) {
-    //   if (payload.replace) {
-    //     Storage.db().remove()
-    //     context.commit('clearEntries')
-    //   }
-    //   lockedBatchOperations = true
-    //   async.eachSeries(entries, (entry, next) => {
-    //     context.dispatch('createEntry', { entry })
-    //     setTimeout(next, 5)
-    //   }, error => {
-    //     if (error) {
-    //       console.warn(error)
-    //     }
-    //     lockedBatchOperations = false
-    //   })
-    // }
+      // Create imported entries
+      if (entries.length) {
+        context
+          .dispatch('batchAddEntries', { entries })
+          .then(() => {
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
+      } else {
+        reject('Empty import in: ' + payload.raw)
+      }
+    })
   },
 
   setContext (context, payload) {
-    bus.$emit('set-context', payload)
-    context.commit('clearEntries')
-    context.commit('setContext', payload)
-    bus.$emit('batch-thinking-start')
-    setTimeout(() => {
+    return new Promise((resolve, reject) => {
+      bus.$emit('set-context', payload)
+      context.commit('clearEntries')
+      context.commit('setContext', payload)
+      bus.$emit('batch-thinking-start')
       const entries = extractEntries(payload.context)
-      context.dispatch('batchAddEntries', { entries })
+      setTimeout(() => {
+        context
+          .dispatch('batchAddEntries', { entries })
+          .then(() => {
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
+      })
     }, 10)
   },
 
+  setUpperContext (context, payload) {
+    return new Promise((resolve, reject) => {
+      bus.$emit('set-context', payload)
+      context.commit('clearEntries')
+      context.commit('setContext', payload)
+      bus.$emit('batch-thinking-start')
+      context
+        .dispatch('getEntries')
+        .then(result => {
+          return filterContext({
+            entries: result.entries,
+            context: payload.context
+          })
+        })
+        .then(entries => {
+          return context.dispatch('batchAddEntries', {
+            entries
+          })
+        })
+        .then(() => {
+          resolve()
+        })
+        .catch(error => {
+          reject(error)
+        })
+    })
+  },
+
   clearContext (context) {
-    bus.$emit('clear-context')
-    context.commit('clearEntries')
-    context.commit('clearContext')
-    bus.$emit('batch-thinking-start')
-    setTimeout(() => {
-      context.dispatch('batchAddEntries', {
-        entries: Storage.all
-      })
-    }, 10)
+    return new Promise((resolve, reject) => {
+      bus.$emit('clear-context')
+      context.commit('clearEntries')
+      context.commit('clearContext')
+      bus.$emit('batch-thinking-start')
+      setTimeout(() => {
+        context
+          .dispatch('batchAddEntries', {
+            entries: Storage.all
+          })
+          .then(() => {
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
+      }, 10)
+    })
   }
 })
 

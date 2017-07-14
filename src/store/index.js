@@ -12,6 +12,7 @@ import selection from './selection'
 import { DaysPlugin } from './groups/days'
 import { MonthsPlugin } from './groups/months'
 import { TasksPlugin } from './groups/tasks'
+import { YearsPlugin } from './groups/years'
 import appName from './app-name'
 
 Vue.use(Vuex)
@@ -32,6 +33,7 @@ export default new Vuex.Store({
     DaysPlugin,
     MonthsPlugin,
     TasksPlugin,
+    YearsPlugin,
     createPersistedState({
       key: appName + '-store',
       paths: [

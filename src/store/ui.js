@@ -8,7 +8,7 @@ const state = {
       tasks: true,
       months: true,
       days: true,
-      history: true
+      storage: true
     }
   },
   recent: {

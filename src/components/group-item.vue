@@ -6,8 +6,7 @@
       :class="{ 'active': trackingEntry }"
       v-if="isEditingTask && editingTaskUid === group.uid()"
       @keyup.esc="stopTaskEditing()"
-      v-esc-outside="stopTaskEditing"
-      v-click-outside="stopTaskEditing")
+      v-esc-outside="stopTaskEditing")
       span.name
         span.non-editable(v-if="group.type !== 'task'")
           group-name(:group="group")
@@ -38,20 +37,20 @@
           i.material-icons delete
         a.icon-button.cancel(
           :title="cancelLabel"
-          @click="stopTaskEditing()")
+          @click.stop.prevent="stopTaskEditing()")
           i.material-icons block
 
     .item.read(
       v-else
-      :class="{ 'active': trackingEntry }")
+      :class="{ 'active': trackingEntry }"
+      :title="startTaskLabel"
+      @click="startTask()")
       span.name(
-        :color="colorCode"
-        @wheel="setEntryAsContext($event)")
+        :color="colorCode")
         span(
           v-if="group.type === 'task'"
           v-long-click="500"
-          @long-click="startEdit('details')"
-          @normal-click="startTask()")
+          @long-click="startEdit('details')")
           group-name(:group="group")
         span(
           v-else
@@ -63,6 +62,27 @@
         @long-click="startEdit('duration')") {{ duration }}
       span.cost(
         v-if="price") {{ cost }}
+
+      span.hover-actions
+        //- a.icon-button.start-task(
+        //-   @click.stop.prevent="startTask()"
+        //-   :title="startTaskLabel"
+        //-   v-if="isTask")
+        //-   i.material-icons timer
+        a.icon-button.start-edit(
+          @click.stop.prevent="startEdit('details')"
+          :title="startEditLabel")
+          i.material-icons mode_edit
+        a.icon-button.filter(
+          :title="filterByThisLabel"
+          @click.stop.prevent="filterTask()")
+          i.material-icons search
+        a.icon-button.context(
+          @click.stop.prevent="setEntryAsContext($event)"
+          :title="setContextLabel"
+          v-if="isContextable")
+          i.material-icons launch
+
       //- span.actions
       //-   //- a.icon-button.filter
       //-   //-   i.material-icons filter_list
@@ -184,6 +204,12 @@
           }
         }
       },
+      isContextable () {
+        return this.group.children[0] instanceof Group
+      },
+      isTask () {
+        return this.group.type === 'task'
+      },
       filterByThisLabel () {
         return capitalize(translate[this.locale].filterByThisLabel)
       },
@@ -192,6 +218,16 @@
       },
       cancelLabel () {
         return capitalize(translate[this.locale].cancel)
+      },
+      startTaskLabel () {
+        return capitalize(translate[this.locale].startTask) +
+          ' «' + this.group.name + '»'
+      },
+      startEditLabel () {
+        return capitalize(translate[this.locale].startEdit)
+      },
+      setContextLabel () {
+        return capitalize(translate[this.locale].setContext)
       },
       ...mapGetters([
         'locale',
@@ -208,6 +244,13 @@
 
     methods: {
       startTask () {
+        if (this.timerActive) {
+          const timerDetails = this.timerEntry.details.join()
+          const groupDetails = this.group.details().join()
+          if (timerDetails === groupDetails) {
+            return
+          }
+        }
         let details = this.group.details()
         if (this.group.children[0] instanceof Group) {
           details = details.concat(funnyTask(this.locale))
@@ -317,9 +360,9 @@
       setEntryAsContext (event) {
         if (this.group.children[0] instanceof Group) {
           event.preventDefault()
-          this.debounceWheel(() => {
-            this.setContext({ context: this.group })
-          }, 200)
+          // this.debounceWheel(() => {
+          this.setContext({ context: this.group })
+          // }, 200)
         }
       },
       ...mapMutations([
@@ -514,6 +557,7 @@
 
     .item.read
       display flex
+      cursor pointer
       .actions
         display none
       .actions
@@ -523,6 +567,15 @@
         top 0px
         padding-top 4px
         padding-bottom 4px
+      .hover-actions
+        display none
+      &:hover
+        // box-shadow 0px 1px 0px 0px titamota-color-border
+        background-color titamota-color-back-light-darker
+        .hover-actions
+          display flex
+          align-self center
+          margin-left auto
 
   .view > .group-item.has-children > .item
     font-size 32px

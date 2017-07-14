@@ -46,6 +46,57 @@ export function parentOfDifferentType (item) {
   }
 }
 
+export function filterContext ({ entries, context } = {}) {
+  // У нас может быть текущий контекст задачей, месяцем, днём, годом.
+  // Но так же если текущий это задача, родительский - месяц, день, год,
+  // и нужно проверять и по ним
+  const ctype = context.type
+  const pdtype = parentOfDifferentType(context)
+  const isTaskOnly = ctype === 'task' && !pdtype
+  const isPeriodOnly = ctype.match(/day|month|year/)
+  // console.log(ptype)
+  const isTaskInsidePeriod = ctype === 'task' &&
+    pdtype && pdtype.type && pdtype.type.match(/day|month|year/)
+  // Cache context info
+  const contextDetails = rootDetails(context).join()
+  const equalPeriod = {
+    month (d1, d2) {
+      return d1.getMonth() === d2.getMonth() &&
+        d1.getFullYear() === d2.getFullYear()
+    },
+    day (d1, d2) {
+      return d1.getDate() === d2.getDate() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getFullYear() === d2.getFullYear()
+    },
+    year (d1, d2) {
+      return d1.getFullYear() === d2.getFullYear()
+    }
+  }
+  let contextStart
+  if (isPeriodOnly) {
+    contextStart = new Date(context.start)
+  } else if (isTaskInsidePeriod) {
+    contextStart = new Date(pdtype.start)
+  }
+
+  console.log(contextStart, contextDetails)
+  return entries.filter(entry => {
+    // console.log(entry.details.join(), period[pdtype.type](entry.start))
+    if (isTaskOnly) {
+      return entry.details.join().indexOf(contextDetails) > -1
+    } else if (isPeriodOnly) {
+      return equalPeriod[ctype](
+        contextStart,
+        new Date(entry.start))
+    } else if (isTaskInsidePeriod) {
+      return equalPeriod[pdtype.type](
+        contextStart,
+        new Date(entry.start))
+    }
+  })
+}
+
 export function getTaskDepth (item) {
   let depth = 0
   let parent = item
