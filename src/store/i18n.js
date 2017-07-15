@@ -77,6 +77,7 @@ const ru = ({
   clearContext: 'очистить контекст',
   upContext: 'выше контекст',
   standby: 'подождите немного',
+  externalLink: 'перейти к',
   sidebar: {
     icons: 'иконки',
     from: 'от',
@@ -144,6 +145,7 @@ const en = ({
   clearContext: 'clear context',
   upContext: 'up context',
   standby: 'please stand by',
+  externalLink: 'go to',
   sidebar: {
     icons: 'icons',
     from: 'from',

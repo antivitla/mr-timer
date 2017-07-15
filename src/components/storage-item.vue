@@ -111,8 +111,8 @@
 
     computed: {
       details () {
-        return this.entry.details
-          .join(taskDelimiter)
+        return decodeURIComponent(this.entry.details
+          .join(taskDelimiter))
       },
       duration () {
         const d = duration(this.entry.duration())

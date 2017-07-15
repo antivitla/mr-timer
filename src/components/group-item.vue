@@ -6,6 +6,7 @@
       :class="{ 'active': trackingEntry }"
       v-if="isEditingTask && editingTaskUid === group.uid()"
       @keyup.esc="stopTaskEditing()"
+      v-click-outside="stopTaskEditing"
       v-esc-outside="stopTaskEditing")
       span.name
         span.non-editable(v-if="group.type !== 'task'")
@@ -29,11 +30,11 @@
       span.actions
         a.icon-button.filter(
           :title="filterByThisLabel"
-          @click="filterTask()")
+          @click.stop.prevent="filterTask()")
           i.material-icons search
         a.icon-button.delete(
           :title="deleteLabel"
-          @click="removeTask()")
+          @click.stop.prevent="removeTask()")
           i.material-icons delete
         a.icon-button.cancel(
           :title="cancelLabel"
@@ -69,6 +70,17 @@
         //-   :title="startTaskLabel"
         //-   v-if="isTask")
         //-   i.material-icons timer
+        a.icon-button.external-link(
+        @click.stop.prevent="gotoHref(taskHref)"
+          :href="taskHref"
+          :title="externalLinkLabel"
+          v-if="isTaskWithLink")
+          i.material-icons launch
+        a.icon-button.context(
+          @click.stop.prevent="setEntryAsContext($event)"
+          :title="setContextLabel"
+          v-if="isContextable")
+          i.material-icons folder_open
         a.icon-button.start-edit(
           @click.stop.prevent="startEdit('details')"
           :title="startEditLabel")
@@ -77,11 +89,6 @@
           :title="filterByThisLabel"
           @click.stop.prevent="filterTask()")
           i.material-icons search
-        a.icon-button.context(
-          @click.stop.prevent="setEntryAsContext($event)"
-          :title="setContextLabel"
-          v-if="isContextable")
-          i.material-icons launch
 
       //- span.actions
       //-   //- a.icon-button.filter
@@ -128,6 +135,8 @@
   function funnyTask (locale) {
     return funny.phrase(funnyTemplates[locale].base)
   }
+
+  const urlRegexp = /((https?):\/\/.*?(\s|$))/
 
   export default {
     props: [
@@ -204,11 +213,24 @@
           }
         }
       },
+      taskHref () {
+        const href = this.group.name.match(urlRegexp)
+        return href ? href[0] : undefined
+      },
       isContextable () {
         return this.group.children[0] instanceof Group
       },
       isTask () {
         return this.group.type === 'task'
+      },
+      isTaskWithLink () {
+        return this.group.type === 'task' &&
+          this.group.name.match(urlRegexp)
+      },
+      externalLinkLabel () {
+        const href = this.group.name.match(urlRegexp) ? this.group.name.match(urlRegexp)[0] : ''
+        return capitalize(translate[this.locale].externalLink) +
+          ' ' + decodeURIComponent(href)
       },
       filterByThisLabel () {
         return capitalize(translate[this.locale].filterByThisLabel)
@@ -221,7 +243,7 @@
       },
       startTaskLabel () {
         return capitalize(translate[this.locale].startTask) +
-          ' «' + this.group.name + '»'
+          ' «' + decodeURIComponent(this.group.name) + '»'
       },
       startEditLabel () {
         return capitalize(translate[this.locale].startEdit)
@@ -371,6 +393,9 @@
           this.setContext({ context: this.group })
           // }, 200)
         }
+      },
+      gotoHref (href) {
+        window.location.href = href
       },
       ...mapMutations([
         'startTaskEditing',
@@ -576,6 +601,9 @@
         padding-bottom 4px
       .hover-actions
         display none
+        a[href]
+          color titamota-color-text
+          text-decoration none
       &:hover
         // box-shadow 0px 1px 0px 0px titamota-color-border
         background-color titamota-color-back-light-darker
