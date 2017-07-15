@@ -11,8 +11,8 @@ import money from './money'
 import selection from './selection'
 import { DaysPlugin } from './groups/days'
 import { MonthsPlugin } from './groups/months'
-import { TasksPlugin } from './groups/tasks'
 import { YearsPlugin } from './groups/years'
+import { TasksPlugin } from './groups/tasks'
 import appName from './app-name'
 
 Vue.use(Vuex)

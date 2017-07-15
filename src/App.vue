@@ -57,6 +57,15 @@
             :key="task.name"
             :group="task")
 
+        //- Years view
+        section.years.view(v-if="currentView === 'years'")
+          p.no-tasks(v-if="!isEntries && !isThinking") {{ noTasksLabel }}
+          thinking-preloader(v-if="isThinking")
+          group-item(
+            v-for="year in filterGroupChildren(Years.children)"
+            :key="year.name"
+            :group="year")
+
         //- Months view
         section.months.view(v-if="currentView === 'months'")
           p.no-tasks(v-if="!isEntries && !isThinking") {{ noTasksLabel }}
@@ -115,6 +124,7 @@
   import thinkingPreloader from '@/components/thinking-preloader'
   import Group from '@/models/group'
   import { Tasks } from '@/store/groups/tasks'
+  import { Years } from '@/store/groups/years'
   import { Months } from '@/store/groups/months'
   import { Days } from '@/store/groups/days'
   import { Storage } from '@/store/storage'
@@ -131,6 +141,7 @@
     data () {
       return {
         Tasks,
+        Years,
         Months,
         Days,
         Storage,
@@ -242,6 +253,9 @@
       isMonths () {
         return Months.children.length > 1
       },
+      isYears () {
+        return Years.children.length > 1
+      },
       isTasks () {
         return Storage.entries.length > 1
       },
@@ -306,26 +320,6 @@
         let views = Object
           .keys(this.viewsAvailable)
           .filter(key => this.viewsAvailable[key])
-        // // check days
-        // let id = views.indexOf('days')
-        // if (id > -1 && !this.isEntries) {
-        //   views.splice(id, 1)
-        // }
-        // // check months
-        // id = views.indexOf('months')
-        // if (id > -1 && !this.isEntries) {
-        //   views.splice(id, 1)
-        // }
-        // // check tasks
-        // id = views.indexOf('tasks')
-        // if (id > -1 && !this.isEntries) {
-        //   views.splice(id, 1)
-        // }
-        // // check storage
-        // id = views.indexOf('storage')
-        // if (id > -1 && !this.isEntries) {
-        //   views.splice(id, 1)
-        // }
         // check current view
         this.debounceRefreshView(() => {
           if (views.indexOf(this.currentView) < 0) {

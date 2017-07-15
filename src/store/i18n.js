@@ -171,11 +171,6 @@ export const translate = ({
   en
 })
 
-export function interpolate (str, value, locale) {
-  //
-  console.log(str, value, locale)
-}
-
 const state = {
   locale: 'ru',
   currency: 'rub'

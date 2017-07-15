@@ -41,7 +41,7 @@ export function parentOfDifferentType (item) {
   while (parent && parent.type === type) {
     parent = parent.parent
   }
-  if (parent !== item) {
+  if (parent !== item && parent.parent) {
     return parent
   }
 }
@@ -54,11 +54,13 @@ export function filterContext ({ entries, context } = {}) {
   const pdtype = parentOfDifferentType(context)
   const isTaskOnly = ctype === 'task' && !pdtype
   const isPeriodOnly = ctype.match(/day|month|year/)
-  // console.log(ptype)
   const isTaskInsidePeriod = ctype === 'task' &&
     pdtype && pdtype.type && pdtype.type.match(/day|month|year/)
   // Cache context info
   const contextDetails = rootDetails(context).join()
+  function equalDetails (e, cdj) {
+    return e.details.join().indexOf(cdj) > -1
+  }
   const equalPeriod = {
     month (d1, d2) {
       return d1.getMonth() === d2.getMonth() &&
@@ -80,19 +82,16 @@ export function filterContext ({ entries, context } = {}) {
     contextStart = new Date(pdtype.start)
   }
 
-  console.log(contextStart, contextDetails)
   return entries.filter(entry => {
-    // console.log(entry.details.join(), period[pdtype.type](entry.start))
     if (isTaskOnly) {
-      return entry.details.join().indexOf(contextDetails) > -1
+      return equalDetails(entry, contextDetails)
     } else if (isPeriodOnly) {
       return equalPeriod[ctype](
-        contextStart,
-        new Date(entry.start))
+        new Date(entry.start), contextStart)
     } else if (isTaskInsidePeriod) {
       return equalPeriod[pdtype.type](
-        contextStart,
-        new Date(entry.start))
+        new Date(entry.start),
+        contextStart) && equalDetails(entry, contextDetails)
     }
   })
 }

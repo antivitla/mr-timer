@@ -335,6 +335,9 @@
         if (this.group.type === 'task') {
           filter = this.group.details()
             .concat(filter)
+        } else if (this.group.type === 'year') {
+          filter = [moment(this.group.start).format('YYYY')]
+            .concat(filter)
         } else if (this.group.type === 'month') {
           filter = [moment(this.group.start).format('MM.YYYY')]
             .concat(filter)
@@ -344,6 +347,10 @@
         }
         if (this.group.type === 'task') {
           const parent = parentOfDifferentType(this.group)
+          if (parent && parent.type === 'year') {
+            filter = [moment(parent.start).format('YYYY')]
+              .concat(filter)
+          }
           if (parent && parent.type === 'month') {
             filter = [moment(parent.start).format('MM.YYYY')]
               .concat(filter)

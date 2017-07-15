@@ -50,11 +50,6 @@ export const mutations = {
         item => -item.start)
       Storage.all.splice(allid, 0, payload.entry)
     }
-
-    // in context
-    if (Storage.context) {
-      // Storage.context.addEntry(payload.entry)
-    }
   },
 
   removeEntry (state, payload) {
@@ -78,11 +73,6 @@ export const mutations = {
     }
     if (allid > -1) {
       Storage.all.splice(allid, 1)
-    }
-
-    // in context
-    if (Storage.context) {
-      // Storage.context.removeEntry(payload.entry)
     }
   },
 
@@ -143,6 +133,7 @@ export const actions = ({
             if (res.data && res.data.trim()) {
               try {
                 entries = JSON.parse(res.data).entries
+                  .map(e => new Entry(e))
               } catch (error) {
                 throw new Error('Error parsing remote data ' + error)
               }
@@ -160,6 +151,7 @@ export const actions = ({
           const saved = localStorage[key]
           if (saved) {
             entries = JSON.parse(localStorage[key]).entries
+              .map(e => new Entry(e))
           }
         } catch (error) {
           reject(error)
@@ -408,6 +400,9 @@ export const actions = ({
       context
         .dispatch('getEntries')
         .then(result => {
+          // Save all entries
+          Storage.all = result.entries
+          // But filter only needed
           return filterContext({
             entries: result.entries,
             context: payload.context

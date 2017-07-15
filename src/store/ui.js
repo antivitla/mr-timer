@@ -6,16 +6,17 @@ const state = {
     available: {
       help: true,
       tasks: true,
+      years: true,
       months: true,
       days: true,
       storage: true
     }
   },
-  recent: {
-    tasks: 2,
-    months: 2,
-    days: 2
-  },
+  // recent: {
+  //   tasks: 2,
+  //   months: 2,
+  //   days: 2
+  // },
   sidebar: false,
   modal: null,
   taskDelimiter

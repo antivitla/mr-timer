@@ -25,8 +25,6 @@
   import { Storage } from '@/store/storage'
   import { taskDelimiter } from '@/store/ui'
 
-  window.stor = Storage
-
   export default {
     props: [
       'context'
@@ -44,17 +42,20 @@
           .join(taskDelimiter)
         const period = Storage.period
         if (period && period.type === 'month') {
-          if (new Date(Storage.period.value).getFullYear() === new Date().getFullYear()) {
-            details = `(${capitalize(moment(Storage.period.value)
+          if (new Date(period.value).getFullYear() === new Date().getFullYear()) {
+            details = `(${capitalize(moment(period.value)
               .format('MMMM'))}) ` + details
           } else {
-            const m = moment(Storage.period.value)
+            const m = moment(period.value)
             details = `(${capitalize(m
               .format('MMMM'))} ${m.format('YYYY')}) ` + details
           }
         } else if (period && period.type === 'day') {
           details = `(${moment(period.value)
             .format('ll').replace(' г.', '')}) ` + details
+        } else if (period && period.type === 'year') {
+          // console.log(new Date(period.value).getFullYear())
+          details = `(${new Date(period.value).getFullYear()}) ` + details
         }
         return details
       },
