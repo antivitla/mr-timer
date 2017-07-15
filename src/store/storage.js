@@ -6,7 +6,8 @@ import appName from './app-name'
 import {
   extractEntries,
   parentOfDifferentType,
-  filterContext } from '@/utils/group'
+  filterContext/* ,
+  findSubContext */ } from '@/utils/group'
 import bus from '@/event-bus'
 import { taskDelimiter } from '@/store/ui'
 
@@ -14,6 +15,7 @@ export const Storage = ({
   entries: [],
   all: [],
   context: null,
+  contextHistory: [],
   period: null
 })
 
@@ -373,6 +375,7 @@ export const actions = ({
 
   setContext (context, payload) {
     return new Promise((resolve, reject) => {
+      Storage.contextHistory.push(Storage.context)
       bus.$emit('set-context', payload)
       context.commit('clearEntries')
       context.commit('setContext', payload)
@@ -419,6 +422,44 @@ export const actions = ({
         .catch(error => {
           reject(error)
         })
+    })
+  },
+
+  setPreviosContext (context, payload) {
+    return new Promise((resolve, reject) => {
+      const prevContext = Storage.contextHistory.pop()
+      if (!prevContext) {
+        context.dispatch('clearContext')
+        resolve()
+        return
+      } else {
+        bus.$emit('set-context', { context: prevContext })
+        context.commit('clearEntries')
+        context.commit('setContext', { context: prevContext })
+        bus.$emit('batch-thinking-start')
+        context
+          .dispatch('getEntries')
+          .then(result => {
+            // Save all entries
+            Storage.all = result.entries
+            // But filter only needed
+            return filterContext({
+              entries: result.entries,
+              context: prevContext
+            })
+          })
+          .then(entries => {
+            return context.dispatch('batchAddEntries', {
+              entries
+            })
+          })
+          .then(() => {
+            resolve()
+          })
+          .catch(error => {
+            reject(error)
+          })
+      }
     })
   },
 

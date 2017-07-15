@@ -46,6 +46,13 @@ export function parentOfDifferentType (item) {
   }
 }
 
+export function findSubContext (source, example) {
+  // let s = source
+  // let e = example
+  // const sflat = flattenGroup(source)
+  // const eflat = flattenGroup(example)
+}
+
 export function filterContext ({ entries, context } = {}) {
   // У нас может быть текущий контекст задачей, месяцем, днём, годом.
   // Но так же если текущий это задача, родительский - месяц, день, год,

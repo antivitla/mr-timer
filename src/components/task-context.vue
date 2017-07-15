@@ -76,13 +76,14 @@
         if (this.context.parent && this.context.parent.parent) {
           this.setUpperContext({ context: this.context.parent })
         } else {
-          this.clearContext()
+          this.setPreviosContext()
         }
       },
       ...mapActions([
         'clearContext',
         'setContext',
-        'setUpperContext'
+        'setUpperContext',
+        'setPreviosContext'
       ])
     }
   }
