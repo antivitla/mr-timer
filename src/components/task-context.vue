@@ -48,7 +48,7 @@
         } else if (periodType === 'year') {
           details = `(${new Date(periodValue).getFullYear()}) ` + details
         }
-        return details
+        return details.trim()
       },
       clearContextLabel () {
         return capitalize(translate[this.locale].clearContext)
@@ -96,17 +96,19 @@
     .clear
     .back
       pointer-events none
-      opacity 0
+      visibility hidden
       cursor pointer
       transition all 0.3s
       &.active
         pointer-events all
-        opacity 1
+        visibility visible
     .back
-      margin-right 0.25em
-      vertical-align middle
+      margin-right 0.375em
+      margin-top 0.2em
+      align-self flex-start
+      color titamota-color-text
     .clear
       vertical-align middle
-      margin-left 0.2em
+      margin-left 0.375em
       color titamota-color-text
 </style>

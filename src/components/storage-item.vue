@@ -323,8 +323,11 @@
         bottom 0px
         display flex
         justify-content flex-end
-        padding-top 4px
-        padding-bottom 4px
+        padding-top 6px
+        padding-bottom 6px
+        @media (min-width 768px)
+          bottom auto
+          top 0px
         .select
           input
             pointer-events none

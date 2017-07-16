@@ -399,14 +399,25 @@
       padding-left 60px
       padding-right 60px
     @media (min-width 1366px)
-      padding-left 140px
-      padding-right 140px
+      // padding-left 140px
+      // padding-right 140px
 
   .view-menu
     display flex
     flex-direction column
     align-items center
     border-bottom solid 1px titamota-color-line
+
+    @media (min-width 768px)
+      flex-direction row
+      max-width 1000px
+      margin-left auto
+      margin-right auto
+      .price-per-hour
+        display block
+        margin-bottom 0px
+      .view-switch
+        margin-left auto
 
     .price-per-hour
       margin-bottom 20px
@@ -436,14 +447,6 @@
         &.active:after
           content ' '
           background-color titamota-color-text
-
-    @media (min-width 768px)
-      flex-direction row
-      .price-per-hour
-        display block
-        margin-bottom 0px
-      .view-switch
-        margin-left auto
 
   .filter-entries
     display flex
@@ -499,8 +502,23 @@
   section.years
     margin 20px auto 20px auto
 
-  main
+  section.view > * {
     max-width 1000px
+    margin-left auto
+    margin-right auto
+  }
+
+  section.storage
+    .details
+      font-size 14px
+    .read
+      .duration
+        margin-left auto
+        margin-right 2em
+        text-align right
+
+  main
+    // max-width 1000px
     margin-left auto
     margin-right auto
 
@@ -509,32 +527,44 @@
     margin-left -5px
     width calc(100% + 10px)
     @media (min-width 768px)
+      max-width 1020px
+      margin-left auto
+      margin-right auto
       margin-bottom 90px
 
   .app-menu
     box-sizing border-box
-    margin-bottom 20px
+    margin-bottom 80px
     display flex
     align-items center
     justify-content space-between
     line-height 40px
+    @media (min-width 768px)
+      max-width 1000px
+      margin-left auto
+      margin-right auto
     &.with-context
       @media (min-width 768px)
         margin-bottom 80px
     .left
+      font-size 36px
       .task-context
         display none
-        font-size 48px
-        line-height 1.125
-        margin-left calc(-48px - 0.25em)
+        font-size inherit
+        margin-left -1.375em
         .name
-          color titamota-color-text
-          font-weight 300
+          font-weight 500
           white-space normal
           padding-right 1em
         .clear
         .back
           font-size 87.5%
+          line-height 30px
+        .clear
+          color titamota-color-text-muted
+        .back
+        .name
+          opacity 0.5
           color titamota-color-text-muted
         @media (min-width 768px)
           display flex
@@ -548,9 +578,6 @@
       .account
         font-size 14px
         margin-right 10px
-
-    @media (min-width 768px)
-      max-width 1040px
 
   .app
     .page
