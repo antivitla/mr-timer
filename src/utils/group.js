@@ -76,10 +76,14 @@ export function wrapContextDetails (contextDetails, details) {
 }
 
 export function unwrapContextDetails (contextDetails, details) {
-  return details.join(taskDelimiter)
-    .replace(new RegExp('^' + contextDetails.join(taskDelimiter)), '')
-    .split(taskDelimiter)
-    .filter(d => d)
-    .map(d => d.trim())
-    .filter(d => d)
+  if (!contextDetails) {
+    return details.slice(0)
+  } else {
+    return details.join(taskDelimiter)
+      .replace(new RegExp('^' + contextDetails.join(taskDelimiter)), '')
+      .split(taskDelimiter)
+      .filter(d => d)
+      .map(d => d.trim())
+      .filter(d => d)
+  }
 }

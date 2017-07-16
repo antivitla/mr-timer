@@ -123,7 +123,7 @@
             'не найден в хранилище. Но возможно и пофиг, особенно если таймер не бежит.')
           return
         }
-        this.details = unwrapContextDetails(payload.context, storageEntry.details)
+        this.details = unwrapContextDetails(this.contextDetails, storageEntry.details)
         this.edit.details = this.details.join(taskDelimiter)
       })
 
