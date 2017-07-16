@@ -1,6 +1,6 @@
 <template lang="pug">
   .timer(
-    :class="{ active: timerActive, 'with-context': Storage.context }")
+    :class="{ 'active': timerActive, 'with-context': contextDetails }")
     button(@click="toggle")
       span.main
         span.hrs(
@@ -20,12 +20,11 @@
       :reset-focus-on="resetFocusOnEvent"
       :placeholder="placeholder")
     task-context(
-      v-if="Storage.context"
-      :context="Storage.context")
+      v-if="context"
+      :context="context")
 </template>
 
 <script>
-  // import uuid from 'uuid/v1'
   import { mapGetters, mapActions, mapMutations } from 'vuex'
   import listInput from './list-input'
   import taskContext from './task-context'
@@ -79,9 +78,8 @@
         const entry = payload.entry
         if (entry.uid() === this.timerEntry.uid()) {
           let details = payload.updatedEntry.details
-          if (Storage.context) {
-            this.details = unwrapContextDetails(
-              Storage.context, details)
+          if (this.contextDetails) {
+            this.details = unwrapContextDetails(this.contextDetails, details)
           }
           this.setTimerEntry({
             entry: new Entry(payload.updatedEntry)
@@ -94,10 +92,8 @@
           return entry.uid() === this.timerEntry.uid()
         })
         if (entry) {
-          const source = payload.update.details
-            .source.join(taskDelimiter)
-          const target = payload.update.details
-            .target.join(taskDelimiter)
+          const source = payload.update.details.source.join(taskDelimiter)
+          const target = payload.update.details.target.join(taskDelimiter)
           const details = this.timerEntry.details
             .join(taskDelimiter)
             .replace(new RegExp('^' + source), target)
@@ -105,20 +101,14 @@
             .filter(i => i)
             .map(i => i.trim())
             .filter(i => i)
-          const timerEntry = new Entry(Object.assign(
-            {},
-            this.timerEntry,
-            { details }))
+          const timerEntry = new Entry(Object.assign({}, this.timerEntry, { details }))
           this.setTimerEntry({ entry: timerEntry })
-          if (Storage.context) {
-            this.details = unwrapContextDetails(
-              Storage.context, details)
-            this.edit.details = this.details
-              .join(taskDelimiter)
+          if (this.contextDetails) {
+            this.details = unwrapContextDetails(this.contextDetails, details)
+            this.edit.details = this.details.join(taskDelimiter)
           } else {
             this.details = details.slice(0)
-            this.edit.details = this.details
-              .join(taskDelimiter)
+            this.edit.details = this.details.join(taskDelimiter)
           }
         }
       })
@@ -129,13 +119,12 @@
         })
         if (!storageEntry) {
           console.warn('Произошел рассинхрон таймера с хранилищем',
-            this.timerEntry, 'не найден в хранилище. Но возможно и пофиг, особенно если таймер не бежит.')
+            this.timerEntry,
+            'не найден в хранилище. Но возможно и пофиг, особенно если таймер не бежит.')
           return
         }
-        this.details = unwrapContextDetails(
-          payload.context, storageEntry.details)
-        this.edit.details = this.details
-          .join(taskDelimiter)
+        this.details = unwrapContextDetails(payload.context, storageEntry.details)
+        this.edit.details = this.details.join(taskDelimiter)
       })
 
       bus.$on('clear-context', payload => {
@@ -144,39 +133,35 @@
         })
         if (!storageEntry) {
           console.warn('Произошел рассинхрон таймера с хранилищем',
-            this.timerEntry, 'не найден в хранилище. Но возможно и пофиг, особенно если таймер не бежит.')
+            this.timerEntry,
+            'не найден в хранилище. Но возможно и пофиг, особенно если таймер не бежит.')
           return
         }
         const details = storageEntry.details.slice(0)
-        const timerEntry = new Entry(Object.assign(
-          {},
-          this.timerEntry,
-          details))
+        const timerEntry = new Entry(Object.assign({}, this.timerEntry, { details }))
         this.setTimerEntry({ entry: timerEntry })
         this.details = details.slice(0)
-        this.edit.details = this.details
-          .join(taskDelimiter)
+        this.edit.details = this.details.join(taskDelimiter)
       })
     },
 
     computed: {
       hrs () {
-        return duration(this.timerDuration)
-          .format('HH')
+        return duration(this.timerDuration).format('HH')
       },
       min () {
-        return durationFraction(this.timerDuration)
-          .format('mm')
+        return durationFraction(this.timerDuration).format('mm')
       },
       sec () {
-        return durationFraction(this.timerDuration)
-          .format('ss')
+        return durationFraction(this.timerDuration).format('ss')
       },
       ...mapGetters([
         'locale',
         'timerDuration',
         'timerActive',
-        'timerEntry'
+        'timerEntry',
+        'contextDetails',
+        'context'
       ])
     },
 
@@ -202,26 +187,20 @@
           }
           // Если мы самостоятально генерим имя записи,
           // не забыть цепануть контекст
-          if (Storage.context) {
-            details = wrapContextDetails(
-              Storage.context, details)
+          if (this.contextDetails) {
+            details = wrapContextDetails(this.contextDetails, details)
           }
         }
         // Сохраняем себе копию деталей для инпута
         // с учётом контекста
-        if (Storage.context) {
-          this.details = unwrapContextDetails(
-            Storage.context, details)
+        if (this.contextDetails) {
+          this.details = unwrapContextDetails(this.contextDetails, details)
         } else {
           this.details = details.slice(0)
         }
-        this.edit.details = this.details
-          .join(taskDelimiter)
+        this.edit.details = this.details.join(taskDelimiter)
         // Создаём запись для таймера и хранилища
-        const entry = new Entry(Object.assign(
-          {},
-          newEntry,
-          { details }))
+        const entry = new Entry(Object.assign({}, newEntry, { details }))
         // Стартуем таймер
         this.startTimer({ entry })
         // Стартуем тик миллисекунд
@@ -242,18 +221,11 @@
           if (!details || !details.length) {
             details = [capitalize(funnyTask(this.locale))]
           }
-          if (Storage.context) {
-            details = wrapContextDetails(
-              Storage.context, details)
+          if (this.contextDetails) {
+            details = wrapContextDetails(this.contextDetails, details)
           }
-          const update = new Entry(Object.assign(
-            {},
-            this.timerEntry,
-            { details }))
-          this.updateEntry({
-            entry: this.timerEntry,
-            update
-          })
+          const update = new Entry(Object.assign({}, this.timerEntry, { details }))
+          this.updateEntry({ entry: this.timerEntry, update })
         }
       },
       stop () {
@@ -264,8 +236,7 @@
       },
       tick () {
         const d = new Date().getTime() - this.timerEntry.start
-        this.ms = durationFraction(d)
-          .format('ms')
+        this.ms = durationFraction(d).format('ms')
         tickTimeout = setTimeout(this.tick, 50)
       },
       stopTick () {

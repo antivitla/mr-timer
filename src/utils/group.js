@@ -2,7 +2,6 @@ import moment from 'moment'
 import Entry from '@/models/entry'
 import Group from '@/models/group'
 import Task from '@/models/task'
-// import _ from 'lodash'
 import { taskDelimiter } from '@/store/ui'
 
 export function parseStartMoment (name, start, formats) {
@@ -46,63 +45,6 @@ export function parentOfDifferentType (item) {
   }
 }
 
-export function findSubContext (source, example) {
-  // let s = source
-  // let e = example
-  // const sflat = flattenGroup(source)
-  // const eflat = flattenGroup(example)
-}
-
-export function filterContext ({ entries, context } = {}) {
-  // У нас может быть текущий контекст задачей, месяцем, днём, годом.
-  // Но так же если текущий это задача, родительский - месяц, день, год,
-  // и нужно проверять и по ним
-  const ctype = context.type
-  const pdtype = parentOfDifferentType(context)
-  const isTaskOnly = ctype === 'task' && !pdtype
-  const isPeriodOnly = ctype.match(/day|month|year/)
-  const isTaskInsidePeriod = ctype === 'task' &&
-    pdtype && pdtype.type && pdtype.type.match(/day|month|year/)
-  // Cache context info
-  const contextDetails = rootDetails(context).join()
-  function equalDetails (e, cdj) {
-    return e.details.join().indexOf(cdj) > -1
-  }
-  const equalPeriod = {
-    month (d1, d2) {
-      return d1.getMonth() === d2.getMonth() &&
-        d1.getFullYear() === d2.getFullYear()
-    },
-    day (d1, d2) {
-      return d1.getDate() === d2.getDate() &&
-        d1.getMonth() === d2.getMonth() &&
-        d1.getFullYear() === d2.getFullYear()
-    },
-    year (d1, d2) {
-      return d1.getFullYear() === d2.getFullYear()
-    }
-  }
-  let contextStart
-  if (isPeriodOnly) {
-    contextStart = new Date(context.start)
-  } else if (isTaskInsidePeriod) {
-    contextStart = new Date(pdtype.start)
-  }
-
-  return entries.filter(entry => {
-    if (isTaskOnly) {
-      return equalDetails(entry, contextDetails)
-    } else if (isPeriodOnly) {
-      return equalPeriod[ctype](
-        new Date(entry.start), contextStart)
-    } else if (isTaskInsidePeriod) {
-      return equalPeriod[pdtype.type](
-        new Date(entry.start),
-        contextStart) && equalDetails(entry, contextDetails)
-    }
-  })
-}
-
 export function getTaskDepth (item) {
   let depth = 0
   let parent = item
@@ -129,15 +71,13 @@ export function rootDetails (group) {
   return rootDetails
 }
 
-export function wrapContextDetails (contextItem, details) {
-  const rd = rootDetails(contextItem)
-  return rd.concat(details)
+export function wrapContextDetails (contextDetails, details) {
+  return contextDetails.concat(details)
 }
 
-export function unwrapContextDetails (contextItem, details) {
-  const rd = rootDetails(contextItem)
+export function unwrapContextDetails (contextDetails, details) {
   return details.join(taskDelimiter)
-    .replace(new RegExp('^' + rd.join(taskDelimiter)), '')
+    .replace(new RegExp('^' + contextDetails.join(taskDelimiter)), '')
     .split(taskDelimiter)
     .filter(d => d)
     .map(d => d.trim())

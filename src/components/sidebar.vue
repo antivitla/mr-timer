@@ -262,7 +262,6 @@
         background-color titamota-color-back-light
         color titamota-color-text
 
-
     .layout
       display flex
       flex-direction column

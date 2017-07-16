@@ -2,6 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
 import storage from './storage'
+import context from './context'
 import user from './user'
 import i18n from './i18n'
 import timer from './timer'
@@ -21,6 +22,7 @@ export default new Vuex.Store({
   strict: true,
   modules: {
     storage,
+    context,
     user,
     i18n,
     timer,

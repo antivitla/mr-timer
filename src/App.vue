@@ -7,11 +7,11 @@
     v-body-scrolltop-on="scrollTopEvents")
     .page(:class="{ 'modal-active': modalActive }")
       main
-        nav.app-menu(:class="{ 'with-context': Storage.context }")
+        nav.app-menu(:class="{ 'with-context': context }")
           div.left
             task-context(
-              v-if="Storage.context"
-              :context="Storage.context")
+              v-if="context"
+              :context="context")
           div.right
             div.toggle-sidebar(@click.stop.prevent="toggleSidebar")
               span.account {{ userKey }}
@@ -174,7 +174,6 @@
       // Clear filter on view switch
       this.$store.subscribe(mutation => {
         if (mutation.type === 'setCurrentView' && mutation.payload.view !== 'storage') {
-          console.log('clear filter')
           this.filter = []
         }
       })
@@ -275,7 +274,8 @@
         'timerActive',
         'sidebarActive',
         'modalActive',
-        'viewsAvailable'
+        'viewsAvailable',
+        'context'
       ])
     },
 
@@ -378,10 +378,6 @@
     padding 0
     background-color titamota-color-back-light
     position relative
-
-  // .app
-  //   height 100vh
-  //   overflow auto
 
   .page-wrapper
     position relative
@@ -516,15 +512,8 @@
       margin-bottom 90px
 
   .app-menu
-    // position absolute
     box-sizing border-box
-    // left 50%
-    // width 100%
     margin-bottom 20px
-    // padding 0 20px
-    // max-width 990px
-    // transform: translateX(-50%)
-    // top 10px
     display flex
     align-items center
     justify-content space-between
@@ -559,11 +548,8 @@
       .account
         font-size 14px
         margin-right 10px
-    @media (min-width 480px)
-      // width calc(100% - 20px)
+
     @media (min-width 768px)
-      // top 40px
-      // width calc(100% - 80px)
       max-width 1040px
 
   .app
@@ -573,8 +559,6 @@
       opacity 1
     &.sidebar-active .page
       transform translateX(-50vw)
-      // filter blur(10px) grayscale(100%)
-      // opacity 0.25
       pointer-events none
       .toggle-sidebar
         visibility hidden

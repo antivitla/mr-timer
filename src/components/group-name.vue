@@ -33,8 +33,6 @@
         const provider = Object.keys(providers).find(key => {
           return providers[key]
         })
-        // const smallHref =
-        //   .replace(providers[provider] ? providers[provider][0] : '', '')
         const name = this.group.name.replace(href, '').trim()
         const link = decodeURIComponent(href.replace(/https?:\/\//, ''))
         return (provider ? `<span class="favicon ${provider}"></span>` : '') +
@@ -88,11 +86,7 @@
 
   .group-name
     .link-url
-      // text-decoration underline
       opacity 0.5
-      // color titamota-color-red
-      // font-style italic
-      // display block
       margin-right 1em
     .link-name + .link-url
       display block
@@ -100,7 +94,6 @@
     .favicon
       width 1em
       height 1em
-      // float left
       display inline-block
       vertical-align top
       background-position center center

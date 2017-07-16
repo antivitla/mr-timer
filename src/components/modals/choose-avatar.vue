@@ -9,9 +9,6 @@
 
 <script>
   import { mapMutations } from 'vuex'
-  // import { Storage } from '@/store/storage'
-  // import { translate } from '@/store/i18n'
-  // import capitalize from 'lodash/capitalize'
 
   export default {
     data () {

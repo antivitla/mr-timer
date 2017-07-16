@@ -10,6 +10,8 @@ function parseStart (name) {
   return d.getTime()
 }
 
+export const parseMonthFormat = parseStart
+
 export default class Month extends Group {
   constructor (obj) {
     super(obj)

@@ -12,6 +12,8 @@ function parseStartMoment (name) {
   return d.getTime()
 }
 
+export const parseDayFormat = parseStartMoment
+
 export default class Day extends Group {
   constructor (obj) {
     super(obj)

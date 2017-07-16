@@ -1,22 +1,13 @@
 import Entry from '@/models/entry'
 import Petrov from '@/petrov'
 import sortedIndexBy from 'lodash/sortedIndexBy'
-// import async from 'async'
 import appName from './app-name'
-import {
-  extractEntries,
-  parentOfDifferentType,
-  filterContext/* ,
-  findSubContext */ } from '@/utils/group'
 import bus from '@/event-bus'
 import { taskDelimiter } from '@/store/ui'
 
 export const Storage = ({
   entries: [],
-  all: [],
-  context: null,
-  contextHistory: [],
-  period: null
+  all: []
 })
 
 const state = {
@@ -24,7 +15,7 @@ const state = {
 }
 
 const getters = {
-  storageContext: () => Storage.context
+  //
 }
 
 export const mutations = {
@@ -80,35 +71,6 @@ export const mutations = {
 
   clearEntries (state, payload) {
     Storage.entries = []
-  },
-
-  setContext (state, payload) {
-    Storage.context = payload.context
-    const t = payload.context.type
-    if (t === 'month' || t === 'day' || t === 'year') {
-      Storage.period = {
-        type: payload.context.type,
-        value: payload.context.start
-      }
-    } else {
-      const parent = parentOfDifferentType(payload.context)
-      if (parent) {
-        const t = parent.type
-        if (t === 'month' || t === 'day' || t === 'year') {
-          Storage.period = {
-            type: parent.type,
-            value: parent.start
-          }
-        }
-      } else {
-        Storage.period = null
-      }
-    }
-  },
-
-  clearContext (state) {
-    Storage.context = null
-    Storage.period = null
   }
 }
 
@@ -370,117 +332,6 @@ export const actions = ({
       } else {
         reject('Empty import in: ' + payload.raw)
       }
-    })
-  },
-
-  setContext (context, payload) {
-    return new Promise((resolve, reject) => {
-      Storage.contextHistory.push(Storage.context)
-      bus.$emit('set-context', payload)
-      context.commit('clearEntries')
-      context.commit('setContext', payload)
-      bus.$emit('batch-thinking-start')
-      const entries = extractEntries(payload.context)
-      setTimeout(() => {
-        context
-          .dispatch('batchAddEntries', { entries })
-          .then(() => {
-            resolve()
-          })
-          .catch(error => {
-            reject(error)
-          })
-      })
-    }, 10)
-  },
-
-  setUpperContext (context, payload) {
-    return new Promise((resolve, reject) => {
-      bus.$emit('set-context', payload)
-      context.commit('clearEntries')
-      context.commit('setContext', payload)
-      bus.$emit('batch-thinking-start')
-      context
-        .dispatch('getEntries')
-        .then(result => {
-          // Save all entries
-          Storage.all = result.entries
-          // But filter only needed
-          return filterContext({
-            entries: result.entries,
-            context: payload.context
-          })
-        })
-        .then(entries => {
-          return context.dispatch('batchAddEntries', {
-            entries
-          })
-        })
-        .then(() => {
-          resolve()
-        })
-        .catch(error => {
-          reject(error)
-        })
-    })
-  },
-
-  setPreviosContext (context, payload) {
-    return new Promise((resolve, reject) => {
-      const prevContext = Storage.contextHistory.pop()
-      if (!prevContext) {
-        context.dispatch('clearContext')
-        resolve()
-        return
-      } else {
-        bus.$emit('set-context', { context: prevContext })
-        context.commit('clearEntries')
-        context.commit('setContext', { context: prevContext })
-        bus.$emit('batch-thinking-start')
-        context
-          .dispatch('getEntries')
-          .then(result => {
-            // Save all entries
-            Storage.all = result.entries
-            // But filter only needed
-            return filterContext({
-              entries: result.entries,
-              context: prevContext
-            })
-          })
-          .then(entries => {
-            return context.dispatch('batchAddEntries', {
-              entries
-            })
-          })
-          .then(() => {
-            resolve()
-          })
-          .catch(error => {
-            reject(error)
-          })
-      }
-    })
-  },
-
-  clearContext (context) {
-    return new Promise((resolve, reject) => {
-      bus.$emit('clear-context')
-      context.commit('clearEntries')
-      context.commit('clearContext')
-      bus.$emit('batch-thinking-start')
-      setTimeout(() => {
-        context
-          .dispatch('batchAddEntries', {
-            entries: Storage.all
-          })
-          .then(() => {
-            resolve()
-          })
-          .catch(error => {
-            reject(error)
-          })
-      }, 10)
     })
   }
 })

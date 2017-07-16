@@ -6,7 +6,7 @@
       :class="{ active: timerActive }"
       src="../assets/images/chibi-07.png"
       style="margin: 0px auto; display: block; margin-bottom: 100px; margin-top: 50px; max-width: 100%")
-    //- Копирайты мои
+    //- Копирайты
     a(
       href="http://github.com/antivitla/mr-timer"
       target="_blank"
@@ -44,12 +44,4 @@
     a[href]
       text-decoration none
       color titamota-color-text
-
-    // img.chibi
-    //   filter blur(50px) grayscale(100%)
-    //   opacity 0
-    //   transition all 0.3s ease-out
-    //   &.active
-    //     filter blur(0px) grayscale(0%)
-    //     opacity 1
 </style>

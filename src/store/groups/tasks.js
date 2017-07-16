@@ -1,7 +1,5 @@
 import Group from '@/models/group'
 import Task from '@/models/task'
-import { Storage } from '@/store/storage'
-import { rootDetails } from '@/utils/group'
 
 // Singleton to keep task tree
 export const Tasks = (new Group({
@@ -20,14 +18,14 @@ export function TasksPlugin (store) {
       // (а может быть и месяц, день), то
       // работа для нас
       let resolvePath
-      if (Storage.context) {
+      if (store.getters['contextDetails']) {
         // Нам надо получить путь задачи, но так как
         // контекстом может быть и время (месяц, день),
         // нужно выцеплять именно узлы задач. При этом
         // мы могли уже внутри контекста находиться,
         // а там уже укороченные пути, поэтому нам нужно
         // заново понять полный путь задачи контекста
-        let contextRootPath = rootDetails(Storage.context)
+        let contextRootPath = store.getters['contextDetails']
         // При вставке задачи в дерево, мы используем "путь" записи.
         // У каждого дерева он свой, но для дерева "только задачи"
         // важны только "детали" (массив имен записи).

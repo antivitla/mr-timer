@@ -10,7 +10,7 @@
       span {{ name }}
       span.icon-button.clear(
         :class="{ 'active': !timerActive }"
-        @click="clearContext"
+        @click="clearContext()"
         :title="clearContextLabel"
       )
         i.material-icons close
@@ -19,10 +19,8 @@
 <script>
   import moment from 'moment'
   import { mapGetters, mapActions } from 'vuex'
-  import { rootDetails } from '@/utils/group'
   import capitalize from 'lodash/capitalize'
   import { translate } from '@/store/i18n'
-  import { Storage } from '@/store/storage'
   import { taskDelimiter } from '@/store/ui'
 
   export default {
@@ -30,32 +28,25 @@
       'context'
     ],
 
-    data () {
-      return {
-        Storage
-      }
-    },
-
     computed: {
       name () {
-        let details = rootDetails(this.context)
-          .join(taskDelimiter)
-        const period = Storage.period
-        if (period && period.type === 'month') {
-          if (new Date(period.value).getFullYear() === new Date().getFullYear()) {
-            details = `(${capitalize(moment(period.value)
+        let details = this.contextDetails ? this.contextDetails.join(taskDelimiter) : ''
+        const periodType = this.contextDateType
+        const periodValue = this.contextDateValue
+        if (periodType === 'month') {
+          if (new Date(periodValue).getFullYear() === new Date().getFullYear()) {
+            details = `(${capitalize(moment(periodValue)
               .format('MMMM'))}) ` + details
           } else {
-            const m = moment(period.value)
+            const m = moment(periodValue)
             details = `(${capitalize(m
               .format('MMMM'))} ${m.format('YYYY')}) ` + details
           }
-        } else if (period && period.type === 'day') {
-          details = `(${moment(period.value)
+        } else if (periodType === 'day') {
+          details = `(${moment(periodValue)
             .format('ll').replace(' г.', '')}) ` + details
-        } else if (period && period.type === 'year') {
-          // console.log(new Date(period.value).getFullYear())
-          details = `(${new Date(period.value).getFullYear()}) ` + details
+        } else if (periodType === 'year') {
+          details = `(${new Date(periodValue).getFullYear()}) ` + details
         }
         return details
       },
@@ -67,23 +58,24 @@
       },
       ...mapGetters([
         'locale',
-        'timerActive'
+        'timerActive',
+        'contextDetails',
+        'contextDateType',
+        'contextDateValue'
       ])
     },
 
     methods: {
       upContext () {
-        if (this.context.parent && this.context.parent.parent) {
-          this.setUpperContext({ context: this.context.parent })
+        if (this.contextDetails) {
+          this.setUpperContext()
         } else {
-          this.setPreviosContext()
+          this.clearContext()
         }
       },
       ...mapActions([
         'clearContext',
-        'setContext',
-        'setUpperContext',
-        'setPreviosContext'
+        'setUpperContext'
       ])
     }
   }

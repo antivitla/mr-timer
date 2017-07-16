@@ -77,7 +77,7 @@
           v-if="isTaskWithLink")
           i.material-icons launch
         a.icon-button.context(
-          @click.stop.prevent="setEntryAsContext($event)"
+          @click.stop.prevent="setGroupAsContext()"
           :title="setContextLabel"
           v-if="isContextable")
           i.material-icons folder_open
@@ -89,15 +89,6 @@
           :title="filterByThisLabel"
           @click.stop.prevent="filterTask()")
           i.material-icons search
-
-      //- span.actions
-      //-   //- a.icon-button.filter
-      //-   //-   i.material-icons filter_list
-      //-   a.icon-button.delete(@click="removeTask()")
-      //-     i.material-icons delete
-      //-   span.icon-button.select(v-if="group.type === 'task'")
-      //-     input(
-      //-       type="checkbox")
 
     group-item(
       v-if="child.type"
@@ -117,7 +108,6 @@
     wrapContextDetails } from '@/utils/group'
   import { translate } from '@/store/i18n'
   import { taskDelimiter } from '@/store/ui'
-  import { Storage } from '@/store/storage'
   import longClick from '@/directives/long-click'
   import clickOutside from '@/directives/click-outside'
   import escOutside from '@/directives/esc-outside'
@@ -260,7 +250,8 @@
         'editingTaskUid',
         'editingTaskFields',
         'editingFocus',
-        'taskDelimiter'
+        'taskDelimiter',
+        'contextDetails'
       ])
     },
 
@@ -277,9 +268,8 @@
         if (this.group.children[0] instanceof Group) {
           details = details.concat(funnyTask(this.locale))
         }
-        if (Storage.context) {
-          details = wrapContextDetails(
-            Storage.context, details)
+        if (this.contextDetails) {
+          details = wrapContextDetails(this.contextDetails, details)
         }
         bus.$emit('start-task', {
           entry: new Entry({
@@ -327,11 +317,9 @@
               .filter(i => i)
               .map(d => d.trim())
               .filter(i => i)
-          if (Storage.context) {
-            source = wrapContextDetails(
-              Storage.context, source)
-            target = wrapContextDetails(
-              Storage.context, target)
+          if (this.contextDetails) {
+            source = wrapContextDetails(this.contextDetails, source)
+            target = wrapContextDetails(this.contextDetails, target)
           }
           update.details = { source, target }
         }
@@ -353,7 +341,6 @@
       },
       filterTask () {
         let filter = []
-        // let parent = this.group.parent
         if (this.group.type === 'task') {
           filter = this.group.details()
             .concat(filter)
@@ -386,12 +373,9 @@
           filter
         })
       },
-      setEntryAsContext (event) {
+      setGroupAsContext () {
         if (this.group.children[0] instanceof Group) {
-          event.preventDefault()
-          // this.debounceWheel(() => {
-          this.setContext({ context: this.group })
-          // }, 200)
+          this.setContextByGroup({ group: this.group })
         }
       },
       gotoHref (href) {
@@ -404,7 +388,7 @@
       ...mapActions([
         'batchRemoveEntries',
         'batchUpdateEntries',
-        'setContext'
+        'setContextByGroup'
       ])
     },
 
@@ -605,7 +589,6 @@
           color titamota-color-text
           text-decoration none
       &:hover
-        // box-shadow 0px 1px 0px 0px titamota-color-border
         background-color titamota-color-back-light-darker
         .hover-actions
           display flex

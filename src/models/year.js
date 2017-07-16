@@ -7,6 +7,8 @@ function parseStart (name) {
   return d.getTime()
 }
 
+export const parseYearFormat = parseStart
+
 export default class Year extends Group {
   constructor (obj) {
     super(obj)

@@ -7,7 +7,6 @@
 </template>
 
 <script>
-  // import bus from '@/event-bus'
   import { mapGetters, mapMutations } from 'vuex'
   import importExport from '@/components/modals/import-export'
   import chooseAvatar from '@/components/modals/choose-avatar'
@@ -42,7 +41,6 @@
 
 <style lang="stylus">
   @import '../assets/stylesheets/variables'
-
   .modal-wrapper
     left 0px
     top 0px
