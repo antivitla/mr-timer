@@ -379,7 +379,7 @@
         }
       },
       gotoHref (href) {
-        window.location.href = href
+        window.open(href, '_blank')
       },
       ...mapMutations([
         'startTaskEditing',
