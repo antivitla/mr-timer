@@ -21,8 +21,12 @@
         //- Timer control
         timer
 
+        //- Mitaba API debug
+        mitaba
+
         //- Petrov API debug
-        //- petrov
+        petrov
+
 
         //- View navigation
         nav.view-menu
@@ -111,6 +115,7 @@
   import moment from 'moment'
   import timer from '@/components/timer'
   import petrov from '@/components/petrov'
+  import mitaba from '@/components/mitaba'
   import pricePerHour from '@/components/price-per-hour'
   import groupItem from '@/components/group-item'
   import storageItem from '@/components/storage-item'
@@ -352,6 +357,7 @@
 
     components: {
       petrov,
+      mitaba,
       timer,
       pricePerHour,
       groupItem,
