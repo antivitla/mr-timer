@@ -12,7 +12,7 @@
       return {}
     },
     created () {
-      Mitaba.test('Vitla')
+      Mitaba.test('Vitlaz')
     }
   }
 </script>
