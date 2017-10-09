@@ -4,7 +4,9 @@
     :lang="locale"
     :currency="currency"
     :is-currency-symbol-before="isCurrencySymbolBefore"
-    v-body-scrolltop-on="scrollTopEvents")
+    v-body-scrolltop-on="scrollTopEvents"
+  )
+    //- Tracker page
     .page(:class="{ 'modal-active': modalActive }")
       main
         nav.app-menu(:class="{ 'with-context': context }")
@@ -14,18 +16,22 @@
               :context="context")
           div.right
             div.toggle-sidebar(@click.stop.prevent="toggleSidebar")
-              span.account {{ userKey }}
+              span.account {{ userName }}
               span.icon-button
                 i.material-icons menu
 
         //- Timer control
         timer
 
+        //- Auth test
+        mitaba-auth
+
         //- Mitaba API debug
+        p &nbsp;
         mitaba
 
         //- Petrov API debug
-        petrov
+        //- petrov
 
 
         //- View navigation
@@ -111,22 +117,30 @@
 </template>
 
 <script>
+  // Vendor
   import { mapMutations, mapGetters, mapActions } from 'vuex'
   import moment from 'moment'
-  import timer from '@/components/timer'
+  // Debug components
   import petrov from '@/components/petrov'
   import mitaba from '@/components/mitaba'
+  import mitabaAuth from '@/components/mitaba-auth'
+  // Timer UI widget
+  import timer from '@/components/timer'
+  // Other UI widgets
   import pricePerHour from '@/components/price-per-hour'
   import groupItem from '@/components/group-item'
   import storageItem from '@/components/storage-item'
-  import siteFooter from '@/components/site-footer'
   import batchActions from '@/components/batch-actions'
   import listInput from '@/components/list-input'
   import taskContext from '@/components/task-context'
-  import helpArticle from '@/components/help-article'
-  import sidebar from '@/components/sidebar'
   import modal from '@/components/modal'
   import thinkingPreloader from '@/components/thinking-preloader'
+  // Layout
+  import helpArticle from '@/components/help-article'
+  import siteFooter from '@/components/site-footer'
+  import sidebar from '@/components/sidebar'
+  // Core
+  import bus from '@/event-bus'
   import Group from '@/models/group'
   import { Tasks } from '@/store/groups/tasks'
   import { Years } from '@/store/groups/years'
@@ -134,12 +148,14 @@
   import { Days } from '@/store/groups/days'
   import { Storage } from '@/store/storage'
   import { Selektion } from '@/store/selection'
+  // Mixins
+  import authMixin from '@/mixin/auth.js'
+  // Utils
   import { translate, locales, currencies } from '@/store/i18n'
   import capitalize from 'lodash/capitalize'
   import { timeEditable } from '@/utils/time'
   import { filterGroupChildren } from '@/utils/group'
   import debounce from '@/utils/debounce'
-  import bus from '@/event-bus'
   import bodyScrolltopOn from '@/directives/body-scrolltop-on'
 
   export default {
@@ -171,17 +187,20 @@
       this.loadRates()
       // bus.$on('open-modal', this.openModal.bind(this))
       // bus.$on('close-modal', this.closeModal.bind(this))
+
       // filter entries (switch to storage and set filter)
       bus.$on('filter-entries', (payload) => {
         this.setCurrentView({ view: 'storage' })
         this.filter = payload.filter
       })
+
       // Clear filter on view switch
       this.$store.subscribe(mutation => {
         if (mutation.type === 'setCurrentView' && mutation.payload.view !== 'storage') {
           this.filter = []
         }
       })
+
       // Clear selection on view switch
       this.$store.subscribe(mutation => {
         if (mutation.type === 'setCurrentView' &&
@@ -189,6 +208,7 @@
           this.selectionClear()
         }
       })
+
       // Thinking toggle
       bus.$on('batch-thinking-start', () => {
         this.isThinking = true
@@ -270,6 +290,7 @@
       },
       ...mapGetters([
         'userKey',
+        'userName',
         'userMode',
         'userGuestKey',
         'locale',
@@ -355,6 +376,10 @@
       bodyScrolltopOn
     },
 
+    mixins: [
+      authMixin
+    ],
+
     components: {
       petrov,
       mitaba,
@@ -369,7 +394,8 @@
       helpArticle,
       sidebar,
       modal,
-      thinkingPreloader
+      thinkingPreloader,
+      mitabaAuth
     }
   }
 </script>

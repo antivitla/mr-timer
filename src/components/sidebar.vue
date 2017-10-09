@@ -114,9 +114,9 @@
     },
 
     computed: {
-      userName () {
-        return capitalize(this.userKey)
-      },
+      // userName () {
+      //   return capitalize(this.userKey)
+      // },
       labelIcons () {
         return capitalize(translate[this.locale].sidebar.icons)
       },
@@ -141,6 +141,7 @@
         'currency',
         'userKey',
         'userAvatar',
+        'userName',
         'sidebarActive',
         'viewsAvailable'
       ])
@@ -291,6 +292,9 @@
         height 60px
         display block
         cursor pointer
+        border-radius 25%
+        opacity 0.75
+        // box-shadow 0px 0px 0px 2px rgba(white, 0.125)
       .name
         font-size 24px
         margin-top 15px

@@ -10,6 +10,7 @@ import ui from './ui'
 import edit from './edit'
 import money from './money'
 import selection from './selection'
+import auth from './auth'
 import { DaysPlugin } from './groups/days'
 import { MonthsPlugin } from './groups/months'
 import { YearsPlugin } from './groups/years'
@@ -29,7 +30,8 @@ export default new Vuex.Store({
     ui,
     edit,
     money,
-    selection
+    selection,
+    auth
   },
   plugins: [
     DaysPlugin,
@@ -42,7 +44,8 @@ export default new Vuex.Store({
         'user',
         'i18n',
         'ui',
-        'money'
+        'money',
+        'auth'
       ]
     })
   ]
