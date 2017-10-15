@@ -32,7 +32,7 @@ const socialConfig = {
 }
 
 const apiConfig = {
-  base: 'http://localhost:8000/api/',
+  base: 'https://local.mitaba.ru/api/',
   profile: 'profile/?avatar_size=60',
   entries: 'entries/',
   social: 'login/social/token_user/'

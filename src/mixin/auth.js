@@ -15,7 +15,7 @@ export default {
       this.$router.push({ name: 'home' })
     }
     // Check authorized state and load token
-    console.log(this.authStep, authSteps.AUTHORIZED)
+    console.log(this.authStep)
     if (this.authStep === authSteps.AUTHORIZED) {
       Mitaba.token = this.authToken
     }
