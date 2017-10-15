@@ -31,8 +31,12 @@ const socialConfig = {
   }
 }
 
+function isDev () {
+  return Boolean(window.location.host.match(/local\./))
+}
+
 const apiConfig = {
-  base: 'https://local.mitaba.ru/api/',
+  base: `https://${isDev() ? 'local.' : ''}mitaba.ru/api/`,
   profile: 'profile/?avatar_size=60',
   entries: 'entries/',
   social: 'login/social/token_user/'
