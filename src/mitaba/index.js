@@ -1,4 +1,8 @@
-const socialConfig = {
+function isDev () {
+  return Boolean(window.location.host.match(/local\./))
+}
+
+const socialConfigDev = {
   facebook: {
     DIALOG_URL: 'https://www.facebook.com/v2.10/dialog/oauth',
     CLIENT_ID: '348877668894043',
@@ -31,12 +35,48 @@ const socialConfig = {
   }
 }
 
-function isDev () {
-  return Boolean(window.location.host.match(/local\./))
+const apiConfigDev = {
+  base: `https://local.mitaba.ru/api/`,
+  profile: 'profile/?avatar_size=60',
+  entries: 'entries/',
+  social: 'login/social/token_user/'
+}
+
+const socialConfig = {
+  facebook: {
+    DIALOG_URL: 'https://www.facebook.com/v2.10/dialog/oauth',
+    CLIENT_ID: '498893767146355',
+    SCOPE: 'email',
+    MITABA_BACKEND: 'facebook'
+  },
+  github: {
+    DIALOG_URL: 'https://github.com/login/oauth/authorize',
+    CLIENT_ID: '7e7836a99b75e6815c8c',
+    SCOPE: 'user',
+    MITABA_BACKEND: 'github'
+  },
+  google: {
+    DIALOG_URL: 'https://accounts.google.com/o/oauth2/v2/auth',
+    CLIENT_ID: '103805617597-m4tl2sqlaqm2s8p9n2cdgtpj5g6d855q.apps.googleusercontent.com',
+    SCOPE: 'email profile',
+    MITABA_BACKEND: 'google-oauth2'
+  },
+  vk: {
+    DIALOG_URL: 'https://oauth.vk.com/authorize',
+    CLIENT_ID: '6222900',
+    SCOPE: 'email',
+    MITABA_BACKEND: 'vk-oauth2'
+  },
+  yandex: {
+    DIALOG_URL: 'https://oauth.yandex.ru/authorize',
+    CLIENT_ID: 'b3baf69227354f67a3ce5454bfaf37ef',
+    SCOPE: 'login:email login:avatar login:info',
+    MITABA_BACKEND: 'yandex-oauth2'
+  }
 }
 
 const apiConfig = {
-  base: `https://${isDev() ? 'local.' : ''}mitaba.ru/api/`,
+  base: `https://mitaba.ru/api/`,
   profile: 'profile/?avatar_size=60',
   entries: 'entries/',
   social: 'login/social/token_user/'
@@ -45,8 +85,8 @@ const apiConfig = {
 class Mitaba {
   constructor () {
     this.config = {
-      api: apiConfig,
-      social: socialConfig
+      api: (isDev() ? apiConfigDev : apiConfig),
+      social: (isDev() ? socialConfigDev : socialConfig)
     }
     this.token = null
   }
