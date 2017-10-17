@@ -15,7 +15,7 @@ import { DaysPlugin } from './groups/days'
 import { MonthsPlugin } from './groups/months'
 import { YearsPlugin } from './groups/years'
 import { TasksPlugin } from './groups/tasks'
-import appName from './app-name'
+import { appName } from './app-info'
 
 Vue.use(Vuex)
 

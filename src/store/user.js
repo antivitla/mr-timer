@@ -6,16 +6,16 @@ COMMON: type (local|remote)
 
 */
 
-export const userTypes = {
-  LOCAL: 'LOCAL',
-  REMOTE: 'REMOTE'
-}
+// export const userTypes = {
+//   LOCAL: 'LOCAL',
+//   REMOTE: 'REMOTE'
+// }
 
 const state = {
   key: 'local',
   guestKey: '',
   mode: '',
-  type: userTypes.LOCAL,
+  // type: userTypes.LOCAL,
   avatar: 'static/img/040-ladybug.svg',
   email: '',
   firstName: '',
@@ -28,7 +28,7 @@ const getters = {
   userGuestKey: state => state.guestKey,
   userName: state => `${state.firstName} ${state.lastName}`,
   userMode: state => state.mode,
-  userType: state => state.type,
+  // userType: state => state.type,
   userAvatar: state => state.avatar,
   userProfile (state) {
     const fields = [
@@ -56,9 +56,9 @@ const mutations = {
   setUserMode (state, payload) {
     state.mode = payload.mode
   },
-  setUserType (state, payload) {
-    state.type = payload.type
-  },
+  // setUserType (state, payload) {
+  //   state.type = payload.type
+  // },
   setUserAvatar (state, payload) {
     state.avatar = payload.avatar
   },
@@ -80,7 +80,7 @@ const mutations = {
     state.key = ''
     state.guestKey = ''
     state.mode = ''
-    state.type = userTypes.LOCAL
+    // state.type = userTypes.LOCAL
     state.avatar = 'static/img/040-ladybug.svg'
     state.email = ''
     state.firstName = ''

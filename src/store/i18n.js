@@ -97,7 +97,8 @@ const ru = ({
   exportTo: 'экспорт записей в',
   startTask: 'начать задачу',
   startEdit: 'редактировать',
-  setContext: 'сделать контекстом'
+  setContext: 'сделать контекстом',
+  logout: 'выйти'
 })
 
 const en = ({
@@ -165,7 +166,8 @@ const en = ({
   exportTo: 'export entries to',
   startTask: 'start task',
   startEdit: 'edit',
-  setContext: 'set as context'
+  setContext: 'set as context',
+  logout: 'logout'
 })
 
 export const translate = ({

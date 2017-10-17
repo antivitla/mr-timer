@@ -1,8 +1,10 @@
+/** http://eslint.org/docs/rules/prefer-promise-reject-errors */
+
 import Entry from '@/models/entry'
 import Petrov from '@/petrov'
 import sortedIndexBy from 'lodash/sortedIndexBy'
-import appName from './app-name'
 import bus from '@/event-bus'
+import { appName } from './app-info'
 import { taskDelimiter } from '@/store/ui'
 
 export const Storage = ({
@@ -307,7 +309,7 @@ export const actions = ({
           raw = JSON.parse(payload.raw)
         } catch (error) {
           console.warn(error)
-          reject('Bad format in: ' + payload.raw)
+          reject(new Error('Bad format in: ' + payload.raw))
         }
         if (Array.isArray(raw)) {
           entries = raw
@@ -315,7 +317,7 @@ export const actions = ({
           entries = raw.entries
         } else {
           console.log('Какой-то непонятный json')
-          reject('Wrong json object in: ' + payload.raw)
+          reject(new Error('Wrong json object in: ' + payload.raw))
         }
       }
 
@@ -330,7 +332,7 @@ export const actions = ({
             reject(error)
           })
       } else {
-        reject('Empty import in: ' + payload.raw)
+        reject(new Error('Empty import in: ' + payload.raw))
       }
     })
   }
