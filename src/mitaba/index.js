@@ -220,7 +220,7 @@ class Mitaba {
   }
 
   _createProviderAuthRedirectUrl (provider) {
-    return `${location.protocol}//${location.host}/${provider}-auth-redirect`
+    return `${location.protocol}//${location.host}${isDev() ? '/' : '/titamota/'}${provider}-auth-redirect`
   }
 
   _createProviderAuthDialogUrl (provider) {
