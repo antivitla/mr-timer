@@ -44,7 +44,7 @@
 
 <script>
   import { appTitle } from '@/store/app-info'
-  import { mapGetters } from 'vuex'
+  import { mapGetters, mapActions } from 'vuex'
   import appNavbar from '@/components/layout/app-navbar'
   import appLayout from '@/components/layout/app-layout'
   import toggleSidebar from '@/components/toggle-sidebar'
@@ -64,6 +64,7 @@
   import appTips from '@/mixins/app-tips'
   import i18nLabel from '@/mixins/i18n-label'
   import i18nQuery from '@/mixins/i18n-query'
+  import storage from '@/mixins/storage'
 
   export default {
     data () {
@@ -81,6 +82,8 @@
     },
     created () {
       console.log(`Welcome to ${appTitle}`)
+      // Initial load entries
+      this.loadEntries()
     },
     computed: {
       ...mapGetters([
@@ -90,14 +93,18 @@
         'availableViewsAsOptions'
       ])
     },
-
+    methods: {
+      ...mapActions([
+        'loadEntries'
+      ])
+    },
     mixins: [
       auth,
       appTips,
       i18nLabel,
-      i18nQuery
+      i18nQuery,
+      storage
     ],
-
     components: {
       appLayout,
       appNavbar,
