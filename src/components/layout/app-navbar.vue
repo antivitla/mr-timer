@@ -11,6 +11,8 @@
   }
 </script>
 <style lang="stylus">
+  @import '~@/assets/stylesheets/variables'
+
   .app-navbar
     display flex
     align-items center
@@ -20,4 +22,7 @@
       margin-right auto
     .right
       margin-left auto
+
+  .app-navbar.menu
+    border-bottom solid titamota-color-border 1px
 </style>

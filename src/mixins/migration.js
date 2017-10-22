@@ -1,4 +1,5 @@
 import Petrov from '@/petrov'
+
 export default {
   methods: {
     loadEntriesFromLocalStorage (key) {

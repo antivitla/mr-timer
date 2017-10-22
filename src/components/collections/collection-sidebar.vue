@@ -1,24 +1,21 @@
 <template lang="pug">
   .collection-sidebar.invert
     toggle-sidebar(:title="tipToggleSidebarInSidebar")
-      //- span.icon-button
-      //-   i.material-icons arrow_back
-
-    settings-profile(v-if="settingsAvailable.profile")
-    div(v-if="settingsAvailable.authorization && !isAuthorized")
-      h4 {{ label('sidebar.authorization') }}
+    settings-profile(v-if="settings.profile")
+    div(v-if="settings.authorization && !isAuthorized")
+      h4 {{ label('settings.authorization') }}
       settings-login
-    div(v-if="settingsAvailable.l10n")
-      h4 {{ label('sidebar.l10n') }}
+    div(v-if="settings.l10n")
+      h4 {{ label('settings.l10n') }}
       settings-i18n
-    div(v-if="settingsAvailable.migration")
-      h4 {{ label('sidebar.migration') }}
+    div(v-if="settings.migration")
+      h4 {{ label('settings.migration') }}
       settings-migration
-    div(v-if="settingsAvailable.exportImport")
-      h4 {{ label('sidebar.exportImport') }}
+    div(v-if="settings.exportImport")
+      h4 {{ label('settings.exportImport') }}
       settings-export-import
     div
-      h4 {{ label('sidebar.toggleUiElements')}}
+      h4 {{ label('settings.settings')}}
       settings-settings
 </template>
 <script>
@@ -43,7 +40,7 @@
     computed: {
       ...mapGetters([
         'isAuthorized',
-        'settingsAvailable'
+        'settings'
       ])
     },
     components: {
@@ -79,7 +76,6 @@
     button
     .button
       font-size 14px
-      // text-align left
     a
       color titamota-color-text-invert
     p

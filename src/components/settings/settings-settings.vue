@@ -3,76 +3,21 @@
     .form
       .fieldset
         h5 {{ label('sidebar.toggleViews') }}
-        p
+        p(v-for="(value, view) in views")
           custom-checkbox(
-            :class="className('tasks')"
-            v-model="settings.tasks")
-          label(v-custom-for="classSelector('tasks')")
-            | {{ label('view.tasks') }}
-        p
-          custom-checkbox(
-            :class="className('years')"
-            v-model="settings.years")
-          label(v-custom-for="classSelector('years')")
-            | {{ label('view.years') }}
-        p
-          custom-checkbox(
-            :class="className('months')"
-            v-model="settings.months")
-          label(v-custom-for="classSelector('months')")
-            | {{ label('view.months') }}
-        p
-          custom-checkbox(
-            :class="className('days')"
-            v-model="settings.days")
-          label(v-custom-for="classSelector('days')")
-            | {{ label('view.days') }}
-        p
-          custom-checkbox(
-            :class="className('storage')"
-            v-model="settings.storage")
-          label(v-custom-for="classSelector('storage')")
-            | {{ label('view.storage') }}
-        p
-          custom-checkbox(
-            :class="className('help')"
-            v-model="settings.help")
-          label(v-custom-for="classSelector('help')")
-            | {{ label('view.help') }}
+            :class="className(view)"
+            v-model="models[view]")
+          label(v-custom-for="classSelector(view)")
+            | {{ label('view.' + view) }}
 
       .fieldset
         h5 {{ label('sidebar.toggleUiSettings') }}
-        p
+        p(v-for="(value, setting) in settings")
           custom-checkbox(
-            :class="className('profile')"
-            v-model="settings.profile")
-          label(v-custom-for="classSelector('profile')")
-            | {{ label('sidebar.profile') }}
-        p
-          custom-checkbox(
-            :class="className('authorization')"
-            v-model="settings.authorization")
-          label(v-custom-for="classSelector('authorization')")
-            | {{ label('sidebar.authorization') }}
-        p
-          custom-checkbox(
-            :class="className('l10n')"
-            v-model="settings.l10n")
-          label(v-custom-for="classSelector('l10n')")
-            | {{ label('sidebar.l10n') }}
-        p
-          custom-checkbox(
-            :class="className('migration')"
-            v-model="settings.migration")
-          label(v-custom-for="classSelector('migration')")
-            | {{ label('sidebar.migration') }}
-        //- p
-        //-   custom-checkbox(
-        //-     :class="className('export-import')"
-        //-     v-model="settings.exportImport")
-        //-   label(v-custom-for="classSelector('export-import')")
-        //-     | {{ label('sidebar.exportImport') }}
-
+            :class="className(setting)"
+            v-model="models[setting]")
+          label(v-custom-for="classSelector(setting)")
+            | {{ label('settings.' + setting) }}
 </template>
 <script>
   import { mapGetters, mapMutations } from 'vuex'
@@ -84,7 +29,7 @@
     name: 'settings-settings',
     data () {
       return {
-        settings: {
+        models: {
           profile: false,
           authorization: false,
           l10n: false,
@@ -100,70 +45,70 @@
       }
     },
     created () {
-      Object.assign(this.settings, this.viewsAvailable)
-      Object.assign(this.settings, this.settingsAvailable)
+      Object.assign(this.models, this.views)
+      Object.assign(this.models, this.settings)
     },
     watch: {
-      'settings.profile': function () {
+      'models.profile': function () {
         this.setAvailableSettings({
-          profile: this.settings.profile
+          profile: this.models.profile
         })
       },
-      'settings.authorization': function () {
+      'models.authorization': function () {
         this.setAvailableSettings({
-          authorization: this.settings.authorization
+          authorization: this.models.authorization
         })
       },
-      'settings.l10n': function () {
+      'models.l10n': function () {
         this.setAvailableSettings({
-          l10n: this.settings.l10n
+          l10n: this.models.l10n
         })
       },
-      'settings.migration': function () {
+      'models.migration': function () {
         this.setAvailableSettings({
-          migration: this.settings.migration
+          migration: this.models.migration
         })
       },
-      'settings.exportImport': function () {
+      'models.exportImport': function () {
         this.setAvailableSettings({
-          exportImport: this.settings.exportImport
+          exportImport: this.models.exportImport
         })
       },
-      'settings.tasks': function () {
+      'models.tasks': function () {
         this.setAvailableViews({
-          tasks: this.settings.tasks
+          tasks: this.models.tasks
         })
       },
-      'settings.years': function () {
+      'models.years': function () {
         this.setAvailableViews({
-          years: this.settings.years
+          years: this.models.years
         })
       },
-      'settings.months': function () {
+      'models.months': function () {
         this.setAvailableViews({
-          months: this.settings.months
+          months: this.models.months
         })
       },
-      'settings.days': function () {
+      'models.days': function () {
         this.setAvailableViews({
-          days: this.settings.days
+          days: this.models.days
         })
       },
-      'settings.storage': function () {
+      'models.storage': function () {
         this.setAvailableViews({
-          storage: this.settings.storage
+          storage: this.models.storage
         })
       },
-      'settings.help': function () {
+      'models.help': function () {
         this.setAvailableViews({
-          help: this.settings.help
+          help: this.models.help
         })
       }
     },
     computed: {
       ...mapGetters([
-        'viewsAvailable',
-        'settingsAvailable'
+        'views',
+        'settings'
       ])
     },
     methods: {

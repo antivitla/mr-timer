@@ -6,14 +6,9 @@
     //- TODO
     //- - Body Scroll Top Directive
 
-    //-
-    //- Page
-    //-
-
-    //- Top
+    //- Top nav
     app-navbar.top(slot="page")
       h2(slot="left") Context
-
       toggle-sidebar#toggle-sidebar-top(
         slot="right"
         :title="tipToggleSidebarTop")
@@ -22,34 +17,25 @@
 
     //- Timer
     section.timer(slot="page")
-      //- p App Timer
 
     //- Optional
-    section.optional(slot="page")
-      p Optional
+    //- section.optional(slot="page")
 
     //- Navbar
     app-navbar.menu(slot="page")
-      p(slot="left") Actions
-      p(slot="right") Views Menu
+      div(slot="left") Actions
+      div(slot="right")
+        custom-switch(:options="availableViewsAsOptions" v-model="currentView")
 
-    //- Main
-    main.views(slot="page")
-      p Main view
+    //- Views
+    component(:is="viewComponent[currentView]" slot="page")
 
     //- Footer
     footer(slot="page")
       p Footer
 
-    //-
     //- Sidebar
-    //-
-
     collection-sidebar(slot="sidebar")
-
-    //-
-    //- Modals
-    //-
 
     //- Modals
     p(slot="modal") Modals
@@ -63,30 +49,50 @@
   import appLayout from '@/components/layout/app-layout'
   import toggleSidebar from '@/components/toggle-sidebar'
   import collectionSidebar from '@/components/collections/collection-sidebar'
-  // Articles
-  import articleWelcome from '@/components/articles/article-welcome'
-  import articleHelp from '@/components/articles/article-help'
+  import customSwitch from '@/components/custom-switch'
+
+  // Views
+  import viewHelp from '@/components/views/view-help'
+  import viewTasks from '@/components/views/view-tasks'
+  import viewYears from '@/components/views/view-years'
+  import viewMonths from '@/components/views/view-months'
+  import viewDays from '@/components/views/view-days'
+  import viewStorage from '@/components/views/view-storage'
+
   // Mixins
-  import authMixin from '@/mixins/auth'
+  import auth from '@/mixins/auth'
   import appTips from '@/mixins/app-tips'
   import i18nLabel from '@/mixins/i18n-label'
   import i18nQuery from '@/mixins/i18n-query'
 
   export default {
+    data () {
+      return {
+        currentView: 'help',
+        viewComponent: {
+          help: viewHelp,
+          tasks: viewTasks,
+          years: viewYears,
+          months: viewMonths,
+          days: viewDays,
+          storage: viewStorage
+        }
+      }
+    },
     created () {
       console.log(`Welcome to ${appTitle}`)
     },
-
     computed: {
       ...mapGetters([
         'currency',
         'isAuthorized',
-        'isCurrencySymbolBefore'
+        'isCurrencySymbolBefore',
+        'availableViewsAsOptions'
       ])
     },
 
     mixins: [
-      authMixin,
+      auth,
       appTips,
       i18nLabel,
       i18nQuery
@@ -97,8 +103,13 @@
       appNavbar,
       toggleSidebar,
       collectionSidebar,
-      articleWelcome,
-      articleHelp
+      customSwitch,
+      viewHelp,
+      viewTasks,
+      viewYears,
+      viewMonths,
+      viewDays,
+      viewStorage
     }
   }
 </script>

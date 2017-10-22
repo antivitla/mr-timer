@@ -1,11 +1,14 @@
 <template lang="pug">
   .settings-migration
+    //- Timer 3.0 account
     p(v-if="countEntries.timer30")
       button.block
         div
           | Импортировать
           strong  {{ labelNumberOfEntries(countEntries.timer30) }}
         small Таймер 3.0, локальный аккаунт
+
+    //- Timer 3.1 account
     p(v-if="countEntries.timer31 && isAuthorized")
       button.block
         div
@@ -13,9 +16,7 @@
           strong  {{ labelNumberOfEntries(countEntries.timer31) }}
         small Таймер 3.1, локальный аккаунт
 
-    //- p.legend
-      small Введите название онлайн-аккаунта для импорта:
-
+    //- Petrov account
     p.input-group.vertical
       input(
         type="text"
@@ -66,6 +67,7 @@
       // Titomata Local Entries
       this.loadEntriesFromLocalStorage('titamota-entries-local')
         .then(entries => {
+          console.log(entries)
           this.countEntries.timer31 = entries.length
         })
         .catch(error => {
@@ -86,13 +88,6 @@
       labelNumberOfEntries (entries) {
         return this.labelFormat('sidebar.numberOfEntries', { entries })
       }
-      // handleInputAccount: debounce(account => {
-      //   this.loadEntriesFromPetrov(account).then(entries => {
-      //     console.log(entries)
-      //   }).catch(error => {
-      //     console.log(error)
-      //   })
-      // }, 300)
     },
     watch: {
       'petrovAccount': debounce(function (account) {
@@ -115,12 +110,6 @@
   .settings-migration
     button
     .button
-      // text-align left
       padding-left 15px
       padding-right 15px
-    .input-group
-      input[type="text"]
-      button
-      .button
-        // text-align left
 </style>

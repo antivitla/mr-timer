@@ -1,13 +1,13 @@
 @import 'variables'
 @import url('https://fonts.googleapis.com/css?family=Merriweather:300,300italic,700&subset=cyrillic')
 
-titamota-article-margin = 60px
-
 article
   font-family Merriweather, serif
-  margin titamota-article-margin auto
+  margin-left auto
+  margin-right auto
   font-size 18px
   line-height 27px
+  max-width 40em
 
   p
     margin-top 27px
@@ -64,7 +64,8 @@ article + article:before
   width 38%
   margin-left auto
   margin-right auto
-  margin-bottom titamota-article-margin
+  margin-top titamota-view-margin - 10px
+  margin-bottom titamota-view-margin
 
 // Локализация
 

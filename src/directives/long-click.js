@@ -71,4 +71,3 @@ export default {
     document.removeEventListener('mouseup', removeTimerSpinner)
   }
 }
-

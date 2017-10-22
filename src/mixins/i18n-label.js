@@ -3,15 +3,12 @@ import capitalize from '@/utils/capitalize'
 import { translate } from '@/store/i18n'
 import MessageFormat from 'messageformat'
 
+const messageFormat = {
+  ru: new MessageFormat('ru'),
+  en: new MessageFormat('en')
+}
+
 export default {
-  data () {
-    return {
-      messageFormat: {
-        ru: new MessageFormat('ru'),
-        en: new MessageFormat('en')
-      }
-    }
-  },
   computed: {
     ...mapGetters([
       'locale',
@@ -31,7 +28,7 @@ export default {
       return isCapitalized ? capitalize(value) : value
     },
     labelFormat (path, params, isCapitalized = true) {
-      return this.messageFormat[this.locale]
+      return messageFormat[this.locale]
         .compile(this.labelFromPath(path))(params)
     }
   }

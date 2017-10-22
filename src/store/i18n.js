@@ -80,21 +80,22 @@ const ru = ({
   upContext: 'выше контекст',
   standby: 'подождите немного',
   externalLink: 'перейти к',
+  settings: {
+    profile: 'профиль',
+    authorization: 'войти через',
+    l10n: 'язык и валюта',
+    exportImport: 'экспорт и импорт',
+    migration: 'перенести данные',
+    settings: 'включить элементы интерфейса'
+  },
   sidebar: {
     icons: 'иконки',
     from: 'от',
     girls: 'девчушки',
     turnOn: 'включить',
-    authorization: 'войти через',
-    l10n: 'язык и валюта',
-    migration: 'перенести данные',
     numberOfEntries: '{entries, plural, =0{0 записей} one{1 запись} few{# записи} other{# записей}}',
-    exportImport: 'экспорт и импорт',
-    settings: 'включить элементы интерфейса',
-    profile: 'профиль',
     toggleViews: 'страницы',
-    toggleUiSettings: 'настройки',
-    toggleUiElements: 'включить'
+    toggleUiSettings: 'настройки'
   },
   profile: {
     localAccount: 'локальный аккаунт'
@@ -167,21 +168,22 @@ const en = ({
   upContext: 'up context',
   standby: 'please stand by',
   externalLink: 'go to',
+  settings: {
+    profile: 'profile',
+    authorization: 'login with',
+    l10n: 'Language and Currency',
+    migration: 'migrate data',
+    exportImport: 'Export and Import',
+    settings: 'toggle UI elements'
+  },
   sidebar: {
     icons: 'icons',
     from: 'from',
     girls: 'girls',
     turnOn: 'turn on',
-    authorization: 'login with',
-    l10n: 'Language and Currency',
-    migration: 'migrate data',
     numberOfEntries: '{entries, plural, =0{0 entries} one{1 entry} other{# entries}}',
-    exportImport: 'Export and Import',
-    settings: 'toggle UI elements',
-    profile: 'profile',
     toggleViews: 'toggle views',
-    toggleUiSettings: 'toggle UI settings',
-    toggleUiElements: 'toggle'
+    toggleUiSettings: 'toggle UI settings'
   },
   profile: {
     localAccount: 'local account'

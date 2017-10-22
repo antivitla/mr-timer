@@ -25,26 +25,21 @@ export default {
       Mitaba.token = this.authToken
     }
   },
-
   computed: {
     _isAuthRedirected () {
       return this.$route.name === 'providerAuthRedirect'
     },
-
     _code () {
       return this.$route.query.code
     },
-
     _provider () {
       return this.$route.params.provider
     },
-
     ...mapGetters([
       'authToken',
       'authStep'
     ])
   },
-
   methods: {
     ...mapMutations([
       'closeSidebar'

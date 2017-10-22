@@ -1,17 +1,15 @@
 export const taskDelimiter = ' / '
 
 const state = {
-  view: {
-    current: 'tasks',
-    available: {
-      help: true,
-      tasks: true,
-      years: true,
-      months: true,
-      days: true,
-      storage: true
-    }
+  views: {
+    help: true,
+    tasks: true,
+    years: true,
+    months: true,
+    days: true,
+    storage: true
   },
+  currentView: 'tasks',
   settings: {
     profile: true,
     authorization: true,
@@ -25,11 +23,17 @@ const state = {
 }
 
 const getters = {
-  currentView: state => state.view.current,
+  currentView: state => state.currentView,
+  views: state => state.views,
+  availableViewsAsOptions: state => {
+    return Object
+      .keys(state.views)
+      .filter(view => state.views[view])
+      .map(view => ({ value: view, label: `view.${view}` }))
+  },
+  settings: state => state.settings,
   sidebarActive: state => state.sidebar,
   modalActive: state => state.modal,
-  viewsAvailable: state => state.view.available,
-  settingsAvailable: state => state.settings,
   taskDelimiter: state => state.taskDelimiter
 }
 
@@ -56,13 +60,13 @@ const mutations = {
     state.modal = null
   },
   toggleAvailableViews (state, payload) {
-    state.view.available[payload.view] = !state.view.available[payload.view]
+    state.views[payload.view] = !state.views[payload.view]
   },
   toggleAvailableSettings (state, payload) {
     state.settings[payload.setting] = !state.settings[payload.setting]
   },
   setAvailableViews (state, payload) {
-    Object.assign(state.view.available, payload)
+    Object.assign(state.views, payload)
   },
   setAvailableSettings (state, payload) {
     Object.assign(state.settings, payload)
