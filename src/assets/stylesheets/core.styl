@@ -4,6 +4,7 @@ body
 html
   margin 0px
   padding 0px
+  min-width 320px
   background-color titamota-color-back-light
   position relative
 
@@ -14,15 +15,11 @@ button
 select
 option
   font-family Rubik, sans-serif
-  font-size 16px
+  font-size 14px
   line-height 20px
   font-weight 300
   color titamota-color-text
   outline none
-
-select
-option
-  font-size 14px
 
 h1, h2, h3, h4, h5, h6
   font-weight 400
@@ -32,7 +29,8 @@ strong
   font-weight 500
 
 p
-  margin 20px auto
+  margin-top 20px
+  margin-bottom 20px
   font-weight 300
 
 h4
@@ -60,7 +58,7 @@ h2
 
 * + .material-icons
 .material-icons + *
-  margin-left 5px
+  margin-left 10px
 
 [valign="middle"]
   vertical-align middle
@@ -71,7 +69,9 @@ a
 a[href]
   color steelblue
 
+
 // Color marks
+
 [color]
   position relative
 [color]:before
@@ -109,58 +109,246 @@ a[href]
 [color="11"]:before
   background-color lighten(titamota-color-dec, 20%)
 
-button
-.button
-  border 0px
+
+// Buttons
+
+button-normal()
   background-color titamota-color-back-gray
-  border-radius 5px
-  line-height 20px
-  font-size 18px
-  font-weight 300
-  padding 10px 40px
-  cursor pointer
   border-bottom solid titamota-color-border 3px
-  outline none
+  color titamota-color-text
   &:active
     border-top solid darken(titamota-color-border, 3%) 3px
     border-bottom-width 0px
     background-color darken(titamota-color-back-gray, 3%)
 
+button-invert()
+  background-color lighten(titamota-color-text, 2.5%)
+  border-color darken(titamota-color-text, 20%)
+  color titamota-color-text-invert
+  &:active
+    background-color darken(titamota-color-text, 0%)
+    border-color darken(titamota-color-text, 25%)
+
+button-primary()
+  color titamota-color-text-invert-highlight
+  background-color lighten(titamota-color-text, 5%)
+  border-color darken(titamota-color-text, 15%)
+  &:active
+    border-color darken(titamota-color-text, 38%)
+    background-color titamota-color-text
+
+button-primary-invert()
+  color titamota-color-text
+  border-bottom solid darken(titamota-color-border, 25%) 3px
+  background-color darken(titamota-color-back-gray, 10%)
+  &:active
+    border-bottom-width 0px
+    border-top solid darken(titamota-color-border, 38%) 3px
+    background-color darken(titamota-color-back-gray, 20%)
+
+button-hero()
+  background-color titamota-color-red
+  color titamota-color-text-invert-highlight
+  border-color titamota-color-red-dark
+
+button-hero-invert()
+  background-color darken(titamota-color-red, 25%)
+  color alpha(titamota-color-text-invert-highlight, 75%)
+  border-color darken(titamota-color-red-dark, 38%)
+
+button
+.button
+  border 0px
+  border-radius 5px
+  font-weight 300
+  padding 10px 40px
+  cursor pointer
+  outline none
+  button-normal()
+  &[disabled]
+    pointer-events none
+    opacity 0.5
+
+  &.block
+    width 100%
+    display block
+
   &.hero
-    background-color titamota-color-red
-    color titamota-color-text-invert-highlight
-    border-color titamota-color-red-dark
+    button-hero()
 
   &.primary
-    background-color titamota-color-text
-    color titamota-color-text-invert-highlight
-    border-color black
+    button-primary()
 
-.icon-button
-  display inline-flex
-  align-items center
-  i.material-icons
-    font-size inherit
-    line-height inherit
+  &.invert
+    button-invert()
+
+.invert
+  button
+  .button
+    button-invert()
+
+.invert
+  button.primary
+  .button.primary
+    button-primary-invert()
+
+.invert
+  button.hero
+  .button.hero
+    button-hero-invert()
+
+
+// Dropdowns
+
+select
+  height 43px
+  border 0px
+  margin 0px
+  width 100%
+  border-radius 5px
+  box-sizing border-box
+  padding-left 10px
+  padding-right 10px
+  cursor pointer
+  color titamota-color-text
+  background-color titamota-color-back-gray
+  border-bottom solid titamota-color-border 3px
+  &:focus
+    border-bottom 0px
+    border-bottom-left-radius 0px
+    border-bottom-right-radius 0px
+    background-color lighten(titamota-color-back-dark, 15%)
+    color lighten(titamota-color-text-invert, 50%)
+    border-top solid darken(titamota-color-text, 20%) 3px
+  option
+    color lighten(titamota-color-text-invert, 50%)
+
+.invert
+  select
+    button-invert()
+    &:focus
+      background-color titamota-color-back-light
+      color titamota-color-text
+    option
+      color titamota-color-text
+
+
+// Inputs
+
+input[type="text"]
+  font-weight 400
+  background-color white
+  padding 0px 15px
+  border-radius 5px
+  border solid titamota-color-border 1px
+  line-height 40px
+  &::placeholder
+    color lighten(titamota-color-text-muted, 20%)
+  &.block
     display block
-  &.lg
-    font-size 24px
-    width 24px
-    height 24px
-    line-height 24px
-    text-align center
-  input[type="checkbox"]
-    cursor pointer
-    height 1em
-    width 1em
-    margin: 0
-    display block
+    width 100%
+
+.invert
+  input[type="text"]
+    background-color darken(titamota-color-text, 20%)
+    border-color lighten(titamota-color-text, 5%)
+    color titamota-color-text-invert
+    &:focus
+      color titamota-color-text
+      background-color titamota-color-back-light
+      border-color titamota-color-back-light
+    &::placeholder
+      color lighten(titamota-color-text, 25%)
+    &:focus::placeholder
+      color darken(titamota-color-text-muted, 10%)
+
+
+input[type="radio"]
+input[type="checkbox"]
+  width 18px
+  height 18px
+  margin 0px
+  vertical-align middle
+
+input[type="text"].inline
+  border 0px
+  height 20px
+  font-size 14px
+  border-radius 0px
+  position relative
+  flex-grow 1
+  box-shadow 0px 1px 0px 0px alpha(titamota-color-text, 25%)
+  padding 0px 3px
+* + input[type="text"].inline
+  margin-left 5px
+
+.invert
+  .custom-checkbox
+    color titamota-color-text-invert
+
+.custom-checkbox + label
+label[for]
+  cursor pointer
+
+
+// Input group
+
+.input-group
+  display flex
+  .button
+  button
+  input[type="text"]
+    width 100%
+    box-sizing border-box
+    &:first-child
+      border-top-right-radius 0px
+      border-bottom-right-radius 0px
+    &:last-child
+      border-top-left-radius 0px
+      border-bottom-left-radius 0px
+  input[type="text"]
+    flex-grow 1
+    &:first-child
+      border-right-width 0px
+    &:last-child
+      border-left-width 0px
+
+  &.vertical
+    flex-direction column
+    .button
+    button
+    input[type="text"]
+      text-align center
+      &:first-child
+        border-top-right-radius 5px
+        border-bottom-right-radius 0px
+        border-bottom-left-radius 0px
+        border-right-width 1px
+        border-bottom-width 0px
+      &:last-child
+        border-top-left-radius 0px
+        border-bottom-left-radius 5px
+        border-top-right-radius 0px
+
+// Article
 
 article
   font-size 18px
   max-width 40em
   // margin-left auto
   // margin-right auto
+
+
+// Animation
+
+@keyframes spin
+  0%
+    transform rotate(0deg)
+  100%
+    transform rotate(360deg)
+
+
+// Other
 
 .switch-menu-wrapper
   display flex
@@ -197,51 +385,3 @@ article
     flex-direction row
     .switch-menu
       margin-bottom 0
-
-/* Forms */
-
-label
-  cursor pointer
-  // display flex
-  // align-items flex-start
-
-.custom-checkbox
-  display inline-block
-  vertical-align top
-  font-size 18px
-  position relative
-  input
-    display block
-    cursor pointer
-    opacity 0
-    position absolute
-    left 0px
-    top 0px
-    right 0px
-    bottom 0px
-    padding 0
-    margin 0
-    width 100%
-    height 100%
-    font-size 1em
-    z-index 2
-  .material-icons
-    display block
-    font-size 18px
-    margin 0
-    z-index 1
-    position relative
-  input:not(:checked) ~ .material-icons.on
-    display none
-  input:not(:checked) ~ .material-icons.off
-    display block
-  input:checked ~ .material-icons.on
-    display block
-  input:checked ~ .material-icons.off
-    display none
-  & + span
-    margin-left 0.5em
-    vertical-align top
-    display inline-block
-    position relative
-    top 1px

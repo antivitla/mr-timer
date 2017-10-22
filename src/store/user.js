@@ -1,35 +1,19 @@
-/*
-
-PETROV backend: key, guestKey, mode
-MITABA backend: avatar, email, firstName, etc.
-COMMON: type (local|remote)
-
-*/
-
-// export const userTypes = {
-//   LOCAL: 'LOCAL',
-//   REMOTE: 'REMOTE'
-// }
-
 const state = {
   key: 'local',
   guestKey: '',
   mode: '',
-  // type: userTypes.LOCAL,
-  avatar: 'static/img/040-ladybug.svg',
+  avatar: 'static/images/040-ladybug.svg',
   email: '',
-  firstName: '',
-  lastName: '',
+  firstName: 'Безымянный',
+  lastName: 'Фрилансер',
   providers: []
 }
 
 const getters = {
   userKey: state => state.key,
   userGuestKey: state => state.guestKey,
-  userName: state => `${state.firstName} ${state.lastName}`,
   userMode: state => state.mode,
-  // userType: state => state.type,
-  userAvatar: state => state.avatar,
+  userName: state => `${state.firstName} ${state.lastName}`,
   userProfile (state) {
     const fields = [
       'avatar',
@@ -56,12 +40,6 @@ const mutations = {
   setUserMode (state, payload) {
     state.mode = payload.mode
   },
-  // setUserType (state, payload) {
-  //   state.type = payload.type
-  // },
-  setUserAvatar (state, payload) {
-    state.avatar = payload.avatar
-  },
   setUserProfile (state, payload) {
     const fields = [
       'avatar',
@@ -80,11 +58,10 @@ const mutations = {
     state.key = ''
     state.guestKey = ''
     state.mode = ''
-    // state.type = userTypes.LOCAL
     state.avatar = 'static/img/040-ladybug.svg'
     state.email = ''
-    state.firstName = ''
-    state.lastName = ''
+    state.firstName = 'Безымянный'
+    state.lastName = 'Фрилансер'
     state.providers = []
   }
 }

@@ -149,7 +149,7 @@
   import { Storage } from '@/store/storage'
   import { Selektion } from '@/store/selection'
   // Mixins
-  import authMixin from '@/mixin/auth.js'
+  import authMixin from '@/mixins/auth.js'
   // Utils
   import { translate, locales, currencies } from '@/store/i18n'
   import capitalize from 'lodash/capitalize'

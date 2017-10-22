@@ -16,7 +16,12 @@ const state = {
 const getters = {
   authStep: state => state.authStep,
   authProvider: state => state.authProvider,
-  authToken: state => state.authToken
+  authToken: state => state.authToken,
+  isAuthorized: state => state.authStep === authSteps.AUTHORIZED,
+  whichProviderWaitingForAuth: state => {
+    const waiting = state.authStep === authSteps.WAITING_FOR_MITABA_AUTH
+    return waiting && state.authProvider
+  }
 }
 
 const mutations = {
@@ -35,6 +40,8 @@ const mutations = {
   },
   setNotAuthorized (state, payload) {
     state.authStep = authSteps.NOT_AUTHORIZED
+    state.authProvider = null
+    state.authToken = null
   }
 }
 

@@ -14,14 +14,15 @@
     app-navbar.top(slot="page")
       h2(slot="left") Context
 
-      toggle-sidebar(slot="right")
-        user-profile
+      toggle-sidebar#toggle-sidebar-top(
+        slot="right"
+        :title="tipToggleSidebarTop")
         span.icon-button
           i.material-icons menu
 
     //- Timer
     section.timer(slot="page")
-      p App Timer
+      //- p App Timer
 
     //- Optional
     section.optional(slot="page")
@@ -44,10 +45,7 @@
     //- Sidebar
     //-
 
-    //- Toggle Sidebar
-    toggle-sidebar(slot="sidebar")
-    //- Profile
-    user-profile(slot="sidebar")
+    collection-sidebar(slot="sidebar")
 
     //-
     //- Modals
@@ -63,8 +61,16 @@
   import { mapGetters } from 'vuex'
   import appNavbar from '@/components/layout/app-navbar'
   import appLayout from '@/components/layout/app-layout'
-  import toggleSidebar from '@/components/layout/toggle-sidebar'
-  import userProfile from '@/components/user-profile'
+  import toggleSidebar from '@/components/toggle-sidebar'
+  import collectionSidebar from '@/components/collections/collection-sidebar'
+  // Articles
+  import articleWelcome from '@/components/articles/article-welcome'
+  import articleHelp from '@/components/articles/article-help'
+  // Mixins
+  import authMixin from '@/mixins/auth'
+  import appTips from '@/mixins/app-tips'
+  import i18nLabel from '@/mixins/i18n-label'
+  import i18nQuery from '@/mixins/i18n-query'
 
   export default {
     created () {
@@ -74,25 +80,35 @@
     computed: {
       ...mapGetters([
         'currency',
+        'isAuthorized',
         'isCurrencySymbolBefore'
       ])
     },
+
+    mixins: [
+      authMixin,
+      appTips,
+      i18nLabel,
+      i18nQuery
+    ],
 
     components: {
       appLayout,
       appNavbar,
       toggleSidebar,
-      userProfile
+      collectionSidebar,
+      articleWelcome,
+      articleHelp
     }
   }
 </script>
 
 <style lang="stylus">
   @import 'assets/stylesheets/core'
-  @import 'assets/stylesheets/sidebar'
 
   // Top Navbar Toggle Sidebar
   .app-navbar.top
+    line-height 40px
     .toggle-sidebar
       display flex
       cursor pointer
@@ -104,10 +120,8 @@
         .logout
           display none
 
-  // Hide Top Navbar Toggle Sidebar when Sidebar active
-  .app-layout.sidebar-active
-    .app-navbar.top
-      .toggle-sidebar
-        visibility hidden
-
+  // Hide toggle-sidebar-top
+  .sidebar-active
+    #toggle-sidebar-top
+      display none
 </style>

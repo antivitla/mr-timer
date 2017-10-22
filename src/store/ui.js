@@ -12,11 +12,13 @@ const state = {
       storage: true
     }
   },
-  // recent: {
-  //   tasks: 2,
-  //   months: 2,
-  //   days: 2
-  // },
+  settings: {
+    profile: true,
+    authorization: true,
+    l10n: true,
+    migration: false,
+    exportImport: false
+  },
   sidebar: false,
   modal: null,
   taskDelimiter
@@ -27,6 +29,7 @@ const getters = {
   sidebarActive: state => state.sidebar,
   modalActive: state => state.modal,
   viewsAvailable: state => state.view.available,
+  settingsAvailable: state => state.settings,
   taskDelimiter: state => state.taskDelimiter
 }
 
@@ -37,8 +40,14 @@ const mutations = {
   toggleSidebar (state, payload) {
     state.sidebar = !state.sidebar
   },
+  openSidebar (state) {
+    state.sidebar = true
+  },
   closeSidebar (state) {
     state.sidebar = false
+  },
+  toggleModal (state) {
+    state.modal = !state.modal
   },
   openModal (state, payload) {
     state.modal = payload.modal
@@ -46,10 +55,17 @@ const mutations = {
   closeModal (state) {
     state.modal = null
   },
-  toggleAvailableView (state, payload) {
-    state.view
-      .available[payload.view] = !state.view
-        .available[payload.view]
+  toggleAvailableViews (state, payload) {
+    state.view.available[payload.view] = !state.view.available[payload.view]
+  },
+  toggleAvailableSettings (state, payload) {
+    state.settings[payload.setting] = !state.settings[payload.setting]
+  },
+  setAvailableViews (state, payload) {
+    Object.assign(state.view.available, payload)
+  },
+  setAvailableSettings (state, payload) {
+    Object.assign(state.settings, payload)
   }
 }
 

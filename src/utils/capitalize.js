@@ -1,3 +1,3 @@
 export default function capitalize (str) {
-  return `${str[0].toUpperCase()}${str.substr(1).toLowerCase()}`
+  return `${str[0].toUpperCase()}${str.substr(1)}`
 }

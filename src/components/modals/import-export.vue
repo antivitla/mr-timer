@@ -117,7 +117,7 @@
 </script>
 
 <style lang="stylus">
-  @import '../../assets/stylesheets/variables'
+  @import '~@/assets/stylesheets/variables'
 
   .import-export
     width 320px

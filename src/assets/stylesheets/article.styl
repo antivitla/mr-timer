@@ -1,0 +1,77 @@
+@import 'variables'
+@import url('https://fonts.googleapis.com/css?family=Merriweather:300,300italic,700&subset=cyrillic')
+
+titamota-article-margin = 60px
+
+article
+  font-family Merriweather, serif
+  margin titamota-article-margin auto
+  font-size 18px
+  line-height 27px
+
+  p
+    margin-top 27px
+    margin-bottom 27px
+
+  q:before
+    content "«"
+
+  q:after
+    content "»"
+
+  strong
+    font-weight 700
+
+  ul
+    list-style none
+    padding-left 2em
+    li:before
+      content '—'
+      display block
+      float left
+      width 1.5em
+      margin-left -1.5em
+
+  li
+    margin-top 0.5em
+    margin-bottom 0.5em
+
+  .well
+    background-color alpha(titamota-color-text, 5%)
+    border-radius 5px
+    font-style italic
+    padding 2em
+    p:first-child
+      margin-top 0
+    p:last-child
+      margin-bottom 0
+
+  hr
+    border 0
+    background-color alpha(titamota-color-text, 10%)
+    height 2px
+    display block
+    width 38%
+    margin-left auto
+    margin-right auto
+
+article + article:before
+  content " "
+  border 0
+  background-color alpha(titamota-color-text, 10%)
+  height 2px
+  display block
+  width 38%
+  margin-left auto
+  margin-right auto
+  margin-bottom titamota-article-margin
+
+// Локализация
+
+[lang="en"]
+  article
+    q:before
+      content "‘"
+
+    q:after
+      content "’"

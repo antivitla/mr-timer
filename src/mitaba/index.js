@@ -35,13 +35,6 @@ const socialConfigDev = {
   }
 }
 
-const apiConfigDev = {
-  base: `https://local.mitaba.ru/api/`,
-  profile: 'profile/?avatar_size=60',
-  entries: 'entries/',
-  social: 'login/social/token_user/'
-}
-
 const socialConfig = {
   facebook: {
     DIALOG_URL: 'https://www.facebook.com/v2.10/dialog/oauth',
@@ -75,9 +68,16 @@ const socialConfig = {
   }
 }
 
+const apiConfigDev = {
+  base: `https://local.mitaba.ru/api/`,
+  profile: 'profile/?avatar_size=120',
+  entries: 'entries/',
+  social: 'login/social/token_user/'
+}
+
 const apiConfig = {
   base: `https://mitaba.ru/api/`,
-  profile: 'profile/?avatar_size=60',
+  profile: 'profile/?avatar_size=120',
   entries: 'entries/',
   social: 'login/social/token_user/'
 }

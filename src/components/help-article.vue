@@ -86,7 +86,7 @@
 </template>
 
 <style lang="stylus">
-  @import '../assets/stylesheets/variables'
+  @import '~@/assets/stylesheets/variables'
   // @import url('https://fonts.googleapis.com/css?family=Merriweather:300,700&subset=cyrillic')
 
   article
@@ -104,7 +104,7 @@
       left 0px
       right 0px
       height 75vh
-      background-image url('../assets/images/chibi-03.png')
+      background-image url('~@/assets/images/chibi-03.png')
       background-position center bottom
       background-repeat no-repeat
       background-size auto 100%

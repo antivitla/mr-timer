@@ -49,7 +49,7 @@
 </script>
 
 <style lang="stylus">
-  @import '../../assets/stylesheets/variables'
+  @import '~@/assets/stylesheets/variables'
 
   .edit-task
     min-height 20px

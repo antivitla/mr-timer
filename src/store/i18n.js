@@ -1,3 +1,5 @@
+import moment from 'moment'
+
 export const locales = ({
   ru: {
     code: 'ru',
@@ -34,7 +36,7 @@ export const currencies = ({
 
 const ru = ({
   view: {
-    storage: 'история',
+    storage: 'хранилище',
     tasks: 'задачи',
     months: 'месяцы',
     days: 'дни',
@@ -82,8 +84,20 @@ const ru = ({
     icons: 'иконки',
     from: 'от',
     girls: 'девчушки',
-    l10n: 'локализация',
-    turnOn: 'включить'
+    turnOn: 'включить',
+    authorization: 'войти через',
+    l10n: 'язык и валюта',
+    migration: 'перенести данные',
+    numberOfEntries: '{entries, plural, =0{0 записей} one{1 запись} few{# записи} other{# записей}}',
+    exportImport: 'экспорт и импорт',
+    settings: 'включить элементы интерфейса',
+    profile: 'профиль',
+    toggleViews: 'страницы',
+    toggleUiSettings: 'настройки',
+    toggleUiElements: 'включить'
+  },
+  profile: {
+    localAccount: 'локальный аккаунт'
   },
   currency: {
     rub: 'рубль',
@@ -98,7 +112,13 @@ const ru = ({
   startTask: 'начать задачу',
   startEdit: 'редактировать',
   setContext: 'сделать контекстом',
-  logout: 'выйти'
+  logout: 'выйти',
+  login: 'войти',
+  tip: {
+    'toggle-sidebar-top': 'открыть меню',
+    'toggle-sidebar-in-sidebar': 'закрыть меню',
+    'user-profile-logout': 'Выйти из своего аккаунта'
+  }
 })
 
 const en = ({
@@ -151,8 +171,20 @@ const en = ({
     icons: 'icons',
     from: 'from',
     girls: 'girls',
-    l10n: 'localization',
-    turnOn: 'turn on'
+    turnOn: 'turn on',
+    authorization: 'login with',
+    l10n: 'Language and Currency',
+    migration: 'migrate data',
+    numberOfEntries: '{entries, plural, =0{0 entries} one{1 entry} other{# entries}}',
+    exportImport: 'Export and Import',
+    settings: 'toggle UI elements',
+    profile: 'profile',
+    toggleViews: 'toggle views',
+    toggleUiSettings: 'toggle UI settings',
+    toggleUiElements: 'toggle'
+  },
+  profile: {
+    localAccount: 'local account'
   },
   currency: {
     rub: 'ruble',
@@ -167,7 +199,13 @@ const en = ({
   startTask: 'start task',
   startEdit: 'edit',
   setContext: 'set as context',
-  logout: 'logout'
+  logout: 'logout',
+  login: 'login',
+  tip: {
+    'toggle-sidebar-top': 'open menu',
+    'toggle-sidebar-in-sidebar': 'close menu',
+    'user-profile-logout': 'logout your account'
+  }
 })
 
 export const translate = ({
@@ -197,8 +235,21 @@ const mutations = {
   }
 }
 
+const actions = {
+  activateLocale (context, payload) {
+    context.commit('setLocale', payload)
+    moment.locale(payload.locale)
+    context.commit('closeSidebar')
+  },
+  activateCurrency (context, payload) {
+    context.commit('setCurrency', payload)
+    context.commit('closeSidebar')
+  }
+}
+
 export default {
   state,
   getters,
-  mutations
+  mutations,
+  actions
 }

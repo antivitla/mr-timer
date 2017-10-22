@@ -34,7 +34,7 @@
 </script>
 
 <style lang="stylus">
-  @import '../../assets/stylesheets/variables'
+  @import '~@/assets/stylesheets/variables'
 
   .choose-avatar
     width 320px
