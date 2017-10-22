@@ -2,7 +2,7 @@ const state = {
   key: 'local',
   guestKey: '',
   mode: '',
-  avatar: 'static/images/040-ladybug.svg',
+  avatar: 'static/img/040-ladybug.svg',
   email: '',
   firstName: 'Безымянный',
   lastName: 'Фрилансер',
