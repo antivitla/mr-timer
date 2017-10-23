@@ -39,7 +39,7 @@
 </template>
 
 <script>
-  import Mitaba from '@/mitaba'
+  import Mitaba from '@/backend/mitaba'
   import { mapGetters } from 'vuex'
   import funny from 'mr-funny'
   import funnyTemplates from '@/funny/templates'
@@ -124,7 +124,7 @@
 </script>
 
 <style lang="stylus">
-  @import '../assets/stylesheets/variables'
-  @import '../assets/stylesheets/common'
-  @import '../assets/stylesheets/api'
+  @import '~@/assets/stylesheets/variables'
+  @import '~@/assets/stylesheets/core'
+  @import '~@/assets/stylesheets/api'
 </style>

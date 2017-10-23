@@ -1,4 +1,4 @@
-import Mitaba from '@/mitaba'
+import Mitaba from '@/backend/mitaba'
 
 export const authSteps = {
   NOT_AUTHORIZED: 'NOT_AUTHORIZED',

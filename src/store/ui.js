@@ -39,7 +39,7 @@ const getters = {
 
 const mutations = {
   setCurrentView (state, payload) {
-    state.view.current = payload.view
+    state.currentView = payload.view
   },
   toggleSidebar (state, payload) {
     state.sidebar = !state.sidebar

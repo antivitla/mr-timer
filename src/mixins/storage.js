@@ -12,11 +12,11 @@ export default {
     this.$store.subscribe(mutation => {
       if (mutation.type === 'setAuthorized') {
         this.setBackend({ backend: 'mitaba' })
-        this.loadEntries()
+        this.getEntries()
       }
       if (mutation.type === 'setNotAuthorized') {
         this.setBackend({ backend: 'local' })
-        this.loadEntries()
+        this.getEntries()
       }
     })
   },
@@ -30,7 +30,7 @@ export default {
       'setBackend'
     ]),
     ...mapActions([
-      'loadEntries'
+      'getEntries'
     ])
   }
 }

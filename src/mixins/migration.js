@@ -1,8 +1,9 @@
-import Petrov from '@/petrov'
-
+import Entry from '@/models/entry'
+import Petrov from '@/backend/petrov'
+import { mapMutations } from 'vuex'
 export default {
   methods: {
-    loadEntriesFromLocalStorage (key) {
+    getEntriesFromLocalStorage (key) {
       return new Promise((resolve, reject) => {
         const raw = localStorage[key]
         let entries
@@ -18,7 +19,7 @@ export default {
         }
       })
     },
-    loadEntriesFromPetrov (account) {
+    getEntriesFromPetrov (account) {
       return new Promise((resolve, reject) => {
         Petrov
           .get(account)
@@ -43,6 +44,14 @@ export default {
           .then(entries => resolve(entries))
           .catch(error => reject(new Error(error.message)))
       })
-    }
+    },
+
+    migrateEntries (entries) {
+      this.setEntries(entries.map(e => new Entry(e)))
+    },
+
+    ...mapMutations([
+      'setEntries'
+    ])
   }
 }

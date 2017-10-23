@@ -25,10 +25,10 @@
     app-navbar.menu(slot="page")
       div(slot="left") Actions
       div(slot="right")
-        custom-switch(:options="availableViewsAsOptions" v-model="currentView")
+        custom-switch(:options="availableViewsAsOptions" v-model="viewModel")
 
     //- Views
-    component(:is="viewComponent[currentView]" slot="page")
+    component(:is="viewComponent[viewModel]" slot="page")
 
     //- Footer
     footer(slot="page")
@@ -44,7 +44,7 @@
 
 <script>
   import { appTitle } from '@/store/app-info'
-  import { mapGetters, mapActions } from 'vuex'
+  import { mapGetters, mapMutations, mapActions } from 'vuex'
   import appNavbar from '@/components/layout/app-navbar'
   import appLayout from '@/components/layout/app-layout'
   import toggleSidebar from '@/components/toggle-sidebar'
@@ -69,7 +69,7 @@
   export default {
     data () {
       return {
-        currentView: 'help',
+        viewModel: 'help',
         viewComponent: {
           help: viewHelp,
           tasks: viewTasks,
@@ -82,20 +82,35 @@
     },
     created () {
       console.log(`Welcome to ${appTitle}`)
-      // Initial load entries
-      this.loadEntries()
+      // Init current view
+      this.viewModel = this.currentView
+      console.log(this.viewModel)
+      // Initial get entries
+      this.getEntries().then(r => {
+        console.log(r)
+      })
+    },
+    watch: {
+      'viewModel': function (view) {
+        console.log(view)
+        this.setCurrentView({ view })
+      }
     },
     computed: {
       ...mapGetters([
         'currency',
+        'currentView',
         'isAuthorized',
         'isCurrencySymbolBefore',
         'availableViewsAsOptions'
       ])
     },
     methods: {
+      ...mapMutations([
+        'setCurrentView'
+      ]),
       ...mapActions([
-        'loadEntries'
+        'getEntries'
       ])
     },
     mixins: [

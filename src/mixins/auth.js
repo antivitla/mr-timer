@@ -1,6 +1,6 @@
 import { mapActions, mapMutations, mapGetters } from 'vuex'
 import { authSteps } from '@/store/auth'
-import Mitaba from '@/mitaba'
+import Mitaba from '@/backend/mitaba'
 
 export default {
   created () {

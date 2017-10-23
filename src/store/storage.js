@@ -2,6 +2,7 @@ import Petrov from '@/backend/petrov'
 import Mitaba from '@/backend/mitaba'
 import Local from '@/backend/local'
 import lastPromise from '@/utils/last-promise'
+import { insertSorted } from '@/utils/sorted'
 
 const driver = {
   local: Local,
@@ -9,9 +10,9 @@ const driver = {
   petrov: Petrov
 }
 
-export const Storage = ({
+export const Storage = {
   entries: []
-})
+}
 
 const state = {
   backend: 'local'
@@ -24,17 +25,51 @@ const getters = {
 const mutations = {
   setBackend (state, payload) {
     state.backend = payload.backend
+  },
+
+  setEntries (state, payload) {
+    payload.entries.forEach(entry => {
+      insertSorted({
+        child: entry,
+        children: Storage.entries,
+        compare: (a, b) => a.start - b.start,
+        dir: 1
+      })
+    })
+  },
+
+  clearEntries () {
+    // storage.entries = []
   }
 }
 
+/*
+
+backend -> storage
+  getEntries
+  postEntries
+  patchEntries
+  deleteEntries
+
+storage -> api
+  getEntries(params) => [entries]
+  postEntries([entries]) => [created entries with id]
+  patchEntries([entries]) => 200
+  deleteEntries([entries]) => 200
+
+*/
+
 const actions = {
-  loadEntries (context, payload) {
+  getEntries (context, payload) {
     const backend = driver[context.getters.backend]
-    console.log('load entries:', backend)
-    // We need to cancel previous pending requests
     return lastPromise({
-      type: 'loadEntries',
+      type: 'getEntries',
       promise: backend.getEntries(payload)
+    })
+    .then(response => {
+      context.commit('clearEntries')
+      context.commit('setEntries', response)
+      return response.entries
     })
   }
 }

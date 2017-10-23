@@ -331,13 +331,7 @@ label[for]
         border-top-right-radius 0px
 
 
-// Animation
 
-@keyframes spin
-  0%
-    transform rotate(0deg)
-  100%
-    transform rotate(360deg)
 
 
 // Other
@@ -377,3 +371,25 @@ label[for]
     flex-direction row
     .switch-menu
       margin-bottom 0
+
+
+// Animation
+
+@keyframes spin
+  0%
+    transform rotate(0deg)
+  100%
+    transform rotate(360deg)
+
+
+// Preloader
+
+.with-preloader
+  .fa-refresh
+    display none
+
+.with-preloader[preloader="true"]
+  .fa-refresh
+    animation spin 1s infinite linear
+    transform rotate(0deg)
+    display inline-block
