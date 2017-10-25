@@ -90,7 +90,6 @@
           this.selected = false
         },
         'tickTimer': () => {
-          console.log(this.entry.id, this.timerEntry.id)
           if (this.entry.id === this.timerEntry.id) {
             this.entry.stop = this.timerEntry.stop
           }
@@ -141,9 +140,7 @@
         return this.Selected.entries.indexOf(this.entry) > -1
       },
       isTrackingEntry () {
-        const isTimerActive = this.timerActive
-        const isEntryInTimer = this.timerEntry.id === this.id
-        return isTimerActive && isEntryInTimer
+        return this.timerActive && this.timerEntry.id === this.id
       },
       ...mapGetters([
         'timerEntry',

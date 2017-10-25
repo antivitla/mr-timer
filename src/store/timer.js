@@ -57,13 +57,13 @@ export const actions = {
       .dispatch('postEntries', { entries: [payload.entry] })
       .then(entries => {
         context.commit('setTimerEntry', { entry: entries[0] })
-        return context.getters('timerEntry')
+        return context.getters.timerEntry
       })
   },
   stopTimer (context) {
     context.commit('stopTimer')
     clearTimeout(timerTimeout)
-    return context.getters('timerEntry')
+    return context.getters.timerEntry
   }
 }
 
