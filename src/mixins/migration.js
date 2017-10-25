@@ -1,5 +1,5 @@
 import Entry from '@/models/entry'
-import Petrov from '@/backend/petrov'
+import Mitaba from '@/backend/mitaba'
 import { mapActions } from 'vuex'
 
 export default {
@@ -22,8 +22,8 @@ export default {
     },
     getEntriesFromPetrov (account) {
       return new Promise((resolve, reject) => {
-        Petrov
-          .get(account)
+        Mitaba
+          .getPetrov(account)
           .then(response => {
             let entries
             try {

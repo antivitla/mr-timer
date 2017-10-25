@@ -7,34 +7,19 @@ function isDev () {
 
 const socialConfigDev = {
   facebook: {
-    DIALOG_URL: 'https://www.facebook.com/v2.10/dialog/oauth',
-    CLIENT_ID: '348877668894043',
-    SCOPE: 'email',
-    MITABA_BACKEND: 'facebook'
+    CLIENT_ID: '348877668894043'
   },
   github: {
-    DIALOG_URL: 'https://github.com/login/oauth/authorize',
-    CLIENT_ID: '029f1bd3d31303085a51',
-    SCOPE: 'user',
-    MITABA_BACKEND: 'github'
+    CLIENT_ID: '029f1bd3d31303085a51'
   },
   google: {
-    DIALOG_URL: 'https://accounts.google.com/o/oauth2/v2/auth',
-    CLIENT_ID: '103805617597-46bfk19ot55d9n1sk8a35o9q82n6ane3.apps.googleusercontent.com',
-    SCOPE: 'email profile',
-    MITABA_BACKEND: 'google-oauth2'
+    CLIENT_ID: '103805617597-46bfk19ot55d9n1sk8a35o9q82n6ane3.apps.googleusercontent.com'
   },
   vk: {
-    DIALOG_URL: 'https://oauth.vk.com/authorize',
-    CLIENT_ID: '6211554',
-    SCOPE: 'email',
-    MITABA_BACKEND: 'vk-oauth2'
+    CLIENT_ID: '6211554'
   },
   yandex: {
-    DIALOG_URL: 'https://oauth.yandex.ru/authorize',
-    CLIENT_ID: '21327e57e0ec4bbe973307ebf45868f1',
-    SCOPE: 'login:email login:avatar login:info',
-    MITABA_BACKEND: 'yandex-oauth2'
+    CLIENT_ID: '21327e57e0ec4bbe973307ebf45868f1'
   }
 }
 
@@ -72,24 +57,22 @@ const socialConfig = {
 }
 
 const apiConfigDev = {
-  base: `https://local.mitaba.ru/api/`,
-  profile: 'profile/?avatar_size=120',
-  entries: 'entries/',
-  social: 'login/social/token_user/'
+  base: `https://local.mitaba.ru/api/`
 }
 
 const apiConfig = {
   base: `https://mitaba.ru/api/`,
   profile: 'profile/?avatar_size=120',
   entries: 'entries/',
+  petrov: 'petrov/?account=',
   social: 'login/social/token_user/'
 }
 
 class Mitaba {
   constructor () {
     this.config = {
-      api: (isDev() ? apiConfigDev : apiConfig),
-      social: (isDev() ? socialConfigDev : socialConfig)
+      api: Object.assign({}, apiConfig, (isDev() ? apiConfigDev : {})),
+      social: Object.assign({}, socialConfig, (isDev() ? socialConfigDev : {}))
     }
     this.token = null
   }
@@ -137,6 +120,12 @@ class Mitaba {
         // Возвращаем готовые Entry-объекты
         return entries.map(e => new Entry(e))
       })
+  }
+
+  getPetrov (account) {
+    const config = this._createConfig('GET')
+    return fetch(`${this._endpoint('petrov')}${account}`, config)
+      .then(parseHttpResponse)
   }
 
   postEntries (entries) {
