@@ -47,9 +47,9 @@
 </script>
 
 <style lang="stylus">
-  @import '../assets/stylesheets/variables'
-  @import '../assets/stylesheets/common'
-  @import '../assets/stylesheets/api'
+  @import '~@/assets/stylesheets/variables'
+  @import '~@/assets/stylesheets/common'
+  @import '~@/assets/stylesheets/api'
 
   .login
     margin 10px

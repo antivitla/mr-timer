@@ -21,7 +21,7 @@
 <script>
   import { mapGetters } from 'vuex'
   // Components
-  import toggleSidebar from '@/components/toggle-sidebar'
+  import toggleSidebar from '@/components/other/toggle-sidebar'
   import settingsProfile from '@/components/settings/settings-profile'
   import settingsLogin from '@/components/settings/settings-login'
   import settingsI18n from '@/components/settings/settings-i18n'

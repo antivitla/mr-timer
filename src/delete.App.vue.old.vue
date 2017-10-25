@@ -103,7 +103,7 @@
           storage-item(
             v-else
             v-for="entry in filteredEntries"
-            :key="entry.uid()"
+            :key="entry.id"
             :entry="entry")
 
       //- Footer
@@ -205,7 +205,7 @@
       this.$store.subscribe(mutation => {
         if (mutation.type === 'setCurrentView' &&
           mutation.type !== this.currentView) {
-          this.selectionClear()
+          this.selectedClear()
         }
       })
 
@@ -363,7 +363,7 @@
         'setLocale',
         'setCurrency',
         'setCurrentView',
-        'selectionClear',
+        'selectedClear',
         'toggleSidebar'
       ]),
       ...mapActions([

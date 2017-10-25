@@ -1,30 +1,22 @@
 <template lang="pug">
   .view
-    div {{ storage.length }}
-    div(v-for="entry in storage.entries" :key="entry.uid()")
-      span {{ entry.start }}
-      span &emsp;
-      span {{ entry.stop - entry.start }}
-      span &emsp;
-      span {{ entry.details }}
+    storage-item(
+      v-for="entry in Storage.entries"
+      :key="entry.id"
+      :entry="entry")
 </template>
 <script>
   import { Storage } from '@/store/storage'
+  import storageItem from '@/components/items/storage-item'
   export default {
     name: 'view-storage',
     data () {
       return {
-        // storage
+        Storage
       }
     },
-    created () {
-      console.log('view-storage created', Storage)
-    },
-    computed: {
-      storage () {
-        console.log(Storage.entries)
-        return Storage
-      }
+    components: {
+      storageItem
     }
   }
 </script>

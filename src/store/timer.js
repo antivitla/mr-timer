@@ -1,17 +1,9 @@
 import Entry from '@/models/entry'
-import bus from '@/event-bus'
 
 let timerTimeout
-const saveDelay = 60000
-let lastSaveTime = new Date().getTime()
 
 function tick (context) {
   context.commit('tickTimer')
-  bus.$emit('tick-timer')
-  if (new Date().getTime() - lastSaveTime > saveDelay) {
-    context.dispatch('saveEntries')
-    lastSaveTime = new Date().getTime()
-  }
   timerTimeout = setTimeout(() => {
     tick(context)
   }, context.state.delay)
@@ -20,7 +12,7 @@ function tick (context) {
 const state = {
   active: false,
   entry: new Entry(),
-  delay: 400
+  delay: 1000
 }
 
 export const getters = {
@@ -42,7 +34,7 @@ export const mutations = {
       start: state.entry.start,
       stop: state.entry.stop,
       details: state.entry.details.slice(0),
-      _uid: state.entry._uid // чтоб очистка контекста тоже зацепила
+      id: state.entry.id // чтоб очистка контекста тоже зацепила
     })
     state.active = false
   },
@@ -59,12 +51,19 @@ export const mutations = {
 
 export const actions = {
   startTimer (context, payload) {
-    context.commit('startTimer', payload)
     tick(context)
+    context.commit('startTimer', payload)
+    return context
+      .dispatch('postEntries', { entries: [payload.entry] })
+      .then(entries => {
+        context.commit('setTimerEntry', { entry: entries[0] })
+        return context.getters('timerEntry')
+      })
   },
   stopTimer (context) {
     context.commit('stopTimer')
     clearTimeout(timerTimeout)
+    return context.getters('timerEntry')
   }
 }
 

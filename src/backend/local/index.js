@@ -1,5 +1,6 @@
 import { appName } from '@/store/app-info'
 import Entry from '@/models/entry'
+import { parseHttpResponse } from '@/utils/http'
 
 class LocalBackendDriver {
   constructor () {
@@ -7,12 +8,14 @@ class LocalBackendDriver {
   }
 
   getEntries () {
-    return new Promise((resolve, reject) => {
+    return (new Promise((resolve, reject) => {
       const raw = localStorage.getItem(this.key)
       if (!raw) {
-        reject(new Response(null, {
+        const body = `The key '${this.key}' was not found in localStorage`
+        resolve(new Response(body, {
           status: 404,
-          statusText: `Not Found: ${this.key}`
+          ok: false,
+          statusText: 'Not Found'
         }))
       } else {
         let entries
@@ -23,18 +26,18 @@ class LocalBackendDriver {
             const forced = raw.split('},{').slice(0, -1).join('},{') + '}]}'
             entries = JSON.parse(forced).entries
           } catch (error) {
-            reject(new Response(null, {
+            reject(new Response(`Corrupted data in '${this.key}'`, {
               status: 500,
-              statusText: `Internal Server Error`
+              statusText: 'Internal Server Error'
             }))
           }
         }
         if (entries) {
-          resolve({
-            entries: entries.map(e => new Entry(e))
-          })
+          resolve(new Response(JSON.stringify(entries)))
         }
       }
+    })).then(parseHttpResponse).then(entries => {
+      return entries.map(e => new Entry(e))
     })
   }
 }

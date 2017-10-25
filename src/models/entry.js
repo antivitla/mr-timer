@@ -24,19 +24,24 @@ export default class Entry {
     start = new Date().getTime(),
     stop = new Date().getTime(),
     details = [funny.phrase(funnyTemplates[locale].base)],
-    _uid = uuid()
+    id = uuid()
   } = {}) {
     this.start = new Date(start).getTime()
     this.stop = new Date(stop).getTime()
     this.details = parseDetails(details)
-    this._uid = _uid
+    this.id = id
   }
 
   duration () {
     return this.stop - this.start
   }
 
-  uid () {
-    return this._uid
+  serialize () {
+    return {
+      id: this.id,
+      start: new Date(this.start).toISOString(),
+      stop: new Date(this.stop).toISOString(),
+      details: this.details.slice(0)
+    }
   }
 }

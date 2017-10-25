@@ -82,7 +82,7 @@
 </script>
 
 <style lang="stylus">
-  @import '../assets/stylesheets/variables'
+  @import '~@/assets/stylesheets/variables'
 
   .task-context
     font-size 14px

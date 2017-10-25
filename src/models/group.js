@@ -79,7 +79,7 @@ export default class Group {
   }
 
   // Путь и есть уникальный id
-  uid () {
+  get id () {
     return this.path().join(taskDelimiter)
   }
 
@@ -129,7 +129,7 @@ export default class Group {
   // в результате образовавшиеся
   removeEntry (entry) {
     const id = this.children.findIndex(item => {
-      return item.uid() === entry.uid()
+      return item.id === entry.id
     })
     if (id > -1) {
       this.children.splice(id, 1)

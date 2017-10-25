@@ -27,7 +27,7 @@ const mutations = {
     state.backend = payload.backend
   },
 
-  setEntries (state, payload) {
+  addEntries (state, payload) {
     payload.entries.forEach(entry => {
       insertSorted({
         child: entry,
@@ -38,26 +38,25 @@ const mutations = {
     })
   },
 
+  removeEntries (state, payload) {
+    payload.entries.forEach(entry => {
+      let id = Storage.entries.indexOf(entry)
+      // Попробуем найти по id
+      if (id < 0) {
+        id = Storage.entries.findIndex(entry2 => {
+          return entry.id === entry2.id
+        })
+      }
+      if (id > -1) {
+        Storage.entries.splice(id, 1)
+      }
+    })
+  },
+
   clearEntries () {
-    // storage.entries = []
+    Storage.entries = []
   }
 }
-
-/*
-
-backend -> storage
-  getEntries
-  postEntries
-  patchEntries
-  deleteEntries
-
-storage -> api
-  getEntries(params) => [entries]
-  postEntries([entries]) => [created entries with id]
-  patchEntries([entries]) => 200
-  deleteEntries([entries]) => 200
-
-*/
 
 const actions = {
   getEntries (context, payload) {
@@ -66,11 +65,32 @@ const actions = {
       type: 'getEntries',
       promise: backend.getEntries(payload)
     })
-    .then(response => {
+    .then(entries => {
       context.commit('clearEntries')
-      context.commit('setEntries', response)
-      return response.entries
+      context.commit('addEntries', { entries })
+      return entries
     })
+  },
+
+  postEntries (context, payload) {
+    return driver[context.getters.backend]
+      .postEntries(payload.entries.map(entry => entry.serialize()))
+      .then(entries => {
+        context.commit('addEntries', { entries })
+        return entries
+      })
+  },
+
+  patchEntries (context, payload) {
+    // context.commit('removeEntries', payload)
+    // return driver[context.getters.backend]
+      // .patchEntries(payload.entries.map(entry => entry.serialize()))
+  },
+
+  deleteEntries (context, payload) {
+    context.commit('removeEntries', payload)
+    return driver[context.getters.backend]
+      .deleteEntries(payload.entries.map(entry => ({ id: entry.id })))
   }
 }
 

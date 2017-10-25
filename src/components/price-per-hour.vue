@@ -61,7 +61,7 @@
 </script>
 
 <style lang="stylus">
-  @import '../assets/stylesheets/variables.styl'
+  @import '~@/assets/stylesheets/variables.styl'
 
   [currency="rub"]
     .symbol-before:before

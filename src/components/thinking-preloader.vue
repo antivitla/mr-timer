@@ -50,7 +50,7 @@
 </script>
 
 <style lang="stylus">
-  @import '../assets/stylesheets/variables'
+  @import '~@/assets/stylesheets/variables'
 
   .thinking-preloader
     text-align center

@@ -9,7 +9,7 @@ import timer from './timer'
 import ui from './ui'
 import edit from './edit'
 import money from './money'
-import selection from './selection'
+import selected from './selected'
 import auth from './auth'
 import { DaysPlugin } from './groups/days'
 import { MonthsPlugin } from './groups/months'
@@ -30,7 +30,7 @@ export default new Vuex.Store({
     ui,
     edit,
     money,
-    selection,
+    selected,
     auth
   },
   plugins: [

@@ -4,7 +4,7 @@
       .fieldset
         h5 {{ label('sidebar.toggleViews') }}
         p(v-for="(value, view) in views")
-          custom-checkbox(
+          custom-checkbox(mark
             :class="className(view)"
             v-model="models[view]")
           label(v-custom-for="classSelector(view)")
@@ -13,7 +13,7 @@
       .fieldset
         h5 {{ label('sidebar.toggleUiSettings') }}
         p(v-for="(value, setting) in settings")
-          custom-checkbox(
+          custom-checkbox(mark
             :class="className(setting)"
             v-model="models[setting]")
           label(v-custom-for="classSelector(setting)")
@@ -21,7 +21,7 @@
 </template>
 <script>
   import { mapGetters, mapMutations } from 'vuex'
-  import customCheckbox from '@/components/custom-checkbox'
+  import customCheckbox from '@/components/other/custom-checkbox'
   import customFor from '@/directives/custom-for'
   import i18nLabel from '@/mixins/i18n-label'
 

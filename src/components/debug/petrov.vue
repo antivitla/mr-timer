@@ -75,5 +75,5 @@
 </script>
 
 <style lang="stylus">
-  @import '../assets/stylesheets/api'
+  @import '~@/assets/stylesheets/api'
 </style>

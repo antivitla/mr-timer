@@ -2,7 +2,7 @@
   div.storage-item(
     :class="{ 'active': isTrackingEntry }")
     span.edit(
-      v-if="isEditingTask && editingTaskUid === uid"
+      v-if="isEditingTask && editingTaskId === id"
       @keyup.esc="cancelEdit()"
       v-esc-outside="cancelEdit"
       v-click-outside="cancelEdit")
@@ -30,12 +30,12 @@
           @input="updateDuration($event)"
           @keyup.enter="submit()")
       span.actions
-        a.icon-button.delete(@click="removeEntry({ entry })")
+        a.icon-button.delete(@click="deleteEntries({ entries: [entry] })")
           i.material-icons delete
         a.icon-button.cancel(@click="cancelEdit()")
           i.material-icons block
-        span.icon-button.select
-          input(type="checkbox" v-model="selected")
+        //- span.icon-button.select
+          custom-checkbox(v-model="selected" mark="true")
 
     span.read(
       v-else
@@ -51,14 +51,14 @@
         v-long-click="500"
         @long-click="startEdit('duration')") {{ duration }}
       span.actions
-        span.icon-button.select(v-if="Selektion.entries.length")
-          input(type="checkbox" v-model="selected")
+        span.icon-button.select(v-if="Selected.entries.length")
+          custom-checkbox(v-model="selected" mark)
 </template>
 
 <script>
   import { mapGetters, mapMutations, mapActions } from 'vuex'
   import { translate } from '@/store/i18n'
-  import { Selektion } from '@/store/selection'
+  import { Selected } from '@/store/selected'
   import { taskDelimiter } from '@/store/ui'
   import { duration, durationEditable } from '@/utils/duration'
   import { timeEditable } from '@/utils/time'
@@ -66,9 +66,8 @@
   import clickOutside from '@/directives/click-outside'
   import escOutside from '@/directives/esc-outside'
   import { focusAndSelectAll } from '@/directives/focus'
-  import listInput from '@/components/list-input'
-  import bus from '@/event-bus'
-  import Entry from '@/models/entry'
+  import listInput from '@/components/other/list-input'
+  import customCheckbox from '@/components/other/custom-checkbox'
 
   export default {
     props: ['entry'],
@@ -81,30 +80,39 @@
           start: null
         },
         selected: false,
-        Selektion
+        Selected
       }
     },
 
     created () {
-      this.$store.subscribe((mutation, state) => {
-        if (mutation.type === 'selectionClear') {
+      const actions = {
+        'selectedClear': () => {
           this.selected = false
+        },
+        'tickTimer': () => {
+          console.log(this.entry.id, this.timerEntry.id)
+          if (this.entry.id === this.timerEntry.id) {
+            this.entry.stop = this.timerEntry.stop
+          }
+        }
+      }
+      this.unsubscribe = this.$store.subscribe(mutation => {
+        if (actions[mutation.type]) {
+          actions[mutation.type]()
         }
       })
+    },
 
-      bus.$on('tick-timer', () => {
-        if (this.entry.uid() === this.timerEntry.uid()) {
-          this.entry.stop = this.timerEntry.stop
-        }
-      })
+    beforeDestroy () {
+      this.unsubscribe()
     },
 
     watch: {
       selected (value, b) {
         if (value) {
-          this.selectionAdd({ entry: this.entry })
+          this.selectedAdd({ entry: this.entry })
         } else {
-          this.selectionRemove({ entry: this.entry })
+          this.selectedRemove({ entry: this.entry })
         }
       }
     },
@@ -116,7 +124,7 @@
       },
       duration () {
         const d = duration(this.entry.duration())
-        if (this.entry.uid() === this.timerEntry.uid()) {
+        if (this.entry.id === this.timerEntry.id) {
           return d.format('HH:mm:ss')
         } else {
           return d.format('HH:mm')
@@ -126,15 +134,15 @@
         return timeEditable
           .stringify(this.entry.start, translate[this.locale].time.at)
       },
-      uid () {
-        return this.entry.uid()
+      id () {
+        return this.entry.id
       },
       isSelected () {
-        return this.Selektion.entries.indexOf(this.entry) > -1
+        return this.Selected.entries.indexOf(this.entry) > -1
       },
       isTrackingEntry () {
         const isTimerActive = this.timerActive
-        const isEntryInTimer = this.timerEntry.uid() === this.uid
+        const isEntryInTimer = this.timerEntry.id === this.id
         return isTimerActive && isEntryInTimer
       },
       ...mapGetters([
@@ -142,22 +150,13 @@
         'timerActive',
         'locale',
         'isEditingTask',
-        'editingTaskUid',
+        'editingTaskId',
         'editingTaskFields',
         'editingFocus'
       ])
     },
 
     methods: {
-      startTask () {
-        bus.$emit('start-task', {
-          entry: new Entry({
-            start: new Date().getTime(),
-            stop: new Date().getTime(),
-            details: this.entry.details.slice(0)
-          })
-        })
-      },
       toggleSelectEntry () {
         this.selected = !this.selected
       },
@@ -180,7 +179,7 @@
             details: this.entry.details.slice(0),
             duration: this.entry.duration()
           },
-          uid: this.entry.uid()
+          id: this.entry.id
         }
         // Парсим из сырых цифр (милисекунд и деталей)
         // в человекочитаемое
@@ -198,8 +197,8 @@
       },
       cancelEdit () {
         this.stopTaskEditing()
-        if (this.Selektion.entries.length < 2) {
-          this.selectionClear()
+        if (this.Selected.entries.length < 2) {
+          this.selectedClear()
         }
       },
       updateDetails (event) {
@@ -214,38 +213,37 @@
           .parse(this.edit.start)
         this.edit.duration = durationEditable
           .stringify(this.entry.stop - start)
-        if (this.entry.uid() === this.timerEntry.uid()) {
+        if (this.entry.id === this.timerEntry.id) {
           this.setTimerStart({ start })
         }
       },
       submit () {
         this.cancelEdit()
-        this.selectionClear()
+        this.selectedClear()
         const start = timeEditable
           .parse(this.edit.start)
         const duration = durationEditable
           .parse(this.edit.duration)
         const stop = start + duration
         const details = this.edit.details.split(taskDelimiter).map(d => d.trim())
-        const _uid = this.entry._uid
+        const id = this.entry.id
         const payload = {
           entry: this.entry,
-          update: { start, stop, details, _uid }
+          update: { start, stop, details, id }
         }
         this.updateEntry(payload)
       },
       ...mapMutations([
         'stopTaskEditing',
         'startTaskEditing',
-        'setTimerEntry',
-        'selectionAdd',
-        'selectionRemove',
-        'selectionClear',
+        'selectedAdd',
+        'selectedRemove',
+        'selectedClear',
         'setTimerStart'
       ]),
       ...mapActions([
         'updateEntry',
-        'removeEntry'
+        'deleteEntries'
       ])
     },
 
@@ -257,13 +255,14 @@
     },
 
     components: {
-      listInput
+      listInput,
+      customCheckbox
     }
   }
 </script>
 
 <style lang="stylus">
-  @import '../assets/stylesheets/variables.styl'
+  @import '~@/assets/stylesheets/variables'
 
   .storage-item
     margin 6px auto 20px auto
@@ -303,8 +302,8 @@
         margin-bottom 5px
         @media (min-width 768px)
           width auto
-          max-width calc(100% - 320px)
-          margin 0px 10px 0px 23px
+          max-width calc(100% - 12em - 180px)
+          margin 0px 10px 0px calc(0.5em + 15px)
       .duration
         cursor pointer
         display block
@@ -312,6 +311,9 @@
         font-family PT Mono
         font-size 14px
         width 100px
+        margin-left auto
+        text-align right
+        margin-right 2.25em
         &:before
           content "="
           margin-right 10px
@@ -323,14 +325,11 @@
         bottom 0px
         display flex
         justify-content flex-end
-        padding-top 6px
-        padding-bottom 6px
+        padding-top 4px
+        padding-bottom 4px
         @media (min-width 768px)
           bottom auto
           top 0px
-        .select
-          input
-            pointer-events none
 
     .edit
       display flex
@@ -431,18 +430,18 @@
       .actions
         display flex
         justify-content flex-end
-        width 5.75em
+        width 4em
         position absolute
         right 0px
         bottom 0px
         padding-top 4px
         padding-bottom 4px
-      .icon-button
-        font-size 140%
-        input
-          margin-left 0.2em
-      .icon-button + .icon-button
-        margin-left 0.375em
+        // .icon-button
+        //    margin-left 0.2em
+        .icon-button + .icon-button
+          margin-left 0.45em
+        .icon-button + .icon-button.select
+          margin-left 0.5em
       @media (min-width 768px)
         flex-direction row
         .start
@@ -450,7 +449,7 @@
         .details
           margin-bottom 0
           margin-left 0.5em
-          width calc(100% - 12.25em - 180px)
+          width calc(100% - 12em - 180px)
         .duration
           margin-left 0.5em
           input

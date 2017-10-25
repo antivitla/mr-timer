@@ -31,13 +31,13 @@ export const mutations = {
 
     // all entries
     const found = Storage.all.find(entry => {
-      return entry.uid() === payload.entry.uid()
+      return entry.id === payload.entry.id
     })
     if (found) {
       found.start = payload.entry.start
       found.stop = payload.entry.stop
       found.details = payload.entry.details.slice(0)
-      found._uid = payload.entry._uid
+      found.id = payload.entry.id
     } else {
       const allid = sortedIndexBy(
         Storage.all,
@@ -52,7 +52,7 @@ export const mutations = {
     let id = Storage.entries.indexOf(payload.entry)
     if (id < 0) {
       id = Storage.entries.findIndex(entry => {
-        return entry.uid() === payload.entry.uid()
+        return entry.id === payload.entry.id
       })
     }
     if (id > -1) {
@@ -63,7 +63,7 @@ export const mutations = {
     let allid = Storage.all.indexOf(payload.entry)
     if (allid < 0) {
       allid = Storage.all.findIndex(entry => {
-        return entry.uid() === payload.entry.uid()
+        return entry.id === payload.entry.id
       })
     }
     if (allid > -1) {
@@ -239,7 +239,7 @@ export const actions = ({
               start: entry.start,
               stop,
               details,
-              _uid: entry._uid
+              id: entry.id
             })
           })
         })

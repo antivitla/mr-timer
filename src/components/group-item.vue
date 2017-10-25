@@ -4,7 +4,7 @@
     :class="{ 'has-children': hasChildren }")
     .item.edit(
       :class="{ 'active': trackingEntry }"
-      v-if="isEditingTask && editingTaskUid === group.uid()"
+      v-if="isEditingTask && editingTaskId === group.id"
       @keyup.esc="stopTaskEditing()"
       v-click-outside="stopTaskEditing"
       v-esc-outside="stopTaskEditing")
@@ -198,7 +198,7 @@
         if (this.timerActive) {
           const entry = this.group.children
             .find(entry => entry instanceof Entry)
-          if (entry && entry.uid() === this.timerEntry.uid()) {
+          if (entry && entry.id === this.timerEntry.id) {
             return entry
           }
         }
@@ -247,7 +247,7 @@
         'timerActive',
         'timerEntry',
         'isEditingTask',
-        'editingTaskUid',
+        'editingTaskId',
         'editingTaskFields',
         'editingFocus',
         'taskDelimiter',
@@ -289,7 +289,7 @@
         let payload = {
           focus: field,
           edit: {},
-          uid: this.group.uid()
+          id: this.group.id
         }
         if (this.group.type === 'task') {
           payload.edit.details = this.group.details()
@@ -407,7 +407,7 @@
 </script>
 
 <style lang="stylus">
-  @import '../assets/stylesheets/variables.styl'
+  @import '~@/assets/stylesheets/variables.styl'
 
   .group-item
     & > .item

@@ -1,3 +1,6 @@
+import Entry from '@/models/entry'
+import { parseHttpResponse } from '@/utils/http'
+
 function isDev () {
   return Boolean(window.location.host.match(/local\./))
 }
@@ -108,96 +111,57 @@ class Mitaba {
       mode: 'cors',
       headers,
       body
-    }).then(r => {
-      if (r.status >= 200 && r.status < 300) {
-        return r.json()
-      } else {
-        r.text().then(message => console.log(message, r))
-        throw new Error(r)
-      }
-    }).then(auth => {
+    }).then(parseHttpResponse).then(auth => {
+      // Сохраняем себе токен
       this.token = auth.token
       return auth
     })
   }
 
   getProfile () {
-    return fetch(
-      this._endpoint('profile'),
-      this._createConfig('GET')
-    ).then(r => {
-      if (r.status >= 200 && r.status < 300) {
-        return r.json()
-      } else {
-        r.text().then(message => console.log(message, r))
-        throw new Error(r)
-      }
-    }).then(profile => {
-      profile.providers = profile.providers.map(p => p.split('-')[0])
-      return profile
-    })
+    const config = this._createConfig('GET')
+    return fetch(this._endpoint('profile'), config)
+      .then(parseHttpResponse)
+      .then(profile => {
+        // Очеловечиваем список провайдеров
+        profile.providers = profile.providers.map(p => p.split('-')[0])
+        return profile
+      })
   }
 
   getEntries () {
-    return fetch(
-      this._endpoint('entries'),
-      this._createConfig('GET')
-    ).then(r => {
-      if (r.status >= 200 && r.status < 300) {
-        return r.json()
-      } else {
-        r.text().then(message => console.log(message, r))
-        throw new Error(r)
-      }
-    })
+    const config = this._createConfig('GET')
+    return fetch(this._endpoint('entries'), config)
+      .then(parseHttpResponse)
+      .then(entries => {
+        // Возвращаем готовые Entry-объекты
+        return entries.map(e => new Entry(e))
+      })
   }
 
   postEntries (entries) {
     const config = this._createConfig('POST')
     config.body = JSON.stringify(entries)
-    return fetch(
-      this._endpoint('entries'),
-      config
-    ).then(r => {
-      if (r.status >= 200 && r.status < 300) {
-        return r.json()
-      } else {
-        r.text().then(message => console.log(message, r))
-        throw new Error(r)
-      }
-    })
+    return fetch(this._endpoint('entries'), config)
+      .then(parseHttpResponse)
+      .then(entries => {
+        // Возвращаем готовые Entry-объекты
+        return entries.map(e => new Entry(e))
+      })
   }
 
   patchEntries (entries) {
     const config = this._createConfig('PATCH')
     config.body = JSON.stringify(entries)
-    return fetch(
-      this._endpoint('entries'),
-      config
-    ).then(r => {
-      if (r.status >= 200 && r.status < 300) {
-        return r.json()
-      } else {
-        r.text().then(message => console.log(message, r))
-        throw new Error(r)
-      }
-    })
+    return fetch(this._endpoint('entries'), config)
+      .then(parseHttpResponse)
   }
 
   deleteEntries (entries) {
     const config = this._createConfig('DELETE')
     config.body = JSON.stringify(entries)
-    return fetch(
-      this._endpoint('entries'),
-      config
-    ).then(r => {
-      if (r.status >= 200 && r.status < 300) {
-        return 'Deleted successfully'
-      } else {
-        r.text().then(message => console.log(message, r))
-        throw new Error(r)
-      }
-    })
+    return fetch(this._endpoint('entries'), config)
+      .then(parseHttpResponse)
   }
 
   _endpoint (name) {

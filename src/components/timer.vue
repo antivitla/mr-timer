@@ -1,14 +1,13 @@
 <template lang="pug">
-  .timer(
+  //- .timer(
     :class="{ 'active': timerActive, 'with-context': contextDetails }")
+  .timer(
+    :class="{ 'active': timerActive }")
     button(@click="toggle")
       span.main
-        span.hrs(
-          :class="{ low: hrs < 1 }") {{ hrs }}
-        span.delimiter(
-          :class="{ low: min < 1 && hrs < 1 }") :
-        span.min(
-          :class="{ low: min < 1 && hrs < 1 }") {{ min }}
+        span.hrs(:class="{ low: hrs < 1 }") {{ hrs }}
+        span.delimiter(:class="{ low: min < 1 && hrs < 1 }") :
+        span.min(:class="{ low: min < 1 && hrs < 1 }") {{ min }}
       span.sec {{ sec }}
       span.ms {{ ms }}
     list-input(
@@ -19,36 +18,34 @@
       :focus="timerActive"
       :reset-focus-on="resetFocusOnEvent"
       :placeholder="placeholder")
-    task-context(
-      v-if="context"
-      :context="context")
+    //- task-context(
+    //-   v-if="context"
+    //-   :context="context")
 </template>
 
 <script>
   import { mapGetters, mapActions, mapMutations } from 'vuex'
-  import listInput from './list-input'
-  import taskContext from './task-context'
   import funny from 'mr-funny'
   import funnyTemplates from '@/funny/templates'
-  import capitalize from 'lodash/capitalize'
   import Entry from '@/models/entry'
+  import listInput from '@/components/other/list-input'
+  // import taskContext from '@/components/other/task-context'
   import { Storage } from '@/store/storage'
   import { taskDelimiter } from '@/store/ui'
+  import capitalize from '@/utils/capitalize'
   import { duration, durationFraction } from '@/utils/duration'
-  import {
-    wrapContextDetails,
-    unwrapContextDetails } from '@/utils/group'
-  import bus from '@/event-bus'
+
+  // import bus from '@/event-bus'
 
   function funnyTask (locale) {
     return funny.phrase(funnyTemplates[locale].base)
   }
 
-  function parseList (list) {
-    return (typeof list === 'string' ? list.split(taskDelimiter) : list)
-      .map(item => item.replace(/\n/g, '').trim())
-      .filter(item => item)
-  }
+  // function parseList (list) {
+  //   return (typeof list === 'string' ? list.split(taskDelimiter) : list)
+  //     .map(item => item.replace(/\n/g, '').trim())
+  //     .filter(item => item)
+  // }
 
   let tickTimeout
 
@@ -67,82 +64,103 @@
     },
 
     created () {
+      // Set funny placholer initially
       this.placeholder = capitalize(funnyTask(this.locale))
 
-      bus.$on('start-task', payload => {
-        this.start(payload.entry)
-        this.$emit(this.resetFocusOnEvent)
-      })
-
-      bus.$on('update-entry', payload => {
-        const entry = payload.entry
-        if (entry.uid() === this.timerEntry.uid()) {
-          let details = payload.updatedEntry.details
-          if (this.contextDetails) {
-            this.details = unwrapContextDetails(this.contextDetails, details)
-          }
-          this.setTimerEntry({
-            entry: new Entry(payload.updatedEntry)
-          })
+      // React on stop and start of timer
+      const actions = {
+        'startTimer': action => {
+          this.onStart(action.payload.entry)
+          this.$emit(this.resetFocusOnEvent)
+        },
+        'stopTimer': action => {
+          this.onStop()
+        }
+      }
+      this.unsubscribe = this.$store.subscribeAction(action => {
+        if (actions[action.type]) {
+          actions[action.type](action)
         }
       })
 
-      bus.$on('batch-update-entries', payload => {
-        let entry = payload.entries.find(entry => {
-          return entry.uid() === this.timerEntry.uid()
-        })
-        if (entry) {
-          const source = payload.update.details.source.join(taskDelimiter)
-          const target = payload.update.details.target.join(taskDelimiter)
-          const details = this.timerEntry.details
-            .join(taskDelimiter)
-            .replace(new RegExp('^' + source), target)
-            .split(taskDelimiter)
-            .filter(i => i)
-            .map(i => i.trim())
-            .filter(i => i)
-          const timerEntry = new Entry(Object.assign({}, this.timerEntry, { details }))
-          this.setTimerEntry({ entry: timerEntry })
-          if (this.contextDetails) {
-            this.details = unwrapContextDetails(this.contextDetails, details)
-            this.edit.details = this.details.join(taskDelimiter)
-          } else {
-            this.details = details.slice(0)
-            this.edit.details = this.details.join(taskDelimiter)
-          }
-        }
-      })
+      // bus.$on('start-task', payload => {
+      //   this.start(payload.entry)
+      //   this.$emit(this.resetFocusOnEvent)
+      // })
 
-      bus.$on('set-context', payload => {
-        const storageEntry = Storage.entries.find(entry => {
-          return entry.uid() === this.timerEntry.uid()
-        })
-        if (!storageEntry) {
-          console.warn('Произошел рассинхрон таймера с хранилищем',
-            this.timerEntry,
-            'не найден в хранилище. Но возможно и пофиг, особенно если таймер не бежит.')
-          return
-        }
-        this.details = unwrapContextDetails(this.contextDetails, storageEntry.details)
-        this.edit.details = this.details.join(taskDelimiter)
-      })
+      // bus.$on('update-entry', payload => {
+      //   const entry = payload.entry
+      //   if (entry.id === this.timerEntry.id) {
+      //     let details = payload.updatedEntry.details
+      //     if (this.contextDetails) {
+      //       this.details = unwrapContextDetails(this.contextDetails, details)
+      //     }
+      //     this.setTimerEntry({
+      //       entry: new Entry(payload.updatedEntry)
+      //     })
+      //   }
+      // })
 
-      bus.$on('clear-context', payload => {
-        const storageEntry = Storage.entries.find(entry => {
-          return entry.uid() === this.timerEntry.uid()
-        })
-        if (!storageEntry) {
-          console.warn('Произошел рассинхрон таймера с хранилищем',
-            this.timerEntry,
-            'не найден в хранилище. Но возможно и пофиг, особенно если таймер не бежит.')
-          return
-        }
-        const details = storageEntry.details.slice(0)
-        const timerEntry = new Entry(Object.assign({}, this.timerEntry, { details }))
-        this.setTimerEntry({ entry: timerEntry })
-        this.details = details.slice(0)
-        this.edit.details = this.details.join(taskDelimiter)
-      })
+      // bus.$on('batch-update-entries', payload => {
+      //   let entry = payload.entries.find(entry => {
+      //     return entry.id === this.timerEntry.id
+      //   })
+      //   if (entry) {
+      //     const source = payload.update.details.source.join(taskDelimiter)
+      //     const target = payload.update.details.target.join(taskDelimiter)
+      //     const details = this.timerEntry.details
+      //       .join(taskDelimiter)
+      //       .replace(new RegExp('^' + source), target)
+      //       .split(taskDelimiter)
+      //       .filter(i => i)
+      //       .map(i => i.trim())
+      //       .filter(i => i)
+      //     const timerEntry = new Entry(Object.assign({}, this.timerEntry, { details }))
+      //     this.setTimerEntry({ entry: timerEntry })
+      //     if (this.contextDetails) {
+      //       this.details = unwrapContextDetails(this.contextDetails, details)
+      //       this.edit.details = this.details.join(taskDelimiter)
+      //     } else {
+      //       this.details = details.slice(0)
+      //       this.edit.details = this.details.join(taskDelimiter)
+      //     }
+      //   }
+      // })
+
+      // bus.$on('set-context', payload => {
+      //   const storageEntry = Storage.entries.find(entry => {
+      //     return entry.id === this.timerEntry.id
+      //   })
+      //   if (!storageEntry) {
+      //     console.warn('Произошел рассинхрон таймера с хранилищем',
+      //       this.timerEntry,
+      //       'не найден в хранилище. Но возможно и пофиг, особенно если таймер не бежит.')
+      //     return
+      //   }
+      //   this.details = unwrapContextDetails(this.contextDetails, storageEntry.details)
+      //   this.edit.details = this.details.join(taskDelimiter)
+      // })
+
+      // bus.$on('clear-context', payload => {
+      //   const storageEntry = Storage.entries.find(entry => {
+      //     return entry.id === this.timerEntry.id
+      //   })
+      //   if (!storageEntry) {
+      //     console.warn('Произошел рассинхрон таймера с хранилищем',
+      //       this.timerEntry,
+      //       'не найден в хранилище. Но возможно и пофиг, особенно если таймер не бежит.')
+      //     return
+      //   }
+      //   const details = storageEntry.details.slice(0)
+      //   const timerEntry = new Entry(Object.assign({}, this.timerEntry, { details }))
+      //   this.setTimerEntry({ entry: timerEntry })
+      //   this.details = details.slice(0)
+      //   this.edit.details = this.details.join(taskDelimiter)
+      // })
+    },
+
+    beforeDestroy () {
+      this.unsubscribe()
     },
 
     computed: {
@@ -160,7 +178,7 @@
         'timerDuration',
         'timerActive',
         'timerEntry',
-        'contextDetails',
+        // 'contextDetails',
         'context'
       ])
     },
@@ -168,72 +186,77 @@
     methods: {
       toggle () {
         if (!this.timerActive) {
-          this.start()
+          const details = this.details.length ? this.details.slice(0) : [this.placeholder]
+          this.startTimer({ entry: new Entry({ details }) })
         } else {
-          this.stop()
+          this.stopTimer()
         }
       },
-      start (newEntry) {
-        this.stop()
-        // Start timer with guaranteed details
-        let details
-        if (newEntry && newEntry.details && newEntry.details.length) {
-          details = newEntry.details.slice(0)
-        } else {
-          if (!this.details.length) {
-            details = [this.placeholder]
-          } else {
-            details = this.details.slice(0)
-          }
-          // Если мы самостоятально генерим имя записи,
-          // не забыть цепануть контекст
-          if (this.contextDetails) {
-            details = wrapContextDetails(this.contextDetails, details)
-          }
-        }
-        // Сохраняем себе копию деталей для инпута
-        // с учётом контекста
-        if (this.contextDetails) {
-          this.details = unwrapContextDetails(this.contextDetails, details)
-        } else {
-          this.details = details.slice(0)
-        }
+      onStart (entry) {
+        this.onStop()
+        this.details = entry.details.slice(0)
         this.edit.details = this.details.join(taskDelimiter)
-        // Создаём запись для таймера и хранилища
-        const entry = new Entry(Object.assign({}, newEntry, { details }))
-        // Стартуем таймер
-        this.startTimer({ entry })
-        // Стартуем тик миллисекунд
-        this.tick()
-        // Добавляем запись в хранилище
-        this.createEntry({ entry })
-        // Генерим новый плейсхолдер-заглушку задачи
         this.placeholder = capitalize(funnyTask(this.locale))
+        this.tick()
       },
-      updateDetails (event) {
-        let details = parseList(event.target.value)
-        this.edit.details = event.target.value
-        this.details = details
-
-        // If timer running, changes to task name
-        // will replace active entry's details
-        if (this.timerActive) {
-          if (!details || !details.length) {
-            details = [capitalize(funnyTask(this.locale))]
-          }
-          if (this.contextDetails) {
-            details = wrapContextDetails(this.contextDetails, details)
-          }
-          const update = new Entry(Object.assign({}, this.timerEntry, { details }))
-          this.updateEntry({ entry: this.timerEntry, update })
-        }
-      },
-      stop () {
-        // Stop
-        this.stopTimer()
-        // Stop ms tick
+      onStop () {
         this.stopTick()
       },
+      // start (newEntry) {
+      //   this.stop()
+      //   // Start timer with guaranteed details
+      //   let details
+      //   if (newEntry && newEntry.details && newEntry.details.length) {
+      //     details = newEntry.details.slice(0)
+      //   } else {
+      //     if (!this.details.length) {
+      //       details = [this.placeholder]
+      //     } else {
+      //       details = this.details.slice(0)
+      //     }
+      //     // // Если мы самостоятально генерим имя записи,
+      //     // // не забыть цепануть контекст
+      //     // if (this.contextDetails) {
+      //     //   details = wrapContextDetails(this.contextDetails, details)
+      //     // }
+      //   }
+      //   // // Сохраняем себе копию деталей для инпута
+      //   // // с учётом контекста
+      //   // if (this.contextDetails) {
+      //   //   this.details = unwrapContextDetails(this.contextDetails, details)
+      //   // } else {
+      //   //   this.details = details.slice(0)
+      //   // }
+      //   this.edit.details = this.details.join(taskDelimiter)
+      //   // Создаём запись для таймера и хранилища
+      //   // const entry = new Entry(Object.assign({}, newEntry, { details }))
+      //   // Стартуем таймер
+      //   // this.startTimer({ entry })
+      //   // Стартуем тик миллисекунд
+      //   this.tick()
+      //   // // Добавляем запись в хранилище
+      //   // this.createEntry({ entry })
+      //   // Генерим новый плейсхолдер-заглушку задачи
+      //   this.placeholder = capitalize(funnyTask(this.locale))
+      // },
+      // updateDetails (event) {
+      //   let details = parseList(event.target.value)
+      //   this.edit.details = event.target.value
+      //   this.details = details
+
+      //   // If timer running, changes to task name
+      //   // will replace active entry's details
+      //   if (this.timerActive) {
+      //     if (!details || !details.length) {
+      //       details = [capitalize(funnyTask(this.locale))]
+      //     }
+      //     // if (this.contextDetails) {
+      //     //   details = wrapContextDetails(this.contextDetails, details)
+      //     // }
+      //     const update = new Entry(Object.assign({}, this.timerEntry, { details }))
+      //     this.updateEntry({ entry: this.timerEntry, update })
+      //   }
+      // },
       tick () {
         const d = new Date().getTime() - this.timerEntry.start
         this.ms = durationFraction(d).format('ms')
@@ -247,25 +270,28 @@
       ]),
       ...mapActions([
         'startTimer',
-        'stopTimer',
-        'createEntry',
-        'updateEntry',
-        'removeEntry'
+        'stopTimer'
+        // 'createEntry',
+        // 'updateEntry',
+        // 'removeEntry'
       ])
     },
 
     components: {
-      listInput,
-      taskContext
+      listInput
+      // taskContext
     }
   }
 </script>
 
 <style lang="stylus">
-  @import '../assets/stylesheets/variables.styl'
+  @import '~@/assets/stylesheets/variables'
 
   .timer
     position relative
+    margin-bottom 60px
+    transform translateX(-5px)
+    width calc(100% + 10px)
 
     button
       height 60px

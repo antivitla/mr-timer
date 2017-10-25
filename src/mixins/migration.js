@@ -1,6 +1,7 @@
 import Entry from '@/models/entry'
 import Petrov from '@/backend/petrov'
-import { mapMutations } from 'vuex'
+import { mapActions } from 'vuex'
+
 export default {
   methods: {
     getEntriesFromLocalStorage (key) {
@@ -12,7 +13,7 @@ export default {
         } else {
           try {
             entries = JSON.parse(raw).entries
-            resolve(entries)
+            resolve(entries.map(entry => new Entry(entry)))
           } catch (error) {
             reject(new Error(500))
           }
@@ -41,17 +42,15 @@ export default {
               }
             }
           })
-          .then(entries => resolve(entries))
+          .then(entries => resolve(entries.map(entry => new Entry(entry))))
           .catch(error => reject(new Error(error.message)))
       })
     },
-
     migrateEntries (entries) {
-      this.setEntries(entries.map(e => new Entry(e)))
+      return this.postEntries({ entries })
     },
-
-    ...mapMutations([
-      'setEntries'
+    ...mapActions([
+      'postEntries'
     ])
   }
 }

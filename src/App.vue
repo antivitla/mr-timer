@@ -2,10 +2,8 @@
   app-layout(
     :currency="currency"
     :is-currency-symbol-before="isCurrencySymbolBefore")
-
     //- TODO
     //- - Body Scroll Top Directive
-
     //- Top nav
     app-navbar.top(slot="page")
       h2(slot="left") Context
@@ -14,32 +12,28 @@
         :title="tipToggleSidebarTop")
         span.icon-button
           i.material-icons menu
-
     //- Timer
-    section.timer(slot="page")
-
+    timer(slot="page")
     //- Optional
-    //- section.optional(slot="page")
-
+    section.optional(slot="page")
+      mitaba
     //- Navbar
     app-navbar.menu(slot="page")
       div(slot="left") Actions
       div(slot="right")
-        custom-switch(:options="availableViewsAsOptions" v-model="viewModel")
-
+        custom-switch(
+          :options="availableViewsAsOptions"
+          v-model="viewModel")
     //- Views
     component(:is="viewComponent[viewModel]" slot="page")
-
     //- Footer
-    footer(slot="page")
-      p Footer
+    collection-footer(slot="page")
 
     //- Sidebar
     collection-sidebar(slot="sidebar")
-
     //- Modals
-    p(slot="modal") Modals
-    p(slot="modal") Modals 2
+    //- p(slot="modal") Modals
+    //- p(slot="modal") Modals 2
 </template>
 
 <script>
@@ -47,9 +41,14 @@
   import { mapGetters, mapMutations, mapActions } from 'vuex'
   import appNavbar from '@/components/layout/app-navbar'
   import appLayout from '@/components/layout/app-layout'
-  import toggleSidebar from '@/components/toggle-sidebar'
+  import toggleSidebar from '@/components/other/toggle-sidebar'
   import collectionSidebar from '@/components/collections/collection-sidebar'
-  import customSwitch from '@/components/custom-switch'
+  import collectionFooter from '@/components/collections/collection-footer'
+  import customSwitch from '@/components/other/custom-switch'
+  import timer from '@/components/timer'
+
+  // Debug
+  import mitaba from '@/components/debug/mitaba'
 
   // Views
   import viewHelp from '@/components/views/view-help'
@@ -84,15 +83,11 @@
       console.log(`Welcome to ${appTitle}`)
       // Init current view
       this.viewModel = this.currentView
-      console.log(this.viewModel)
       // Initial get entries
-      this.getEntries().then(r => {
-        console.log(r)
-      })
+      this.getEntries()
     },
     watch: {
       'viewModel': function (view) {
-        console.log(view)
         this.setCurrentView({ view })
       }
     },
@@ -125,23 +120,28 @@
       appNavbar,
       toggleSidebar,
       collectionSidebar,
+      collectionFooter,
       customSwitch,
       viewHelp,
       viewTasks,
       viewYears,
       viewMonths,
       viewDays,
-      viewStorage
+      viewStorage,
+      mitaba,
+      timer
     }
   }
 </script>
 
 <style lang="stylus">
-  @import 'assets/stylesheets/core'
+  @import '~@/assets/stylesheets/core'
+  @import '~@/directives/long-click'
 
   // Top Navbar Toggle Sidebar
   .app-navbar.top
     line-height 40px
+    margin-bottom 60px
     .toggle-sidebar
       display flex
       cursor pointer

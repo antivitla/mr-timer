@@ -12,22 +12,30 @@ export default {
       this.activateCurrency({ currency })
     }
     // Set url query when changing locale and currency
-    this.$store.subscribeAction((action) => {
-      if (action.type === 'activateLocale') {
+    const actions = {
+      'activateLocale': (action) => {
         const name = this.$route.name
         const query = Object.assign({}, this.$route.query, {
           locale: action.payload.locale
         })
         this.$router.push({ name, query })
-      }
-      if (action.type === 'activateCurrency') {
+      },
+      'activateCurrency': (action) => {
         const name = this.$route.name
         const query = Object.assign({}, this.$route.query, {
           currency: action.payload.currency
         })
         this.$router.push({ name, query })
       }
+    }
+    this.unsubscribe = this.$store.subscribeAction(action => {
+      if (actions[action.type]) {
+        actions[action.type](action)
+      }
     })
+  },
+  beforeDestroy () {
+    this.unsubscribe()
   },
   computed: {
     ...mapGetters([

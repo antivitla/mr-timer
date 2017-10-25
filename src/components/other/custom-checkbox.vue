@@ -6,15 +6,20 @@
       :id="id"
       :checked="value"
       @change="updateValue($event.target.checked)")
-    i.material-icons.on check_box
-    i.material-icons.off check_box_outline_blank
+    i.material-icons.on
+      span(v-if="!mark") check_box
+      span(v-else) check
+    i.material-icons.off
+      span(v-if="!mark") check_box_outline_blank
+      span.empty(v-else) check
 </template>
 <script>
   export default {
     name: 'custom-checkbox',
     props: {
       value: Boolean,
-      id: String
+      id: String,
+      mark: Boolean
     },
     methods: {
       updateValue (value) {
@@ -45,4 +50,6 @@
       display block
     input:checked ~ .off
       display none
+    .empty
+      opacity 0
 </style>

@@ -6,10 +6,10 @@
       v-click-outside="closeSidebar"
       v-esc-outside="closeSidebar")
       slot(name="sidebar") Sidebar
-    section.modal(
-      v-click-outside="closeModal"
-      v-esc-outside="closeModal")
-      slot(name="modal") Modal
+    //- section.modal(
+    //-   v-click-outside="closeModal"
+    //-   v-esc-outside="closeModal")
+    //-   slot(name="modal")
 </template>
 <script>
   import { mapGetters, mapMutations } from 'vuex'
@@ -83,8 +83,7 @@
       .page
         transform translateX(-100%)
         @media (min-width titamota-tablet-w)
-          transform translateX(-0px)
-          margin-right 400px
+          transform translateX(-400px)
       .sidebar
         transform translateX(0%)
         opacity 1

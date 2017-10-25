@@ -40,7 +40,7 @@
 </script>
 
 <style lang="stylus">
-  @import '../assets/stylesheets/variables'
+  @import '~@/assets/stylesheets/variables'
   .modal-wrapper
     left 0px
     top 0px
