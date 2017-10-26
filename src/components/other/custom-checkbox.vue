@@ -15,7 +15,6 @@
 </template>
 <script>
   export default {
-    name: 'custom-checkbox',
     props: {
       value: Boolean,
       id: String,

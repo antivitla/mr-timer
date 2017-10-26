@@ -32,7 +32,6 @@
   ]
 
   export default {
-    name: 'petrov',
     data () {
       return {
         url: Petrov.baseUrl,

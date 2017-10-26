@@ -24,9 +24,7 @@
   import { taskDelimiter } from '@/store/ui'
 
   export default {
-    props: [
-      'context'
-    ],
+    props: ['context'],
 
     computed: {
       name () {

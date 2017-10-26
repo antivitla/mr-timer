@@ -22,19 +22,23 @@ export const Days = (new Group({
 
 export function DaysPlugin (store) {
   store.subscribe((mutation, state) => {
-    if (mutation.type === 'addEntry') {
-      let resolvePath
-      if (store.getters['contextDetails']) {
-        let contextRootPath = store.getters['contextDetails']
-        resolvePath = function (entry) {
-          return [format(entry.start)]
-            .concat(entry.details.slice(contextRootPath.length))
-        }
-      }
-      Days.addEntry(mutation.payload.entry, 0, resolvePath)
+    if (mutation.type === 'addEntries') {
+      // let resolvePath
+      // if (store.getters['contextDetails']) {
+      //   let contextRootPath = store.getters['contextDetails']
+      //   resolvePath = function (entry) {
+      //     return [format(entry.start)]
+      //       .concat(entry.details.slice(contextRootPath.length))
+      //   }
+      // }
+      mutation.payload.entries.forEach(entry => {
+        Days.addEntry(entry)
+      })
     }
-    if (mutation.type === 'removeEntry') {
-      Days.removeEntry(mutation.payload.entry)
+    if (mutation.type === 'removeEntries') {
+      mutation.payload.entries.forEach(entry => {
+        Days.removeEntry(entry)
+      })
     }
     if (mutation.type === 'clearEntries') {
       Days.children = []

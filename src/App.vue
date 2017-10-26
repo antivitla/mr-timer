@@ -6,7 +6,7 @@
     //- - Body Scroll Top Directive
     //- Top nav
     app-navbar.top(slot="page")
-      h2(slot="left") Context
+      div(slot="left") Context
       toggle-sidebar#toggle-sidebar-top(
         slot="right"
         :title="tipToggleSidebarTop")
@@ -15,11 +15,13 @@
     //- Timer
     timer(slot="page")
     //- Optional
-    section.optional(slot="page")
+    //- section.optional(slot="page")
       mitaba
     //- Navbar
     app-navbar.menu(slot="page")
-      div(slot="left") Actions
+      div(slot="left")
+        filter-entries(v-if="viewModel === 'storage'")
+        div(v-else) Currency
       div(slot="right")
         custom-switch(
           :options="availableViewsAsOptions"
@@ -45,6 +47,7 @@
   import collectionSidebar from '@/components/collections/collection-sidebar'
   import collectionFooter from '@/components/collections/collection-footer'
   import customSwitch from '@/components/other/custom-switch'
+  import filterEntries from '@/components/other/filter-entries'
   import timer from '@/components/timer'
 
   // Debug
@@ -122,6 +125,7 @@
       collectionSidebar,
       collectionFooter,
       customSwitch,
+      filterEntries,
       viewHelp,
       viewTasks,
       viewYears,

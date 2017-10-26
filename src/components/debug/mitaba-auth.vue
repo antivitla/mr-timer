@@ -28,7 +28,6 @@
   import { mapGetters, mapActions } from 'vuex'
 
   export default {
-    name: 'mitaba-auth',
     computed: {
       ...mapGetters([
         'userProfile'

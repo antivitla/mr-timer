@@ -92,7 +92,7 @@
 
     group-item(
       v-if="child.type"
-      v-for="child in filterGroupChildren(group.children)"
+      v-for="child in group.children"
       :key="child.name"
       :group="child")
 </template>
@@ -101,19 +101,18 @@
   import { mapGetters, mapMutations, mapActions } from 'vuex'
   import { durationHuman, durationEditable } from '@/utils/duration'
   import moment from 'moment'
-  import {
-    extractEntries,
-    parentOfDifferentType,
-    filterGroupChildren,
-    wrapContextDetails } from '@/utils/group'
+  import { extractEntries, parentOfDifferentType } from '@/utils/group'
+    // parentOfDifferentType,
+    // filterGroupChildren,
+    // wrapContextDetails }
   import { translate } from '@/store/i18n'
   import { taskDelimiter } from '@/store/ui'
   import longClick from '@/directives/long-click'
   import clickOutside from '@/directives/click-outside'
   import escOutside from '@/directives/esc-outside'
   import { focusAndSelectAll } from '@/directives/focus'
-  import listInput from '@/components/list-input'
-  import groupName from '@/components/group-name'
+  import listInput from '@/components/other/list-input'
+  import groupName from '@/components/items/group-name'
   import bus from '@/event-bus'
   import Entry from '@/models/entry'
   import Group from '@/models/group'
@@ -129,18 +128,16 @@
   const urlRegexp = /((https?):\/\/.*?(\s|$))/
 
   export default {
-    props: [
-      'group'
-    ],
-
+    name: 'group-item',
+    props: ['group'],
     data () {
       return {
         edit: {
           details: null,
           duration: null
         },
-        debounceWheel: debounce(),
-        filterGroupChildren
+        debounceWheel: debounce()
+        // filterGroupChildren
       }
     },
 
@@ -150,12 +147,12 @@
     },
 
     mounted () {
-      bus.$on('tick-timer', () => {
-        const entry = this.trackingEntry
-        if (entry) {
-          entry.stop = this.timerEntry.stop
-        }
-      })
+      // bus.$on('tick-timer', () => {
+      //   const entry = this.trackingEntry
+      //   if (entry) {
+      //     entry.stop = this.timerEntry.stop
+      //   }
+      // })
     },
 
     computed: {
@@ -268,9 +265,9 @@
         if (this.group.children[0] instanceof Group) {
           details = details.concat(funnyTask(this.locale))
         }
-        if (this.contextDetails) {
-          details = wrapContextDetails(this.contextDetails, details)
-        }
+        // if (this.contextDetails) {
+        //   details = wrapContextDetails(this.contextDetails, details)
+        // }
         bus.$emit('start-task', {
           entry: new Entry({
             start: new Date().getTime(),
@@ -317,10 +314,10 @@
               .filter(i => i)
               .map(d => d.trim())
               .filter(i => i)
-          if (this.contextDetails) {
-            source = wrapContextDetails(this.contextDetails, source)
-            target = wrapContextDetails(this.contextDetails, target)
-          }
+          // if (this.contextDetails) {
+          //   source = wrapContextDetails(this.contextDetails, source)
+          //   target = wrapContextDetails(this.contextDetails, target)
+          // }
           update.details = { source, target }
         }
         if (this.edit.duration) {
@@ -374,9 +371,9 @@
         })
       },
       setGroupAsContext () {
-        if (this.group.children[0] instanceof Group) {
-          this.setContextByGroup({ group: this.group })
-        }
+        // if (this.group.children[0] instanceof Group) {
+        //   this.setContextByGroup({ group: this.group })
+        // }
       },
       gotoHref (href) {
         window.open(href, '_blank')

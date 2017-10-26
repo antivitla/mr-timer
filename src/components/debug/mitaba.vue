@@ -49,8 +49,6 @@
   }
 
   export default {
-    name: 'mitaba',
-
     data () {
       return {
         response: {},

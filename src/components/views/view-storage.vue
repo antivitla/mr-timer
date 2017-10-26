@@ -9,7 +9,6 @@
   import { Storage } from '@/store/storage'
   import storageItem from '@/components/items/storage-item'
   export default {
-    name: 'view-storage',
     data () {
       return {
         Storage

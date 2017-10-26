@@ -1,10 +1,22 @@
 <template lang="pug">
   .view
-    p Months
+    group-item(
+      v-for="month in Months.children"
+      :key="month.name"
+      :group="month")
 </template>
 <script>
+  import { Months } from '@/store/groups/months'
+  import groupItem from '@/components/items/group-item'
   export default {
-    name: 'view-months'
+    data () {
+      return {
+        Months
+      }
+    },
+    components: {
+      groupItem
+    }
   }
 </script>
 <style lang="stylus">

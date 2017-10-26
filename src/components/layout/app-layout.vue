@@ -16,7 +16,6 @@
   import clickOutside from '@/directives/click-outside'
   import escOutside from '@/directives/esc-outside'
   export default {
-    name: 'app-layout',
     computed: {
       appLayoutClass () {
         return {

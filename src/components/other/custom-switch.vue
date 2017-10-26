@@ -9,7 +9,6 @@
   import i18nLabel from '@/mixins/i18n-label'
 
   export default {
-    name: 'custom-switch',
     props: {
       options: Array,
       value: String

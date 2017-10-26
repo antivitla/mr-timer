@@ -15,7 +15,6 @@
 
   export default {
     props: ['group'],
-
     computed: {
       displayName () {
         return this[this.group.type]
@@ -105,15 +104,15 @@
       &.undefined
         display none
       &.github
-        background-image url('../assets/images/github.svg')
+        background-image url('~@/assets/images/github.svg')
       &.basecamp
-        background-image url('../assets/images/basecamp.svg')
+        background-image url('~@/assets/images/basecamp.svg')
       &.asana
-        background-image url('../assets/images/asana.png')
+        background-image url('~@/assets/images/asana.png')
       &.trello
-        background-image url('../assets/images/trello.svg')
+        background-image url('~@/assets/images/trello.svg')
       &.bitbucket
-        background-image url('../assets/images/bitbucket.svg')
+        background-image url('~@/assets/images/bitbucket.svg')
       &.atlassian
-        background-image url('../assets/images/atlassian.svg')
+        background-image url('~@/assets/images/atlassian.svg')
 </style>

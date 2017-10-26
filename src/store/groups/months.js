@@ -20,19 +20,23 @@ export const Months = (new Group({
 
 export function MonthsPlugin (store) {
   store.subscribe((mutation, state) => {
-    if (mutation.type === 'addEntry') {
-      let resolvePath
-      if (store.getters['contextDetails']) {
-        let contextRootPath = store.getters['contextDetails']
-        resolvePath = function (entry) {
-          return [format(entry.start)]
-            .concat(entry.details.slice(contextRootPath.length))
-        }
-      }
-      Months.addEntry(mutation.payload.entry, 0, resolvePath)
+    if (mutation.type === 'addEntries') {
+      // let resolvePath
+      // if (store.getters['contextDetails']) {
+      //   let contextRootPath = store.getters['contextDetails']
+      //   resolvePath = function (entry) {
+      //     return [format(entry.start)]
+      //       .concat(entry.details.slice(contextRootPath.length))
+      //   }
+      // }
+      mutation.payload.entries.forEach(entry => {
+        Months.addEntry(entry)
+      })
     }
-    if (mutation.type === 'removeEntry') {
-      Months.removeEntry(mutation.payload.entry)
+    if (mutation.type === 'removeEntries') {
+      mutation.payload.entries.forEach(entry => {
+        Months.removeEntry(entry)
+      })
     }
     if (mutation.type === 'clearEntries') {
       Months.children = []

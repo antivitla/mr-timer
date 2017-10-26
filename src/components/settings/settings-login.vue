@@ -25,7 +25,6 @@
   import { mapGetters, mapActions } from 'vuex'
   import { translate } from '@/store/i18n'
   export default {
-    name: 'settings-login',
     data () {
       return {
         whichProviderWaitingForAuthTemp: 'github'

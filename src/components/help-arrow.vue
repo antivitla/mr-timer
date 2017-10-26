@@ -11,7 +11,6 @@
 <script>
   import arrow from '@/directives/arrow'
   export default {
-    name: 'help-arrow',
     props: ['target'],
     directives: {
       arrow

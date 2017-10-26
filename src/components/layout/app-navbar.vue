@@ -5,11 +5,6 @@
     div.right
       slot(name="right") Right
 </template>
-<script>
-  export default {
-    name: 'app-navbar'
-  }
-</script>
 <style lang="stylus">
   @import '~@/assets/stylesheets/variables'
 

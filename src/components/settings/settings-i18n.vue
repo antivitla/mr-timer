@@ -17,7 +17,6 @@
   import capitalize from '@/utils/capitalize'
   import i18nLabel from '@/mixins/i18n-label'
   export default {
-    name: 'settings-i18n',
     data () {
       return {
         capitalize,

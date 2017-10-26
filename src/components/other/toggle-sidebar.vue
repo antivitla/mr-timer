@@ -5,7 +5,6 @@
 <script>
   import { mapMutations } from 'vuex'
   export default {
-    name: 'toggle-sidebar',
     methods: {
       ...mapMutations([
         'toggleSidebar'

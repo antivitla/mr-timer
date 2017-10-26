@@ -8,7 +8,6 @@
   import articleWelcome from '@/components/articles/article-welcome'
 
   export default {
-    name: 'view-help',
     components: {
       articleHelp,
       articleWelcome

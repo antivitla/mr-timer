@@ -71,7 +71,6 @@
 
   export default {
     props: ['entry'],
-
     data () {
       return {
         edit: {

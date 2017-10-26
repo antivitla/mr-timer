@@ -1,9 +1,8 @@
 <template lang="pug">
   //- .timer(
     :class="{ 'active': timerActive, 'with-context': contextDetails }")
-  .timer(
-    :class="{ 'active': timerActive }")
-    button(@click="toggle")
+  .timer(:class="{ 'active': timerActive || timerIsQuickActivated }")
+    button(@click="toggle" @mousedown="quickActivate")
       span.main
         span.hrs(:class="{ low: hrs < 1 }") {{ hrs }}
         span.delimiter(:class="{ low: min < 1 && hrs < 1 }") :
@@ -59,7 +58,8 @@
         placeholder: '',
         ms: '000',
         resetFocusOnEvent: 'start-task',
-        Storage: Storage
+        Storage: Storage,
+        timerIsQuickActivated: false
       }
     },
 
@@ -192,6 +192,14 @@
           this.stopTimer()
         }
       },
+      quickActivate () {
+        if (!this.timerActive) {
+          this.timerIsQuickActivated = true
+          setTimeout(() => {
+            this.timerIsQuickActivated = false
+          }, 300)
+        }
+      },
       onStart (entry) {
         this.onStop()
         this.details = entry.details.slice(0)
@@ -289,7 +297,7 @@
 
   .timer
     position relative
-    margin-bottom 60px
+    margin-bottom 90px
     transform translateX(-5px)
     width calc(100% + 10px)
 
