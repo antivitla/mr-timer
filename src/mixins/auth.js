@@ -23,6 +23,9 @@ export default {
     // Check authorized state and load token
     if (this.authStep === authSteps.AUTHORIZED) {
       Mitaba.token = this.authToken
+    } else {
+      // Or clear user data
+      this.clearUser()
     }
   },
   computed: {
@@ -42,7 +45,8 @@ export default {
   },
   methods: {
     ...mapMutations([
-      'closeSidebar'
+      'closeSidebar',
+      'clearUser'
     ]),
     ...mapActions([
       'authorizeWithMitaba'
