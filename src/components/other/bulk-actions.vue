@@ -1,13 +1,13 @@
 <template lang="pug">
-  .batch-actions
+  .bulk-actions
     span.icon-button.delete(
       :title="deleteLabel"
-      @click="batchRemove()")
+      @click="deleteSelectedEntries()")
       i.material-icons delete
-    span.label {{ selectedLabel(Selektion.entries.length) }}
+    span.label {{ selectedLabel(Selected.entries.length) }}
     span.icon-button.delete(
       :title="cancelLabel"
-      @click="selectedClear()")
+      @click="clearSelectedEntries()")
       i.material-icons block
 </template>
 
@@ -16,12 +16,12 @@
   import pluralize from '@/utils/pluralize'
   import capitalize from 'lodash/capitalize'
   import { translate } from '@/store/i18n'
-  import { Selektion } from '@/store/selection'
+  import { Selected } from '@/store/selected'
 
   export default {
     data () {
       return {
-        Selektion
+        Selected
       }
     },
 
@@ -49,24 +49,22 @@
         const or = t.or
         return q + ' ' + entries + ' ' + or
       },
-      batchRemove () {
-        this.batchRemoveEntries({
-          entries: this.Selektion.entries
-        })
-        this.selectedClear()
+      deleteSelectedEntries () {
+        this.deleteEntries({ entries: this.Selected.entries })
+        this.clearSelectedEntries()
       },
       ...mapMutations([
-        'selectedClear'
+        'clearSelectedEntries'
       ]),
       ...mapActions([
-        'batchRemoveEntries'
+        'deleteEntries'
       ])
     }
   }
 </script>
 
 <style lang="stylus">
-  .batch-actions
+  .bulk-actions
     display flex
     font-size 14px
     line-height 24px

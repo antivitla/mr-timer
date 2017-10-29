@@ -4,10 +4,12 @@
       v-for="entry in Storage.entries"
       :key="entry.id"
       :entry="entry")
+    view-pagination(type="storage")
 </template>
 <script>
   import { Storage } from '@/store/storage'
   import storageItem from '@/components/items/storage-item'
+  import viewPagination from '@/components/views/view-pagination'
   export default {
     data () {
       return {
@@ -15,7 +17,8 @@
       }
     },
     components: {
-      storageItem
+      storageItem,
+      viewPagination
     }
   }
 </script>

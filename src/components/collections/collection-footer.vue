@@ -17,7 +17,7 @@
     display: block;
     padding-top: 40px;
     padding-bottom: 40px;
-    box-shadow: 0 -1px 0 0 titamota-color-line;
+    // box-shadow: 0 -1px 0 0 titamota-color-line;
     .chibi
       max-width 100%
       margin 50px auto 100px auto

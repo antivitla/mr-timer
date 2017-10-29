@@ -16,6 +16,10 @@ const mutations = {
     }
   },
 
+  clearSelectedEntries (state, payload) {
+    Selected.entries = []
+  },
+
   selectedClear (state, payload) {
     Selected.entries = []
   }

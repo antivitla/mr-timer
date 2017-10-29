@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
 import storage from './storage'
 import context from './context'
+import pagination from './pagination'
 import user from './user'
 import i18n from './i18n'
 import timer from './timer'
@@ -24,6 +25,7 @@ export default new Vuex.Store({
   modules: {
     storage,
     context,
+    pagination,
     user,
     i18n,
     timer,

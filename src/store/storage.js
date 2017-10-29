@@ -1,3 +1,4 @@
+import Entry from '@/models/entry'
 import Petrov from '@/backend/petrov'
 import Mitaba from '@/backend/mitaba'
 import Local from '@/backend/local'
@@ -61,11 +62,18 @@ const mutations = {
 const actions = {
   getEntries (context, payload) {
     const backend = driver[context.getters.backend]
+    // Проверить есть ли паджинация и запомнить её
+    // Делаем, собственно, запрос
     return lastPromise({
       type: 'getEntries',
       promise: backend.getEntries(payload)
     })
-    .then(entries => {
+    .then(response => {
+      // Создаём итемы
+      const entries = response.results.map(e => new Entry(e))
+      // Запоминаем паджинацию
+      context.commit('setPaginationCount', response)
+      // Запоминаем
       context.commit('clearEntries')
       context.commit('addEntries', { entries })
       return entries

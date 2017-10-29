@@ -40,11 +40,11 @@
     return funny.phrase(funnyTemplates[locale].base)
   }
 
-  // function parseList (list) {
-  //   return (typeof list === 'string' ? list.split(taskDelimiter) : list)
-  //     .map(item => item.replace(/\n/g, '').trim())
-  //     .filter(item => item)
-  // }
+  function parseList (list) {
+    return (typeof list === 'string' ? list.split(taskDelimiter) : list)
+      .map(item => item.replace(/\n/g, '').trim())
+      .filter(item => item)
+  }
 
   let tickTimeout
 
@@ -247,23 +247,29 @@
       //   // Генерим новый плейсхолдер-заглушку задачи
       //   this.placeholder = capitalize(funnyTask(this.locale))
       // },
+
+      updateDetails (event) {
+        let details = parseList(event.target.value)
+        this.edit.details = event.target.value
+        this.details = details
+        // If timer running, changes to task name
+        // will replace active entry's details
+        // if (this.timerActive) {
+        //   if (!details || !details.length) {
+        //     details = [capitalize(funnyTask(this.locale))]
+        //   }
+        //   // if (this.contextDetails) {
+        //   //   details = wrapContextDetails(this.contextDetails, details)
+        //   // }
+        //   const update = new Entry(Object.assign({}, this.timerEntry, { details }))
+        //   this.updateEntry({ entry: this.timerEntry, update })
+        // }
+      },
       // updateDetails (event) {
       //   let details = parseList(event.target.value)
       //   this.edit.details = event.target.value
       //   this.details = details
 
-      //   // If timer running, changes to task name
-      //   // will replace active entry's details
-      //   if (this.timerActive) {
-      //     if (!details || !details.length) {
-      //       details = [capitalize(funnyTask(this.locale))]
-      //     }
-      //     // if (this.contextDetails) {
-      //     //   details = wrapContextDetails(this.contextDetails, details)
-      //     // }
-      //     const update = new Entry(Object.assign({}, this.timerEntry, { details }))
-      //     this.updateEntry({ entry: this.timerEntry, update })
-      //   }
       // },
       tick () {
         const d = new Date().getTime() - this.timerEntry.start

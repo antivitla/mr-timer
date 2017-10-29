@@ -1,3 +1,4 @@
+import deepAssign from 'deep-assign'
 import Entry from '@/models/entry'
 import { parseHttpResponse } from '@/utils/http'
 
@@ -71,8 +72,8 @@ const apiConfig = {
 class Mitaba {
   constructor () {
     this.config = {
-      api: Object.assign({}, apiConfig, (isDev() ? apiConfigDev : {})),
-      social: Object.assign({}, socialConfig, (isDev() ? socialConfigDev : {}))
+      api: deepAssign({}, apiConfig, (isDev() ? apiConfigDev : {})),
+      social: deepAssign({}, socialConfig, (isDev() ? socialConfigDev : {}))
     }
     this.token = null
   }
@@ -116,10 +117,6 @@ class Mitaba {
     const config = this._createConfig('GET')
     return fetch(this._endpoint('entries'), config)
       .then(parseHttpResponse)
-      .then(entries => {
-        // Возвращаем готовые Entry-объекты
-        return entries.map(e => new Entry(e))
-      })
   }
 
   getPetrov (account) {

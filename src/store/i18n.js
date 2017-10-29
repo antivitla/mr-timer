@@ -80,6 +80,11 @@ const ru = ({
   upContext: 'выше контекст',
   standby: 'подождите немного',
   externalLink: 'перейти к',
+  pagination: {
+    previous: 'позже',
+    next: 'раньше',
+    all: 'все записи'
+  },
   settings: {
     profile: 'профиль',
     authorization: 'войти через',
@@ -168,6 +173,11 @@ const en = ({
   upContext: 'up context',
   standby: 'please stand by',
   externalLink: 'go to',
+  pagination: {
+    previous: 'later',
+    next: 'earlier',
+    all: 'all entries'
+  },
   settings: {
     profile: 'profile',
     authorization: 'login with',

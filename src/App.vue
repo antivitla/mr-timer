@@ -20,8 +20,9 @@
     //- Navbar
     app-navbar.menu(slot="page")
       div(slot="left")
-        filter-entries(v-if="viewModel === 'storage'")
-        div(v-else) Currency
+        filter-entries(v-if="viewModel === 'storage' && !Selected.entries.length")
+        bulk-actions(v-if="viewModel === 'storage' && Selected.entries.length")
+        div(v-if="viewModel !== 'storage'") Currency
       div(slot="right")
         custom-switch(
           :options="availableViewsAsOptions"
@@ -33,13 +34,13 @@
 
     //- Sidebar
     collection-sidebar(slot="sidebar")
+
     //- Modals
     //- p(slot="modal") Modals
     //- p(slot="modal") Modals 2
 </template>
 
 <script>
-  import { appTitle } from '@/store/app-info'
   import { mapGetters, mapMutations, mapActions } from 'vuex'
   import appNavbar from '@/components/layout/app-navbar'
   import appLayout from '@/components/layout/app-layout'
@@ -48,7 +49,11 @@
   import collectionFooter from '@/components/collections/collection-footer'
   import customSwitch from '@/components/other/custom-switch'
   import filterEntries from '@/components/other/filter-entries'
+  import bulkActions from '@/components/other/bulk-actions'
   import timer from '@/components/timer'
+  // Store
+  import { appTitle } from '@/store/app-info'
+  import { Selected } from '@/store/selected'
 
   // Debug
   import mitaba from '@/components/debug/mitaba'
@@ -79,7 +84,8 @@
           months: viewMonths,
           days: viewDays,
           storage: viewStorage
-        }
+        },
+        Selected
       }
     },
     created () {
@@ -126,6 +132,7 @@
       collectionFooter,
       customSwitch,
       filterEntries,
+      bulkActions,
       viewHelp,
       viewTasks,
       viewYears,
@@ -156,6 +163,11 @@
         .avatar
         .logout
           display none
+
+  // Menu Navbar
+  .app-navbar.menu
+    line-height 24px
+    border-bottom solid titamota-color-border 1px
 
   // Hide toggle-sidebar-top
   .sidebar-active
