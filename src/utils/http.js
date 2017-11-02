@@ -6,6 +6,11 @@ export function parseHttpResponse (response) {
   } else {
     response.text().then(text => {
       console.warn(response.status, response.statusText, text)
+      const errorElement = document.getElementById('debug-error')
+      if (errorElement) {
+        errorElement.classList.add('active')
+        errorElement.innerHTML = text
+      }
     })
     throw new Error(response.statusText)
   }

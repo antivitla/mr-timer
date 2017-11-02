@@ -69,8 +69,9 @@ const actions = {
       promise: backend.getEntries(payload)
     })
     .then(response => {
+      console.log(response)
       // Создаём итемы
-      const entries = response.results.map(e => new Entry(e))
+      const entries = response.entries.map(e => new Entry(e))
       // Запоминаем паджинацию
       context.commit('setPaginationCount', response)
       // Запоминаем

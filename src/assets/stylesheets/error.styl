@@ -1,0 +1,21 @@
+@import 'variables'
+
+#debug-error
+  display none !important
+  font-size 14px
+  color titamota-color-red
+  margin 60px
+  white-space pre-line
+  font-weight 400
+  overflow auto
+  &:before
+    content 'Server error occured, report this to antivitla@gmail.com:'
+    font-size 30px
+    line-height 1.2
+    font-weight 500
+    display block
+    margin-bottom 30px
+
+  &.active
+    display block !important
+

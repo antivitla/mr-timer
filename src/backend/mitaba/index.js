@@ -64,7 +64,7 @@ const apiConfigDev = {
 const apiConfig = {
   base: `https://mitaba.ru/api/`,
   profile: 'profile/?avatar_size=120',
-  entries: 'entries/',
+  entries: 'entries/?last=days&limit=2&offset=0',
   petrov: 'petrov/?account=',
   social: 'login/social/token_user/'
 }
