@@ -62,18 +62,22 @@ const mutations = {
 const actions = {
   getEntries (context, payload) {
     const backend = driver[context.getters.backend]
-    // Проверить есть ли паджинация и запомнить её
     // Делаем, собственно, запрос
     return lastPromise({
       type: 'getEntries',
       promise: backend.getEntries(payload)
     })
     .then(response => {
-      console.log(response)
       // Создаём итемы
       const entries = response.entries.map(e => new Entry(e))
       // Запоминаем паджинацию
-      context.commit('setPaginationCount', response)
+      if (response.pagination) {
+        if (!response.pagination.group) {
+          context.commit('setEntriesPagination', response.pagination)
+        } else {
+          context.commit('setGroupPagination', response.pagination)
+        }
+      }
       // Запоминаем
       context.commit('clearEntries')
       context.commit('addEntries', { entries })

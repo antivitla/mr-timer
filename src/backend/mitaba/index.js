@@ -1,6 +1,7 @@
 import deepAssign from 'deep-assign'
 import Entry from '@/models/entry'
-import { parseHttpResponse } from '@/utils/http'
+import axios from 'axios'
+import qs from 'qs'
 
 function isDev () {
   return Boolean(window.location.host.match(/local\./))
@@ -64,8 +65,8 @@ const apiConfigDev = {
 const apiConfig = {
   base: `https://mitaba.ru/api/`,
   profile: 'profile/?avatar_size=120',
-  entries: 'entries/?last=days&limit=2&offset=0',
-  petrov: 'petrov/?account=',
+  entries: 'entries/',
+  petrov: 'petrov/',
   social: 'login/social/token_user/'
 }
 
@@ -76,6 +77,12 @@ class Mitaba {
       social: deepAssign({}, socialConfig, (isDev() ? socialConfigDev : {}))
     }
     this.token = null
+    this.resource = axios.create({
+      baseURL: this.config.api.base,
+      headers: {
+        'Content-Type': 'application/json; charset=UTF-8'
+      }
+    })
   }
 
   authorizeWithProvider (provider) {
@@ -83,53 +90,55 @@ class Mitaba {
   }
 
   authorize ({ provider, code } = {}) {
-    const headers = new Headers()
-    headers.append('Content-Type', 'application/json; charset=UTF-8')
-    const body = JSON.stringify({
-      code,
-      provider: this.config.social[provider].MITABA_BACKEND,
-      redirect_uri: this._createProviderAuthRedirectUrl(provider)
-    })
-    return fetch(this._endpoint('social'), {
-      method: 'POST',
-      mode: 'cors',
-      headers,
-      body
-    }).then(parseHttpResponse).then(auth => {
-      // Сохраняем себе токен
-      this.token = auth.token
-      return auth
-    })
+    return this.resource
+      .post(this.config.api.social, {
+        redirect_uri: this._createProviderAuthRedirectUrl(provider),
+        provider,
+        code
+      }, {
+        withCredentials: true
+      })
+      .then(this._parseSuccessResponse)
+      .then(auth => {
+        // Сохраняем себе токен
+        this.token = auth.token
+        return auth
+      })
+      .catch(error => {
+        console.warn(error)
+      })
   }
 
   getProfile () {
-    const config = this._createConfig('GET')
-    return fetch(this._endpoint('profile'), config)
-      .then(parseHttpResponse)
+    return this.resource
+      .get(this.config.api.profile, this._protectedConfig())
+      .then(this._parseSuccessResponse)
       .then(profile => {
         // Очеловечиваем список провайдеров
         profile.providers = profile.providers.map(p => p.split('-')[0])
         return profile
       })
+      .catch(error => {
+        console.warn(error)
+      })
   }
 
-  getEntries () {
-    const config = this._createConfig('GET')
-    return fetch(this._endpoint('entries'), config)
-      .then(parseHttpResponse)
+  getEntries ({ params = {} }) {
+    return this.resource
+      .get(this.config.api.entries, this._protectedConfig({ params }))
+      .then(this._parseSuccessResponse)
   }
 
   getPetrov (account) {
-    const config = this._createConfig('GET')
-    return fetch(`${this._endpoint('petrov')}${account}`, config)
-      .then(parseHttpResponse)
+    return this.resource
+      .get(this.config.api.petrov, {params: { account }})
+      .then(this._parseSuccessResponse)
   }
 
   postEntries (entries) {
-    const config = this._createConfig('POST')
-    config.body = JSON.stringify(entries)
-    return fetch(this._endpoint('entries'), config)
-      .then(parseHttpResponse)
+    return this.resource
+      .post(this.config.api.entries, entries, this._protectedConfig())
+      .then(this._parseSuccessResponse)
       .then(entries => {
         // Возвращаем готовые Entry-объекты
         return entries.map(e => new Entry(e))
@@ -137,36 +146,30 @@ class Mitaba {
   }
 
   patchEntries (entries) {
-    const config = this._createConfig('PATCH')
-    config.body = JSON.stringify(entries)
-    return fetch(this._endpoint('entries'), config)
-      .then(parseHttpResponse)
+    return this.resource
+      .patch(this.config.api.entries, entries, this._protectedConfig())
+      .then(this._parseSuccessResponse)
   }
 
   deleteEntries (entries) {
-    const config = this._createConfig('DELETE')
-    config.body = JSON.stringify(entries)
-    return fetch(this._endpoint('entries'), config)
-      .then(parseHttpResponse)
+    return this.resource
+      .delete(this.config.api.entries, this._protectedConfig({data: entries}))
   }
 
-  _endpoint (name) {
-    return `${this.config.api.base}${this.config.api[name]}`
-  }
-
-  _createConfig (method = 'GET') {
+  _protectedConfig (config) {
     if (!this.token) {
       throw new Error('А токена-то нету! Без него с API не поработать')
     }
-    const headers = new Headers()
-    headers.append('Content-Type', 'application/json; charset=UTF-8')
-    headers.append('Authorization', `Token ${this.token}`)
-    return {
-      method: method.toUpperCase(),
-      mode: 'cors',
-      credentials: 'include',
-      headers
-    }
+    return Object.assign({
+      headers: {
+        'Authorization': `Token ${this.token}`
+      },
+      withCredentials: true
+    }, config)
+  }
+
+  _parseSuccessResponse (response) {
+    return response.data
   }
 
   _createProviderAuthRedirectUrl (provider) {
@@ -180,10 +183,7 @@ class Mitaba {
       response_type: 'code',
       scope: this.config.social[provider].SCOPE
     }
-    const urlParams = Object.keys(dialogParams)
-      .map(k => `${k}=${dialogParams[k]}`)
-      .join('&')
-    return `${this.config.social[provider].DIALOG_URL}?${urlParams}`
+    return `${this.config.social[provider].DIALOG_URL}?${qs.stringify(dialogParams)}`
   }
 }
 

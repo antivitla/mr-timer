@@ -6,8 +6,12 @@
 <script>
   import articleHelp from '@/components/articles/article-help'
   import articleWelcome from '@/components/articles/article-welcome'
+  import bus from '@/event-bus'
 
   export default {
+    mounted () {
+      bus.$emit('scroll-top')
+    },
     components: {
       articleHelp,
       articleWelcome

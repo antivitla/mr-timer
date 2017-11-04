@@ -1,9 +1,9 @@
 <template lang="pug">
   app-layout(
     :currency="currency"
-    :is-currency-symbol-before="isCurrencySymbolBefore")
-    //- TODO
-    //- - Body Scroll Top Directive
+    :is-currency-symbol-before="isCurrencySymbolBefore"
+    v-body-scroll-top-on="'scroll-top'")
+
     //- Top nav
     app-navbar.top(slot="page")
       div(slot="left") Context
@@ -41,7 +41,7 @@
 </template>
 
 <script>
-  import { mapGetters, mapMutations, mapActions } from 'vuex'
+  import { mapGetters, mapMutations } from 'vuex'
   import appNavbar from '@/components/layout/app-navbar'
   import appLayout from '@/components/layout/app-layout'
   import toggleSidebar from '@/components/other/toggle-sidebar'
@@ -51,6 +51,7 @@
   import filterEntries from '@/components/other/filter-entries'
   import bulkActions from '@/components/other/bulk-actions'
   import timer from '@/components/timer'
+
   // Store
   import { appTitle } from '@/store/app-info'
   import { Selected } from '@/store/selected'
@@ -65,6 +66,9 @@
   import viewMonths from '@/components/views/view-months'
   import viewDays from '@/components/views/view-days'
   import viewStorage from '@/components/views/view-storage'
+
+  // Other
+  import bodyScrollTopOn from '@/directives/body-scroll-top-on'
 
   // Mixins
   import auth from '@/mixins/auth'
@@ -92,8 +96,6 @@
       console.log(`Welcome to ${appTitle}`)
       // Init current view
       this.viewModel = this.currentView
-      // Initial get entries
-      this.getEntries()
     },
     watch: {
       'viewModel': function (view) {
@@ -112,9 +114,6 @@
     methods: {
       ...mapMutations([
         'setCurrentView'
-      ]),
-      ...mapActions([
-        'getEntries'
       ])
     },
     mixins: [
@@ -141,6 +140,9 @@
       viewStorage,
       mitaba,
       timer
+    },
+    directives: {
+      bodyScrollTopOn
     }
   }
 </script>

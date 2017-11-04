@@ -4,12 +4,14 @@
       v-if="isTaskWithLink()"
       v-html="displayHtmlName")
     span(v-else) {{ displayName }}
+    span.weekend(v-if="weekend && group.type === 'day'") {{ label('weekend', false) }}
 </template>
 
 <script>
   import moment from 'moment'
   import { mapGetters } from 'vuex'
   import capitalize from 'lodash/capitalize'
+  import i18nLabel from '@/mixins/i18n-label'
 
   const urlRegexp = /((https?):\/\/.*?(\s|$))/
 
@@ -54,29 +56,37 @@
       },
       day () {
         const d = moment(this.group.start)
-        let label = d.format('LL')
+        let label = d.format('LLLL')
         if (this.locale === 'ru') {
-          label = label.replace('г.', '').trim()
+          label = capitalize(d.format('dddd, D MMMM YYYY'))
+        }
+        if (this.locale === 'en') {
+          label = d.format('ddd, MMMM D, YYYY')
         }
         if (d.year() === (new Date()).getFullYear()) {
-          label = label.split(' ').slice(0, 2).join(' ')
-          if (this.locale === 'en') {
-            label = label.replace(',', '')
-          }
+          label = label
+            .replace(/, \d{4}/, '')
+            .replace(/ \d{4}/, '')
         }
         return label
+      },
+      weekend () {
+        const day = parseInt(moment(this.group.lastUpdated()).format('d'))
+        return (day === 0 || day === 6)
       },
       ...mapGetters([
         'locale'
       ])
     },
-
     methods: {
       isTaskWithLink () {
         return this.group.type === 'task' &&
           this.group.name.match(urlRegexp)
       }
-    }
+    },
+    mixins: [
+      i18nLabel
+    ]
   }
 </script>
 
@@ -84,12 +94,26 @@
   @import '~@/assets/stylesheets/variables'
 
   .group-name
+    *
+      vertical-align top
     .link-url
       opacity 0.5
       margin-right 1em
     .link-name + .link-url
       display block
       font-size 87.5%
+    .weekend
+      position relative
+      // vertical-align middle
+      top 3px
+      margin-left 10px
+      font-size 14px
+      font-weight 500
+      background-color titamota-color-red
+      color white
+      padding 3px 7px
+
+      border-radius 5px
     .favicon
       width 1em
       height 1em

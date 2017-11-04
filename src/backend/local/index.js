@@ -1,6 +1,4 @@
 import { appName } from '@/store/app-info'
-import Entry from '@/models/entry'
-import { parseHttpResponse } from '@/utils/http'
 
 class LocalBackendDriver {
   constructor () {
@@ -12,10 +10,10 @@ class LocalBackendDriver {
       const raw = localStorage.getItem(this.key)
       if (!raw) {
         const body = `The key '${this.key}' was not found in localStorage`
-        resolve(new Response(body, {
+        reject(new Response(body, {
           status: 404,
           ok: false,
-          statusText: 'Not Found'
+          statusText: `Not Found ${this.key} in LocalStorage`
         }))
       } else {
         let entries
@@ -33,12 +31,10 @@ class LocalBackendDriver {
           }
         }
         if (entries) {
-          resolve(new Response(JSON.stringify(entries)))
+          resolve({ entries })
         }
       }
-    })).then(parseHttpResponse).then(entries => {
-      return entries.map(e => new Entry(e))
-    })
+    }))
   }
 }
 

@@ -5,7 +5,7 @@ import Month from '@/models/month'
 // Format to YYYY-MM
 function format (ms) {
   const d = new Date(ms)
-  return d.getFullYear() + '-' + ('0' + d.getMonth()).slice(-2)
+  return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2)
 }
 
 // Singleton to keep months tree

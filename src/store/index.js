@@ -47,7 +47,8 @@ export default new Vuex.Store({
         'i18n',
         'ui',
         'money',
-        'auth'
+        'auth',
+        'pagination'
       ]
     })
   ]
