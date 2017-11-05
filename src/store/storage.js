@@ -61,6 +61,9 @@ const mutations = {
 
 const actions = {
   getEntries (context, payload) {
+    // Сразу же очищаем записи
+    context.commit('clearEntries')
+    // Лезем на сервер
     const backend = driver[context.getters.backend]
     // Делаем, собственно, запрос
     return lastPromise({
@@ -79,7 +82,6 @@ const actions = {
         }
       }
       // Запоминаем
-      context.commit('clearEntries')
       context.commit('addEntries', { entries })
       return entries
     })
@@ -95,9 +97,12 @@ const actions = {
   },
 
   patchEntries (context, payload) {
-    // context.commit('removeEntries', payload)
-    // return driver[context.getters.backend]
-      // .patchEntries(payload.entries.map(entry => entry.serialize()))
+    // Изменяем записи сразу же, не дожидаясь ответа сервера
+    context.commit('removeEntries', { entries: payload.remove })
+    context.commit('addEntries', { entries: payload.add })
+    // Отправляем на сервер
+    return driver[context.getters.backend]
+      .patchEntries(payload.add.map(entry => entry.serialize()))
   },
 
   deleteEntries (context, payload) {

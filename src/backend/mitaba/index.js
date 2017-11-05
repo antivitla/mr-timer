@@ -138,17 +138,13 @@ class Mitaba {
   postEntries (entries) {
     return this.resource
       .post(this.config.api.entries, entries, this._protectedConfig())
-      .then(this._parseSuccessResponse)
-      .then(entries => {
-        // Возвращаем готовые Entry-объекты
-        return entries.map(e => new Entry(e))
-      })
+      .then(this._parseEntries)
   }
 
   patchEntries (entries) {
     return this.resource
       .patch(this.config.api.entries, entries, this._protectedConfig())
-      .then(this._parseSuccessResponse)
+      .then(this._parseEntries)
   }
 
   deleteEntries (entries) {
@@ -170,6 +166,10 @@ class Mitaba {
 
   _parseSuccessResponse (response) {
     return response.data
+  }
+
+  _parseEntries (response) {
+    return response.data.map(e => new Entry(e))
   }
 
   _createProviderAuthRedirectUrl (provider) {

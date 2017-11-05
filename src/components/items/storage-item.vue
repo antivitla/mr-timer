@@ -34,8 +34,6 @@
           i.material-icons delete
         a.icon-button.cancel(@click="cancelEdit()")
           i.material-icons block
-        //- span.icon-button.select
-          custom-checkbox(v-model="selected" mark="true")
 
     span.read(
       v-else
@@ -68,6 +66,7 @@
   import { focusAndSelectAll } from '@/directives/focus'
   import listInput from '@/components/other/list-input'
   import customCheckbox from '@/components/other/custom-checkbox'
+  import Entry from '@/models/entry'
 
   export default {
     props: ['entry'],
@@ -216,18 +215,18 @@
       submit () {
         this.cancelEdit()
         this.selectedClear()
-        const start = timeEditable
-          .parse(this.edit.start)
-        const duration = durationEditable
-          .parse(this.edit.duration)
+        const id = this.entry.id
+        const start = timeEditable.parse(this.edit.start)
+        const duration = durationEditable.parse(this.edit.duration)
         const stop = start + duration
         const details = this.edit.details.split(taskDelimiter).map(d => d.trim())
-        const id = this.entry.id
-        const payload = {
-          entry: this.entry,
-          update: { start, stop, details, id }
-        }
-        this.updateEntry(payload)
+        // Collect into new entry
+        const updatedEntry = new Entry({ id, start, stop, details })
+        // Perform update
+        this.patchEntries({
+          remove: [this.entry],
+          add: [updatedEntry]
+        })
       },
       ...mapMutations([
         'stopTaskEditing',
@@ -238,7 +237,7 @@
         'setTimerStart'
       ]),
       ...mapActions([
-        'updateEntry',
+        'patchEntries',
         'deleteEntries'
       ])
     },
@@ -474,5 +473,4 @@
         font-weight bold
       .details textarea
         font-weight 500
-
 </style>
