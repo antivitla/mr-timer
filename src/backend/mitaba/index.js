@@ -123,7 +123,7 @@ class Mitaba {
       })
   }
 
-  getEntries ({ params = {} }) {
+  getEntries ({ params } = {}) {
     return this.resource
       .get(this.config.api.entries, this._protectedConfig({ params }))
       .then(this._parseSuccessResponse)
