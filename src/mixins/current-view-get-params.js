@@ -17,13 +17,13 @@ export default {
         days: this.paginationDays,
         months: this.paginationMonths,
         years: this.paginationYears,
-        entries: this.paginationEntries
+        storage: this.paginationEntries
       }
       const params = {
         limit: pagination[this.currentView].limit,
         offset: pagination[this.currentView].offset
       }
-      if (this.currentView === 'entries') {
+      if (this.currentView === 'storage') {
         params.filter = this.filter
       } else {
         params.last = this.currentView
