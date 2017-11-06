@@ -17,6 +17,7 @@
   import capitalize from 'lodash/capitalize'
   import { translate } from '@/store/i18n'
   import { Selected } from '@/store/selected'
+  import currentViewGetParams from '@/mixins/current-view-get-params'
 
   export default {
     data () {
@@ -24,7 +25,6 @@
         Selected
       }
     },
-
     computed: {
       deleteLabel () {
         return capitalize(translate[this.locale].delete)
@@ -36,7 +36,6 @@
         'locale'
       ])
     },
-
     methods: {
       selectedLabel (q) {
         const t = translate[this.locale]
@@ -50,16 +49,23 @@
         return q + ' ' + entries + ' ' + or
       },
       deleteSelectedEntries () {
-        this.deleteEntries({ entries: Selected.entries })
+        this.deleteAndGetEntries({
+          deleteEntries: Selected.entries.slice(0),
+          getParams: this.getParams()
+        })
         this.clearSelected()
       },
       ...mapMutations([
         'clearSelected'
       ]),
       ...mapActions([
-        'deleteEntries'
+        'deleteEntries',
+        'deleteAndGetEntries'
       ])
-    }
+    },
+    mixins: [
+      currentViewGetParams
+    ]
   }
 </script>
 

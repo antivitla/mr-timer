@@ -124,6 +124,7 @@
   import { extractEntries, parentOfDifferentType, filterGroupChildren } from '@/utils/group'
   import { taskDelimiter } from '@/store/ui'
   import i18nLabel from '@/mixins/i18n-label'
+  import currentViewGetParams from '@/mixins/current-view-get-params'
   import funny from 'mr-funny'
   import funnyTemplates from '@/funny/templates'
 
@@ -255,12 +256,13 @@
         if (this.group.children[0] instanceof Group) {
           details = details.concat(funnyTask(this.locale))
         }
-        this.startTimer({
+        this.startTimerAndGetEntries({
           entry: new Entry({
             start: new Date(),
             stop: new Date(),
             details
-          })
+          }),
+          getParams: this.getParams()
         })
         // Мотаем чтоб увидеть старт таймера
         bus.$emit('scroll-top')
@@ -349,8 +351,9 @@
       },
       removeTask () {
         this.stopTaskEditing()
-        this.deleteEntries({
-          entries: extractEntries(this.group)
+        this.deleteAndGetEntries({
+          deleteEntries: extractEntries(this.group),
+          getParams: this.getParams()
         })
       },
       filterTask () {
@@ -401,13 +404,14 @@
         'setFilter'
       ]),
       ...mapActions([
-        'startTimer',
-        'deleteEntries',
+        'startTimerAndGetEntries',
+        'deleteAndGetEntries',
         'patchEntries'
       ])
     },
     mixins: [
-      i18nLabel
+      i18nLabel,
+      currentViewGetParams
     ],
     directives: {
       longClick,

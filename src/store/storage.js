@@ -113,6 +113,13 @@ const actions = {
     context.commit('removeEntries', payload)
     return driver[context.getters.backend]
       .deleteEntries(payload.entries.map(entry => ({ id: entry.id })))
+  },
+
+  deleteAndGetEntries (context, payload) {
+    context.commit('removeEntries', { entries: payload.deleteEntries })
+    return context
+      .dispatch('deleteEntries', { entries: payload.deleteEntries })
+      .then(() => context.dispatch('getEntries', { params: payload.getParams }))
   }
 }
 

@@ -51,19 +51,28 @@ export const mutations = {
 
 export const actions = {
   startTimer (context, payload) {
+    const entry = new Entry(Object.assign({}, payload.entry, { id: 'new' }))
+    context.commit('startTimer', { entry })
     tick(context)
-    context.commit('startTimer', payload)
     return context
-      .dispatch('postEntries', { entries: [payload.entry] })
+      .dispatch('postEntries', { entries: [entry] })
       .then(entries => {
         context.commit('setTimerEntry', { entry: entries[0] })
         return context.getters.timerEntry
       })
   },
+
   stopTimer (context) {
     context.commit('stopTimer')
     clearTimeout(timerTimeout)
     return context.getters.timerEntry
+  },
+
+  startTimerAndGetEntries (context, payload) {
+    return context.dispatch('startTimer', { entry: payload.entry })
+      .then(entry => {
+        return context.dispatch('getEntries', { params: payload.getParams })
+      })
   }
 }
 

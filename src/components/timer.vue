@@ -31,6 +31,7 @@
   // import taskContext from '@/components/other/task-context'
   import { Storage } from '@/store/storage'
   import { taskDelimiter } from '@/store/ui'
+  import currentViewGetParams from '@/mixins/current-view-get-params'
   import capitalize from '@/utils/capitalize'
   import { duration, durationFraction } from '@/utils/duration'
 
@@ -62,7 +63,6 @@
         timerIsQuickActivated: false
       }
     },
-
     created () {
       // Set funny placholer initially
       this.placeholder = capitalize(funnyTask(this.locale))
@@ -84,10 +84,12 @@
       })
       this.unsubscribe = this.$store.subscribe(mutation => {
         if (mutation.type === 'tickTimer') {
-          this.patchEntries({
-            remove: [this.timerEntry],
-            add: [this.timerEntry]
-          })
+          if (this.timerEntry.id !== 'new') {
+            this.patchEntries({
+              remove: [this.timerEntry],
+              add: [this.timerEntry]
+            })
+          }
         }
       })
 
@@ -166,12 +168,10 @@
       //   this.edit.details = this.details.join(taskDelimiter)
       // })
     },
-
     beforeDestroy () {
       this.unsubscribeActions()
       this.unsubscribe()
     },
-
     computed: {
       hrs () {
         return duration(this.timerDuration).format('HH')
@@ -191,12 +191,14 @@
         'context'
       ])
     },
-
     methods: {
       toggle () {
         if (!this.timerActive) {
           const details = this.details.length ? this.details.slice(0) : [this.placeholder]
-          this.startTimer({ entry: new Entry({ details }) })
+          this.startTimerAndGetEntries({
+            entry: new Entry({ details }),
+            getParams: this.getParams()
+          })
         } else {
           this.stopTimer()
         }
@@ -292,15 +294,14 @@
         'setTimerEntry'
       ]),
       ...mapActions([
-        'startTimer',
+        'startTimerAndGetEntries',
         'stopTimer',
         'patchEntries'
-        // 'createEntry',
-        // 'updateEntry',
-        // 'removeEntry'
       ])
     },
-
+    mixins: [
+      currentViewGetParams
+    ],
     components: {
       listInput
       // taskContext
