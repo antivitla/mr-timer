@@ -1,7 +1,36 @@
+const defaultPagination = {
+  entries: {
+    count: 0,
+    limit: 20,
+    offset: 0
+  },
+  days: {
+    count: 0,
+    limit: 3,
+    offset: 0,
+    next: null,
+    previous: null
+  },
+  months: {
+    count: 0,
+    limit: 3,
+    offset: 0,
+    next: null,
+    previous: null
+  },
+  years: {
+    count: 0,
+    limit: 1,
+    offset: 0,
+    next: null,
+    previous: null
+  }
+}
+
 const state = {
   entries: {
     count: 0,
-    limit: 50,
+    limit: 20,
     offset: 0
   },
   days: {
@@ -56,6 +85,9 @@ const mutations = {
   },
   setGroupPagination (state, payload) {
     Object.assign(state[payload.group], payload)
+  },
+  clearPagination (state) {
+    Object.assign(state, defaultPagination)
   }
 }
 

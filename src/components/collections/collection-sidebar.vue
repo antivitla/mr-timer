@@ -15,7 +15,7 @@
       h4 {{ label('settings.exportImport') }}
       settings-export-import
     div
-      h4 {{ label('settings.settings')}}
+      h4 {{ label('settings.settings') }}
       settings-settings
 </template>
 <script>

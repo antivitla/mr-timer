@@ -131,7 +131,7 @@ class Mitaba {
 
   getPetrov (account) {
     return this.resource
-      .get(this.config.api.petrov, {params: { account }})
+      .get(this.config.api.petrov, { params: { account } })
       .then(this._parseSuccessResponse)
   }
 
@@ -149,7 +149,7 @@ class Mitaba {
 
   deleteEntries (entries) {
     return this.resource
-      .delete(this.config.api.entries, this._protectedConfig({data: entries}))
+      .delete(this.config.api.entries, this._protectedConfig({ data: entries }))
   }
 
   _protectedConfig (config) {

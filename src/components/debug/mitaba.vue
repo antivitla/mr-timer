@@ -85,8 +85,8 @@
         }
         if (method === 'delete') {
           params = [
-            {id: this.response[Math.floor(Math.random() * this.response.length)].id},
-            {id: this.response[Math.floor(Math.random() * this.response.length)].id}
+            { id: this.response[Math.floor(Math.random() * this.response.length)].id },
+            { id: this.response[Math.floor(Math.random() * this.response.length)].id }
           ]
         }
         Mitaba[`${method}${name}`](params).then(response => {

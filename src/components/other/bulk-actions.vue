@@ -7,7 +7,7 @@
     span.label {{ selectedLabel(Selected.entries.length) }}
     span.icon-button.delete(
       :title="cancelLabel"
-      @click="clearSelectedEntries()")
+      @click="clearSelected()")
       i.material-icons block
 </template>
 
@@ -50,11 +50,11 @@
         return q + ' ' + entries + ' ' + or
       },
       deleteSelectedEntries () {
-        this.deleteEntries({ entries: this.Selected.entries })
-        this.clearSelectedEntries()
+        this.deleteEntries({ entries: Selected.entries })
+        this.clearSelected()
       },
       ...mapMutations([
-        'clearSelectedEntries'
+        'clearSelected'
       ]),
       ...mapActions([
         'deleteEntries'

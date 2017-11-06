@@ -34,7 +34,6 @@
         cachedEnter: ''
       }
     },
-
     props: [
       'value',
       'placeholder',
@@ -43,13 +42,12 @@
       'focus',
       'resetFocusOn'
     ],
-
     mounted () {
       autosize(this.$el)
       bus.$on(this.resetFocusOn, () => {
         this.focusedOnce = false
       })
-      this.$store.subscribe(mutation => {
+      this.unsubscribe = this.$store.subscribe(mutation => {
         let t = mutation.type
         if (t === 'setContext' || t === 'clearContext') {
           setTimeout(() => {
@@ -58,7 +56,9 @@
         }
       })
     },
-
+    beforeDestroy () {
+      this.unsubscribe()
+    },
     watch: {
       joinedList () {
         setTimeout(() => {
@@ -71,7 +71,6 @@
         }
       }
     },
-
     computed: {
       joinedList () {
         let jl = ''
@@ -107,7 +106,6 @@
         }
       }
     },
-
     methods: {
       updateValue ($event) {
         // Clear from linebreaks
@@ -134,7 +132,6 @@
           }
         }
       },
-
       keepValue (event) {
         this.doNotUpdate = true
         if (event.target.value) {
@@ -144,7 +141,6 @@
         }
       }
     },
-
     directives: {
       focusAndSelectRange
     }

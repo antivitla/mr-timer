@@ -1,6 +1,6 @@
 <template lang="pug">
-  .price-per-hour(:class="{ active: price > 0 }")
-    span.label {{ labelPrice}}
+  .price-per-hour(:class="{ 'active': price > 0 }")
+    span.label {{ labelPrice }}
     span.symbol-before
     input(
       type="text"

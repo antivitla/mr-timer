@@ -1,7 +1,7 @@
 <template lang="pug">
   .view
     group-item(
-      v-for="day in Days.children"
+      v-for="day in filterGroupChildren(Days.children)"
       :key="day.name"
       :group="day")
     view-pagination(
@@ -12,6 +12,7 @@
 <script>
   import { mapGetters, mapMutations, mapActions } from 'vuex'
   import { Days } from '@/store/groups/days'
+  import { filterGroupChildren } from '@/utils/group'
   import groupItem from '@/components/items/group-item'
   import viewPagination from '@/components/views/view-pagination'
   import bus from '@/event-bus'
@@ -19,7 +20,8 @@
   export default {
     data () {
       return {
-        Days
+        Days,
+        filterGroupChildren
       }
     },
     mounted () {

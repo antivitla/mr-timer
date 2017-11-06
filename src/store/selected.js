@@ -3,24 +3,20 @@ export const Selected = {
 }
 
 const mutations = {
-  selectedAdd (state, payload) {
-    if (Selected.entries.indexOf(payload.entry) < 0) {
+  addSelected (state, payload) {
+    if (Selected.entries.findIndex(entry => entry.id === payload.entry.id) < 0) {
       Selected.entries.push(payload.entry)
     }
   },
 
-  selectedRemove (state, payload) {
-    const id = Selected.entries.indexOf(payload.entry)
+  removeSelected (state, payload) {
+    const id = Selected.entries.findIndex(entry => entry.id === payload.entry.id)
     if (id > -1) {
       Selected.entries.splice(id, 1)
     }
   },
 
-  clearSelectedEntries (state, payload) {
-    Selected.entries = []
-  },
-
-  selectedClear (state, payload) {
+  clearSelected (state, payload) {
     Selected.entries = []
   }
 }

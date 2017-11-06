@@ -29,7 +29,7 @@
     created () {
       this.selectedLocale = this.locale
       this.selectedCurrency = this.currency
-      this.$store.subscribeAction(action => {
+      this.unsubscribe = this.$store.subscribeAction(action => {
         if (action.type === 'activateLocale') {
           this.selectedLocale = action.payload.locale
         }
@@ -37,6 +37,9 @@
           this.selectedCurrency = action.payload.currency
         }
       })
+    },
+    beforeDestroy () {
+      this.unsubscribe()
     },
     watch: {
       'selectedLocale': function (locale) {

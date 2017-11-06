@@ -12,6 +12,7 @@ import edit from './edit'
 import money from './money'
 import selected from './selected'
 import auth from './auth'
+import filter from './filter'
 import { DaysPlugin } from './groups/days'
 import { MonthsPlugin } from './groups/months'
 import { YearsPlugin } from './groups/years'
@@ -33,7 +34,8 @@ export default new Vuex.Store({
     edit,
     money,
     selected,
-    auth
+    auth,
+    filter
   },
   plugins: [
     DaysPlugin,

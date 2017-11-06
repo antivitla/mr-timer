@@ -75,7 +75,7 @@ const ru = ({
   filterPlaceholder: 'разделяй через « / »',
   noResultsLabel: 'записей не найдено',
   noTasksLabel: 'задач не найдено',
-  filterByThisLabel: 'найти все записи в истории',
+  filterByThis: 'найти все записи в истории',
   clearContext: 'очистить контекст',
   upContext: 'выше контекст',
   standby: 'подождите немного',
@@ -95,7 +95,9 @@ const ru = ({
     numberEntries: '{entries, plural, =0{нет записей} one{# запись} few{# записи} other{# записей}}',
     numberDays: '{days, plural, =0{0 дней} one{1 день} few{# дня} other{# дней}}',
     numberMonths: '{months, plural, =0{0 месяцев} one{1 месяц} few{# месяца} other{# месяцев}}',
-    numberYears: '{years, plural, =0{0 лет} one{1 год} few{# года} other{# лет}}'
+    numberYears: '{years, plural, =0{0 лет} one{1 год} few{# года} other{# лет}}',
+    latest: '{gender, select, male{последний} female{последняя} other{последние}}',
+    earliest: '{gender, select, male{первый} female{первая} other{первые}}'
   },
   settings: {
     profile: 'профиль',
@@ -180,7 +182,7 @@ const en = ({
   filterPlaceholder: 'separate by " / "',
   noResultsLabel: 'no time records found',
   noTasksLabel: 'tasks not found',
-  filterByThisLabel: 'find all entries in history',
+  filterByThis: 'find all entries in history',
   clearContext: 'clear context',
   upContext: 'up context',
   standby: 'please stand by',
@@ -203,7 +205,9 @@ const en = ({
     numberEntries: '{entries, plural, =0{no entries} one{# entry} other{# entries}}',
     numberDays: '{days, plural, =0{no days} one{# day} other{# days}}',
     numberMonths: '{months, plural, =0{no months} one{# month} other{# months}}',
-    numberYears: '{years, plural, =0{no years} one{# year} other{# years}}'
+    numberYears: '{years, plural, =0{no years} one{# year} other{# years}}',
+    latest: '{gender, select, male{latest} female{latest} other{latest}}',
+    earliest: '{gender, select, male{earliest} female{earliest} other{earliest}}'
   },
   settings: {
     profile: 'profile',

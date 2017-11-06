@@ -4,9 +4,9 @@
   .timer(:class="{ 'active': timerActive || timerIsQuickActivated }")
     button(@click="toggle" @mousedown="quickActivate")
       span.main
-        span.hrs(:class="{ low: hrs < 1 }") {{ hrs }}
-        span.delimiter(:class="{ low: min < 1 && hrs < 1 }") :
-        span.min(:class="{ low: min < 1 && hrs < 1 }") {{ min }}
+        span.hrs(:class="{ 'low': hrs < 1 }") {{ hrs }}
+        span.delimiter(:class="{ 'low': min < 1 && hrs < 1 }") :
+        span.min(:class="{ 'low': min < 1 && hrs < 1 }") {{ min }}
       span.sec {{ sec }}
       span.ms {{ ms }}
     list-input(

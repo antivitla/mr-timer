@@ -2,10 +2,10 @@
   div.api-debug
     h2 Petrov API
     p.url
-      span.method {{method}}
+      span.method {{ method }}
       input(
         type="text"
-        v-bind:class="{error: !account}"
+        v-bind:class="{ 'error': !account }"
         @keyup.13="send()"
         v-model.trim="account"
         placeholder="код аккаунта")
@@ -15,10 +15,10 @@
         v-for="method in methods"
         @click="send(method.name)"
         v-bind:class="isLastMethod(method.name)"
-        v-bind:disabled="isDisabled") {{method.name}}
+        v-bind:disabled="isDisabled") {{ method.name }}
 
-    p.response(v-bind:class="{error: !status}" v-if="response")
-      pre {{response}}
+    p.response(v-bind:class="{ 'error': !status }" v-if="response")
+      pre {{ response }}
 </template>
 
 <script>

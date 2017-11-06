@@ -15,6 +15,7 @@
     box-sizing border-box
     .left
       margin-right auto
+      flex-grow 1
     .right
       margin-left auto
 </style>

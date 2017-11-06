@@ -61,8 +61,6 @@ const mutations = {
 
 const actions = {
   getEntries (context, payload) {
-    // Сразу же очищаем записи
-    context.commit('clearEntries')
     // Лезем на сервер
     const backend = driver[context.getters.backend]
     // Делаем, собственно, запрос
@@ -81,9 +79,15 @@ const actions = {
           context.commit('setGroupPagination', response.pagination)
         }
       }
+      context.commit('clearEntries')
       // Запоминаем
       context.commit('addEntries', { entries })
       return entries
+    }).catch(error => {
+      if (error.response.status === 404) {
+        context.commit('clearEntries')
+        context.commit('clearPagination')
+      }
     })
   },
 

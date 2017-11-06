@@ -2,9 +2,12 @@
   .group-item(
     :depth="depth"
     :class="{ 'has-children': hasChildren }")
+
+    //- Edit
+
     .item.edit(
-      :class="{ 'active': trackingEntry }"
       v-if="isEditingTask && editingTaskId === group.id"
+      :class="{ 'active': trackingEntry }"
       @keyup.esc="stopTaskEditing()"
       v-click-outside="stopTaskEditing"
       v-esc-outside="stopTaskEditing")
@@ -18,8 +21,7 @@
           @input-original-event="updateDetails($event)"
           :on-submit="submitTask")
       span.duration
-        span.non-editable(
-          v-if="trackingEntry") {{ duration }}
+        span.non-editable(v-if="trackingEntry") {{ duration }}
         input(
           v-else
           type="text"
@@ -29,17 +31,19 @@
           @keyup.enter="submitTask()")
       span.actions
         a.icon-button.filter(
-          :title="filterByThisLabel"
+          :title="label('filterByThis')"
           @click.stop.prevent="filterTask()")
           i.material-icons search
         a.icon-button.delete(
-          :title="deleteLabel"
+          :title="label('delete')"
           @click.stop.prevent="removeTask()")
           i.material-icons delete
         a.icon-button.cancel(
-          :title="cancelLabel"
+          :title="label('cancel')"
           @click.stop.prevent="stopTaskEditing()")
           i.material-icons block
+
+    //- Read
 
     .item.read(
       v-else
@@ -64,62 +68,64 @@
       span.cost(
         v-if="price") {{ cost }}
 
-      span.hover-actions
+      span.actions
         //- a.icon-button.start-task(
         //-   @click.stop.prevent="startTask()"
         //-   :title="startTaskLabel"
         //-   v-if="isTask")
         //-   i.material-icons timer
         a.icon-button.external-link(
-        @click.stop.prevent="gotoHref(taskHref)"
+          @click.stop.prevent="gotoHref(taskHref)"
           :href="taskHref"
           :title="externalLinkLabel"
           v-if="isTaskWithLink")
           i.material-icons launch
         a.icon-button.context(
           @click.stop.prevent="setGroupAsContext()"
-          :title="setContextLabel"
+          :title="label('setContext')"
           v-if="isContextable")
           i.material-icons folder_open
         a.icon-button.start-edit(
           @click.stop.prevent="startEdit('details')"
-          :title="startEditLabel")
+          :title="label('startEdit')")
           i.material-icons mode_edit
         a.icon-button.filter(
-          :title="filterByThisLabel"
+          :title="label('filterByThis')"
           @click.stop.prevent="filterTask()")
           i.material-icons search
 
     group-item(
-      v-if="child.type"
-      v-for="child in group.children"
+      v-for="child in filterGroupChildren(group.children)"
       :key="child.name"
       :group="child")
 </template>
 
 <script>
   import { mapGetters, mapMutations, mapActions } from 'vuex'
-  import { durationHuman, durationEditable } from '@/utils/duration'
   import moment from 'moment'
-  import { extractEntries, parentOfDifferentType } from '@/utils/group'
-    // parentOfDifferentType,
-    // filterGroupChildren,
-    // wrapContextDetails }
-  import { translate } from '@/store/i18n'
-  import { taskDelimiter } from '@/store/ui'
+
+  // Directives
   import longClick from '@/directives/long-click'
   import clickOutside from '@/directives/click-outside'
   import escOutside from '@/directives/esc-outside'
   import { focusAndSelectAll } from '@/directives/focus'
+
+  // Components
   import listInput from '@/components/other/list-input'
   import groupName from '@/components/items/group-name'
+
+  // Other
   import bus from '@/event-bus'
   import Entry from '@/models/entry'
   import Group from '@/models/group'
+
+  // Utils
+  import { durationHuman, durationEditable } from '@/utils/duration'
+  import { extractEntries, parentOfDifferentType, filterGroupChildren } from '@/utils/group'
+  import { taskDelimiter } from '@/store/ui'
+  import i18nLabel from '@/mixins/i18n-label'
   import funny from 'mr-funny'
   import funnyTemplates from '@/funny/templates'
-  import capitalize from 'lodash/capitalize'
-  import debounce from '@/utils/debounce'
 
   function funnyTask (locale) {
     return funny.phrase(funnyTemplates[locale].base)
@@ -136,30 +142,17 @@
           details: null,
           duration: null
         },
-        debounceWheel: debounce()
-        // filterGroupChildren
+        filterGroupChildren
       }
     },
-
     // Nested component hack
     beforeCreate () {
       this.$options.components.groupItem = require('./group-item.vue')
     },
-
-    mounted () {
-      // bus.$on('tick-timer', () => {
-      //   const entry = this.trackingEntry
-      //   if (entry) {
-      //     entry.stop = this.timerEntry.stop
-      //   }
-      // })
-    },
-
     computed: {
       duration () {
-        const d = translate[this.locale].duration
-        return durationHuman(
-          this.group.duration(), d.hr, d.min, d.sec)
+        const d = this.label('duration', false)
+        return durationHuman(this.group.duration(), d.hr, d.min, d.sec)
       },
       colorCode () {
         if (this.group.type === 'month' || this.group.type === 'day') {
@@ -181,8 +174,7 @@
         return this.group.path().length - 1
       },
       hasChildren () {
-        return this.group.children
-          .some(item => item instanceof Group)
+        return this.group.children.some(item => item instanceof Group)
       },
       getStorageEntry () {
         let child = this.group
@@ -193,11 +185,12 @@
       },
       trackingEntry () {
         if (this.timerActive) {
-          const entry = this.group.children
-            .find(entry => entry instanceof Entry)
-          if (entry && entry.id === this.timerEntry.id) {
-            return entry
-          }
+          return this.group.children
+            .find(entry => {
+              const isEntry = entry instanceof Entry
+              const isTracking = entry.id === this.timerEntry.id
+              return isEntry && isTracking
+            })
         }
       },
       taskHref () {
@@ -216,27 +209,12 @@
       },
       externalLinkLabel () {
         const href = this.group.name.match(urlRegexp) ? this.group.name.match(urlRegexp)[0] : ''
-        return capitalize(translate[this.locale].externalLink) +
+        return this.label('externalLink') +
           ' ' + decodeURIComponent(href)
       },
-      filterByThisLabel () {
-        return capitalize(translate[this.locale].filterByThisLabel)
-      },
-      deleteLabel () {
-        return capitalize(translate[this.locale].delete)
-      },
-      cancelLabel () {
-        return capitalize(translate[this.locale].cancel)
-      },
       startTaskLabel () {
-        return capitalize(translate[this.locale].startTask) +
+        return this.label('startTask') +
           ' «' + decodeURIComponent(this.group.name) + '»'
-      },
-      startEditLabel () {
-        return capitalize(translate[this.locale].startEdit)
-      },
-      setContextLabel () {
-        return capitalize(translate[this.locale].setContext)
       },
       ...mapGetters([
         'locale',
@@ -246,14 +224,23 @@
         'isEditingTask',
         'editingTaskId',
         'editingTaskFields',
-        'editingFocus',
-        'taskDelimiter',
-        'contextDetails'
+        'editingFocus'
       ])
     },
-
     methods: {
       startTask () {
+        // Не стартовать, если мы не являемся задачей,
+        // например даты
+        if (this.group.type !== 'task') {
+          return
+        }
+        // Если мы уже в режиме редактирования,
+        // ничего не делать
+        if (this.isEditingTask) {
+          return
+        }
+        // Если мы пытаемся запустить уже запущенную задачу,
+        // ничего не делать
         if (this.timerActive) {
           const timerDetails = this.timerEntry.details.join()
           const groupDetails = this.group.details().join()
@@ -261,20 +248,22 @@
             return
           }
         }
+        // В остальном - стартуем новую задачу,
+        // причем сразу с рандомной подзадачей,
+        // если кликуемая задача уже имеет подзадачи
         let details = this.group.details()
         if (this.group.children[0] instanceof Group) {
           details = details.concat(funnyTask(this.locale))
         }
-        // if (this.contextDetails) {
-        //   details = wrapContextDetails(this.contextDetails, details)
-        // }
-        bus.$emit('start-task', {
+        this.startTimer({
           entry: new Entry({
-            start: new Date().getTime(),
-            stop: new Date().getTime(),
-            details: details.slice(0)
+            start: new Date(),
+            stop: new Date(),
+            details
           })
         })
+        // Мотаем чтоб увидеть старт таймера
+        bus.$emit('scroll-top')
       },
       clearEdit () {
         this.edit.details = null
@@ -305,19 +294,17 @@
         this.edit.duration = event.target.value
       },
       submitTask () {
+        // Выдираем все соотв. записи
         const entries = extractEntries(this.group)
+        // Собираем изменения
         const update = {}
         if (this.edit.details) {
-          let source = this.editingTaskFields.details
-          let target = this.edit.details
+          const source = this.editingTaskFields.details
+          const target = this.edit.details
               .split(taskDelimiter)
               .filter(i => i)
               .map(d => d.trim())
               .filter(i => i)
-          // if (this.contextDetails) {
-          //   source = wrapContextDetails(this.contextDetails, source)
-          //   target = wrapContextDetails(this.contextDetails, target)
-          // }
           update.details = { source, target }
         }
         if (this.edit.duration) {
@@ -327,12 +314,42 @@
           const add = (dNew + entries.length - dOld) / entries.length
           update.stop = { add }
         }
+        // Применяем изменения
+        const updatedEntries = entries.map(entry => {
+          let details = entry.details.slice(0)
+          let stop = entry.stop
+          if (update.details) {
+            let source = update.details.source.join(taskDelimiter)
+            let target = update.details.target.join(taskDelimiter)
+            details = entry.details
+              .join(taskDelimiter)
+              .replace(new RegExp('^' + source), target)
+              .split(taskDelimiter)
+              .filter(d => d)
+              .map(d => d.trim())
+              .filter(d => d)
+          }
+          if (update.stop && update.stop.add) {
+            stop = entry.stop + update.stop.add
+          }
+          return new Entry({
+            id: entry.id,
+            start: entry.start,
+            stop,
+            details
+          })
+        })
+        // Только теперь можно очистить редактирование
         this.stopTaskEditing()
-        this.batchUpdateEntries({ entries, update })
+        // Изменяем
+        this.patchEntries({
+          remove: entries,
+          add: updatedEntries
+        })
       },
       removeTask () {
         this.stopTaskEditing()
-        this.batchRemoveEntries({
+        this.deleteEntries({
           entries: extractEntries(this.group)
         })
       },
@@ -366,9 +383,8 @@
               .concat(filter)
           }
         }
-        bus.$emit('filter-entries', {
-          filter
-        })
+        this.setCurrentView({ view: 'storage' })
+        this.setFilter({ filter })
       },
       setGroupAsContext () {
         // if (this.group.children[0] instanceof Group) {
@@ -380,22 +396,25 @@
       },
       ...mapMutations([
         'startTaskEditing',
-        'stopTaskEditing'
+        'stopTaskEditing',
+        'setCurrentView',
+        'setFilter'
       ]),
       ...mapActions([
-        'batchRemoveEntries',
-        'batchUpdateEntries',
-        'setContextByGroup'
+        'startTimer',
+        'deleteEntries',
+        'patchEntries'
       ])
     },
-
+    mixins: [
+      i18nLabel
+    ],
     directives: {
       longClick,
       clickOutside,
       escOutside,
       focusAndSelectAll
     },
-
     components: {
       listInput,
       groupName
@@ -532,10 +551,8 @@
             color titamota-color-text-invert-highlight
       .actions
         display flex
-        padding-top 4px
         padding 4px
         justify-content flex-end
-        width 5.75em
         position absolute
         right 0px
         bottom 0px
@@ -543,7 +560,7 @@
       @media (min-width 768px)
         flex-direction row
         .name
-          width calc(100% - 12.75em)
+          width calc(100% - 15em)
           margin 0 0 0 -8px
         .duration
           margin-left 0.5em
@@ -559,7 +576,7 @@
       input[type="checkbox"]
         margin-left 0.2em
     .icon-button + .icon-button
-      margin-left 0.375em
+      margin-left 7px
 
     .item.active
       color titamota-color-red
@@ -571,53 +588,52 @@
     .item.read
       display flex
       cursor pointer
+      position relative
       .actions
-        display none
-      .actions
-        display flex
         position absolute
         right 0px
         top 0px
-        padding-top 4px
-        padding-bottom 4px
-      .hover-actions
+        padding 4px
         display none
         a[href]
           color titamota-color-text
           text-decoration none
       &:hover
         background-color titamota-color-back-light-darker
-        .hover-actions
+        .actions
           display flex
           align-self center
           margin-left auto
 
-  .view > .group-item.has-children > .item
-    font-size 32px
-    line-height 42px
-    font-weight 400
-    .duration
-    .cost
-      font-size 80%
-    &.edit
-      .name
-        textarea
-          font-weight 400
 
-    @media (min-width 768px)
-      &.edit
-        .actions
-          width 5.5em
-        .name
-          width calc(100% - 11.5em)
-          textarea
-            font-weight 400
-
-  .view > .group-item.has-children
+  // Root items
+  .group-item[depth="1"].has-children
     margin-bottom 40px
     margin-top 40px
     &:first-child
       margin-top 0px
+    & > .item
+      font-size 32px
+      line-height 42px
+      font-weight 400
+      .duration
+      .cost
+        font-size 80%
+      &.edit
+        .name
+          textarea
+            font-weight 400
+
+  @media (min-width 768px)
+    .group-item[depth="2"] > .item.edit
+      .name
+        width calc(100% - 13.25em)
+
+    .group-item[depth="1"] > .item.edit
+      .name
+        width calc(100% - 9em)
+        textarea
+          font-weight 400
 
   [currency="rub"]
     .cost:before

@@ -20,15 +20,15 @@
     //- Navbar
     app-navbar.menu(slot="page")
       div(slot="left")
-        filter-entries(v-if="viewModel === 'storage' && !Selected.entries.length")
-        bulk-actions(v-if="viewModel === 'storage' && Selected.entries.length")
+        filter-entries(v-if="isFiltersVisible")
+        bulk-actions(v-if="isBulkActionsVisible")
         div(v-if="viewModel !== 'storage'") Currency
       div(slot="right")
         custom-switch(
           :options="availableViewsAsOptions"
           v-model="viewModel")
     //- Views
-    component(:is="viewComponent[viewModel]" slot="page")
+    component(:is="viewComponent[currentView]" slot="page")
     //- Footer
     collection-footer(slot="page")
 
@@ -80,7 +80,7 @@
   export default {
     data () {
       return {
-        viewModel: 'help',
+        viewModel: '',
         viewComponent: {
           help: viewHelp,
           tasks: viewTasks,
@@ -89,20 +89,41 @@
           days: viewDays,
           storage: viewStorage
         },
-        Selected
+        Selected,
+        filter: []
       }
     },
     created () {
       console.log(`Welcome to ${appTitle}`)
       // Init current view
       this.viewModel = this.currentView
+      this.unsubscribe = this.$store.subscribe(mutation => {
+        if (mutation.type === 'setCurrentView') {
+          this.viewModel = mutation.payload.view
+          if (mutation.payload.view !== 'storage') {
+            this.clearSelected()
+            this.clearFilter()
+          }
+        }
+      })
+    },
+    beforeDestroy () {
+      this.unsubscribe()
     },
     watch: {
       'viewModel': function (view) {
-        this.setCurrentView({ view })
+        if (view) {
+          this.setCurrentView({ view })
+        }
       }
     },
     computed: {
+      isFiltersVisible () {
+        return this.viewModel === 'storage' && !Selected.entries.length
+      },
+      isBulkActionsVisible () {
+        return this.viewModel === 'storage' && Selected.entries.length
+      },
       ...mapGetters([
         'currency',
         'currentView',
@@ -113,7 +134,9 @@
     },
     methods: {
       ...mapMutations([
-        'setCurrentView'
+        'setCurrentView',
+        'clearSelected',
+        'clearFilter'
       ])
     },
     mixins: [

@@ -9,7 +9,7 @@ class Petrov {
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
       },
       transformRequest: [function (data) {
-        const transformed = qs.stringify({data: JSON.stringify(data)})
+        const transformed = qs.stringify({ data: JSON.stringify(data) })
         return transformed
       }]
     })

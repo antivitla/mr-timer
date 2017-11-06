@@ -2,7 +2,7 @@
   .custom-switch
     a(
       v-for="option in options"
-      :class="{ active: value === option.value }"
+      :class="{ 'active': value === option.value }"
       @click="updateValue(option.value)") {{ label(option.label) }}
 </template>
 <script>

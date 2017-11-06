@@ -81,10 +81,9 @@
         Selected
       }
     },
-
     created () {
       const actions = {
-        'selectedClear': () => {
+        'clearSelected': () => {
           this.selected = false
         },
         'tickTimer': () => {
@@ -98,22 +97,25 @@
           actions[mutation.type]()
         }
       })
+      // Начальное выставление выбранности
+      Selected.entries.forEach(entry => {
+        if (entry.id === this.entry.id) {
+          this.selected = true
+        }
+      })
     },
-
     beforeDestroy () {
       this.unsubscribe()
     },
-
     watch: {
       selected (value, b) {
         if (value) {
-          this.selectedAdd({ entry: this.entry })
+          this.addSelected({ entry: this.entry })
         } else {
-          this.selectedRemove({ entry: this.entry })
+          this.removeSelected({ entry: this.entry })
         }
       }
     },
-
     computed: {
       details () {
         return decodeURIComponent(this.entry.details
@@ -134,9 +136,6 @@
       id () {
         return this.entry.id
       },
-      isSelected () {
-        return this.Selected.entries.indexOf(this.entry) > -1
-      },
       isTrackingEntry () {
         return this.timerActive && this.timerEntry.id === this.id
       },
@@ -150,7 +149,6 @@
         'editingFocus'
       ])
     },
-
     methods: {
       toggleSelectEntry () {
         this.selected = !this.selected
@@ -192,8 +190,8 @@
       },
       cancelEdit () {
         this.stopTaskEditing()
-        if (this.Selected.entries.length < 2) {
-          this.selectedClear()
+        if (Selected.entries.length < 2) {
+          this.clearSelected()
         }
       },
       updateDetails (event) {
@@ -214,7 +212,7 @@
       },
       submit () {
         this.cancelEdit()
-        this.selectedClear()
+        this.clearSelected()
         const id = this.entry.id
         const start = timeEditable.parse(this.edit.start)
         const duration = durationEditable.parse(this.edit.duration)
@@ -231,9 +229,9 @@
       ...mapMutations([
         'stopTaskEditing',
         'startTaskEditing',
-        'selectedAdd',
-        'selectedRemove',
-        'selectedClear',
+        'addSelected',
+        'removeSelected',
+        'clearSelected',
         'setTimerStart'
       ]),
       ...mapActions([
@@ -241,14 +239,12 @@
         'deleteEntries'
       ])
     },
-
     directives: {
       longClick,
       clickOutside,
       escOutside,
       focusAndSelectAll
     },
-
     components: {
       listInput,
       customCheckbox

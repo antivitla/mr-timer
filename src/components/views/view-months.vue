@@ -1,7 +1,7 @@
 <template lang="pug">
   .view
     group-item(
-      v-for="month in Months.children"
+      v-for="month in filterGroupChildren(Months.children)"
       :key="month.name"
       :group="month")
     view-pagination(
@@ -12,6 +12,7 @@
 <script>
   import { mapGetters, mapMutations, mapActions } from 'vuex'
   import { Months } from '@/store/groups/months'
+  import { filterGroupChildren } from '@/utils/group'
   import groupItem from '@/components/items/group-item'
   import viewPagination from '@/components/views/view-pagination'
   import bus from '@/event-bus'
@@ -19,7 +20,8 @@
   export default {
     data () {
       return {
-        Months
+        Months,
+        filterGroupChildren
       }
     },
     mounted () {
