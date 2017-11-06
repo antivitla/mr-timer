@@ -77,9 +77,17 @@
           this.onStop()
         }
       }
-      this.unsubscribe = this.$store.subscribeAction(action => {
+      this.unsubscribeActions = this.$store.subscribeAction(action => {
         if (actions[action.type]) {
           actions[action.type](action)
+        }
+      })
+      this.unsubscribe = this.$store.subscribe(mutation => {
+        if (mutation.type === 'tickTimer') {
+          this.patchEntries({
+            remove: [this.timerEntry],
+            add: [this.timerEntry]
+          })
         }
       })
 
@@ -160,6 +168,7 @@
     },
 
     beforeDestroy () {
+      this.unsubscribeActions()
       this.unsubscribe()
     },
 
@@ -284,7 +293,8 @@
       ]),
       ...mapActions([
         'startTimer',
-        'stopTimer'
+        'stopTimer',
+        'patchEntries'
         // 'createEntry',
         // 'updateEntry',
         // 'removeEntry'

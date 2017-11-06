@@ -137,7 +137,7 @@
         return this.entry.id
       },
       isTrackingEntry () {
-        return this.timerActive && this.timerEntry.id === this.id
+        return this.timerActive && this.timerEntry.id === this.entry.id
       },
       ...mapGetters([
         'timerEntry',
@@ -449,8 +449,7 @@
           margin-left auto
           position static
 
-  .timer-active
-    .storage-item.active
+    &.active
       color titamota-color-red
       .start
       .duration

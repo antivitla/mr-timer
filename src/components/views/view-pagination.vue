@@ -18,7 +18,7 @@
           v-if="currentExist && currentCount > currentLimit"
           :class="{ 'active': currentLimit === currentCount }"
           @click="changeLimit(currentCount)") {{ labelAll }}
-    .right(v-if="!limitOnly && currentExist")
+    .right(v-if="!limitOnly && currentCount > 1")
       .latest(
         v-if="currentOffset > 0"
         @click="latestOffset()")
