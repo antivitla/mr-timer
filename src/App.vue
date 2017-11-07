@@ -42,7 +42,7 @@
 </template>
 
 <script>
-  import { mapGetters, mapMutations } from 'vuex'
+  import { mapGetters, mapMutations, mapActions } from 'vuex'
   import appNavbar from '@/components/layout/app-navbar'
   import appLayout from '@/components/layout/app-layout'
   import toggleSidebar from '@/components/other/toggle-sidebar'
@@ -110,6 +110,9 @@
           }
         }
       })
+      // Init i18n
+      this.activateLocale({ locale: this.locale })
+      this.activateCurrency({ currency: this.currency })
     },
     beforeDestroy () {
       this.unsubscribe()
@@ -146,6 +149,10 @@
         'clearSelected',
         'clearFilter',
         'clearPagination'
+      ]),
+      ...mapActions([
+        'activateLocale',
+        'activateCurrency'
       ])
     },
     mixins: [
