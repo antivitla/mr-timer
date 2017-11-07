@@ -6,7 +6,6 @@
       :key="entry.id"
       :entry="entry")
     view-pagination(
-      v-if="isPaginationNeeded"
       type="entries"
       @limit="onChangeLimit"
       @offset="onChangeOffset")
@@ -50,9 +49,6 @@
       bus.$emit('scroll-top')
     },
     computed: {
-      isPaginationNeeded () {
-        return this.paginationEntries.count >= this.paginationEntries.limit || true
-      },
       isEntries () {
         return Storage.entries.length
       },
