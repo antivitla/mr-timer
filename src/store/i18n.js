@@ -76,11 +76,15 @@ const ru = ({
   noResultsLabel: 'записей не найдено',
   noTasksLabel: 'задач не найдено',
   filterByThis: 'найти все записи в истории',
-  clearContext: 'очистить контекст',
-  upContext: 'выше контекст',
   standby: 'подождите немного',
   externalLink: 'перейти к',
   weekend: 'выходной',
+  context: {
+    description: 'путь к текущей задаче',
+    up: 'выше по пути к текущей задаче',
+    clear: 'очистить текущую задачу',
+    setCurrent: 'сделать текущей задачей'
+  },
   pagination: {
     later: 'позже',
     earlier: 'раньше',
@@ -133,7 +137,6 @@ const ru = ({
   exportTo: 'экспорт записей в',
   startTask: 'начать задачу',
   startEdit: 'редактировать',
-  setContext: 'сделать контекстом',
   logout: 'выйти',
   login: 'войти',
   tip: {
@@ -185,11 +188,15 @@ const en = ({
   noResultsLabel: 'no time records found',
   noTasksLabel: 'tasks not found',
   filterByThis: 'find all entries in history',
-  clearContext: 'clear context',
-  upContext: 'up context',
   standby: 'please stand by',
   externalLink: 'go to',
   weekend: 'weekend',
+  context: {
+    description: 'Path to current task',
+    up: 'up in current task path',
+    clear: 'clear current task',
+    setCurrent: 'set current task'
+  },
   pagination: {
     later: 'later',
     earlier: 'earlier',
@@ -245,7 +252,6 @@ const en = ({
   exportTo: 'export entries to',
   startTask: 'start task',
   startEdit: 'edit',
-  setContext: 'set as context',
   logout: 'logout',
   login: 'login',
   tip: {

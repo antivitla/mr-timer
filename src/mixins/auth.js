@@ -15,7 +15,7 @@ export default {
         this.closeSidebar()
       })
       .catch(error => {
-        console.log(error)
+        console.warn(error)
       })
       // return home state
       this.$router.push({ name: 'home' })

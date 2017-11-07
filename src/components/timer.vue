@@ -311,8 +311,8 @@
   .timer
     position relative
     margin-bottom 90px
-    transform translateX(-5px)
-    width calc(100% + 10px)
+    transform translateX(-10px)
+    width calc(100% + 20px)
 
     button
       height 60px

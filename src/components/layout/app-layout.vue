@@ -55,6 +55,7 @@
       margin-right 0px
       transition all 0.3s ease-out
       transform translateX(0px)
+      margin-right 0
       opacity 1
       @media (min-width 480px)
         padding-left 30px
@@ -63,6 +64,10 @@
         padding-top 60px
         padding-left 60px
         padding-right 60px
+      @media (min-width 1366px)
+        padding-top 60px
+        padding-left calc(50vw - 600px)
+        padding-right calc(50vw - 600px)
 
     .sidebar
       position fixed
@@ -84,6 +89,11 @@
         transform translateX(-100%)
         @media (min-width titamota-tablet-w)
           transform translateX(-400px)
+        @media (min-width titamota-screen-w-13)
+          transform translateX(0px)
+          margin-right 400px
+          padding-left 120px
+          padding-right 120px
       .sidebar
         transform translateX(0%)
         opacity 1

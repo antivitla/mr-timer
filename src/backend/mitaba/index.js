@@ -70,11 +70,20 @@ const apiConfig = {
   social: 'login/social/token_user/'
 }
 
+const socialBackend = {
+  facebook: 'facebook',
+  github: 'github',
+  google: 'google-oauth2',
+  vk: 'vk-oauth2',
+  yandex: 'yandex-oauth2'
+}
+
 class Mitaba {
   constructor () {
     this.config = {
       api: deepAssign({}, apiConfig, (isDev() ? apiConfigDev : {})),
-      social: deepAssign({}, socialConfig, (isDev() ? socialConfigDev : {}))
+      social: deepAssign({}, socialConfig, (isDev() ? socialConfigDev : {})),
+      socialBackend
     }
     this.token = null
     this.resource = axios.create({
@@ -93,7 +102,7 @@ class Mitaba {
     return this.resource
       .post(this.config.api.social, {
         redirect_uri: this._createProviderAuthRedirectUrl(provider),
-        provider,
+        provider: this.config.socialBackend[provider],
         code
       }, {
         withCredentials: true
@@ -105,7 +114,7 @@ class Mitaba {
         return auth
       })
       .catch(error => {
-        console.warn(error)
+        throw new Error(error.response.statusText)
       })
   }
 
@@ -119,7 +128,7 @@ class Mitaba {
         return profile
       })
       .catch(error => {
-        console.warn(error)
+        throw new Error(error.response.statusText)
       })
   }
 

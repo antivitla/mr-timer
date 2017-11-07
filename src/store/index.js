@@ -50,7 +50,8 @@ export default new Vuex.Store({
         'ui',
         'money',
         'auth',
-        'pagination'
+        'pagination',
+        'context'
       ]
     })
   ]

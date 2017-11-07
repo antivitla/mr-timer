@@ -27,7 +27,7 @@ const defaultPagination = {
   },
   tasks: {
     count: 0,
-    limit: 2,
+    limit: 3,
     offset: 0,
     next: null,
     previous: null
@@ -63,7 +63,7 @@ const state = {
   },
   tasks: {
     count: 0,
-    limit: 2,
+    limit: 3,
     offset: 0,
     next: null,
     previous: null

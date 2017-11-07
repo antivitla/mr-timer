@@ -81,9 +81,10 @@
           i.material-icons launch
         a.icon-button.context(
           @click.stop.prevent="setGroupAsContext()"
-          :title="label('setContext')"
+          :title="label('context.setCurrent')"
           v-if="isContextable")
-          i.material-icons folder_open
+          //- i.fa.fa-thumb-tack
+          i.material-icons flag
         a.icon-button.start-edit(
           @click.stop.prevent="startEdit('details')"
           :title="label('startEdit')")
@@ -119,7 +120,12 @@
 
   // Utils
   import { durationHuman, durationEditable } from '@/utils/duration'
-  import { extractEntries, parentOfDifferentType, filterGroupChildren } from '@/utils/group'
+  import {
+    extractEntries,
+    parentOfDifferentType,
+    filterGroupChildren,
+    rootDetails
+  } from '@/utils/group'
   import { taskDelimiter } from '@/store/ui'
   import i18nLabel from '@/mixins/i18n-label'
   import viewHelper from '@/mixins/view-helper'
@@ -197,7 +203,7 @@
         return href ? href[0] : undefined
       },
       isContextable () {
-        return this.group.children[0] instanceof Group
+        return this.group.children[0] instanceof Group && this.group.type === 'task'
       },
       isTask () {
         return this.group.type === 'task'
@@ -223,7 +229,8 @@
         'isEditingTask',
         'editingTaskId',
         'editingTaskFields',
-        'editingFocus'
+        'editingFocus',
+        'context'
       ])
     },
     methods: {
@@ -388,9 +395,21 @@
         this.setFilter({ filter })
       },
       setGroupAsContext () {
-        // if (this.group.children[0] instanceof Group) {
-        //   this.setContextByGroup({ group: this.group })
-        // }
+        if (this.currentView === 'tasks') {
+          this.setTasksPagination({ offset: 0 })
+        }
+        if (this.context.length) {
+          this.downContextAndGetEntries({
+            context: rootDetails(this.group),
+            getParams: this.viewGetParams()
+          })
+        } else {
+          this.setContextAndGetEntries({
+            context: rootDetails(this.group),
+            getParams: this.viewGetParams()
+          })
+        }
+        bus.$emit('scroll-top')
       },
       gotoHref (href) {
         window.open(href, '_blank')
@@ -399,12 +418,15 @@
         'startTaskEditing',
         'stopTaskEditing',
         'setCurrentView',
-        'setFilter'
+        'setFilter',
+        'setTasksPagination'
       ]),
       ...mapActions([
         'startTimerAndGetEntries',
         'deleteAndGetEntries',
-        'patchEntries'
+        'patchEntries',
+        'setContextAndGetEntries',
+        'downContextAndGetEntries'
       ])
     },
     mixins: [

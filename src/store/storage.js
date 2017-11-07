@@ -4,6 +4,32 @@ import Mitaba from '@/backend/mitaba'
 import Local from '@/backend/local'
 import lastPromise from '@/utils/last-promise'
 import { insertSorted } from '@/utils/sorted'
+import { taskDelimiter } from '@/store/ui'
+
+function removeContext (entries, context) {
+  if (!context.length) {
+    return entries.map(entry => new Entry(entry))
+  }
+  return entries.map(entry => {
+    const reg = new RegExp(`^${context.join(taskDelimiter)}`)
+    const details = entry.details.join(taskDelimiter)
+      .replace(reg, '')
+      .split(taskDelimiter)
+      .map(d => d.trim())
+      .filter(d => d)
+    return new Entry(Object.assign({}, entry, { details }))
+  })
+}
+
+function addContext (entries, context) {
+  if (!context.length) {
+    return entries.map(entry => new Entry(entry))
+  }
+  return entries.map(entry => {
+    const details = context.concat(entry.details).slice(0)
+    return new Entry(Object.assign({}, entry, { details }))
+  })
+}
 
 const driver = {
   local: Local,
@@ -61,16 +87,25 @@ const mutations = {
 
 const actions = {
   getEntries (context, payload) {
-    // Лезем на сервер
+    const params = payload ? payload.params : {}
+    // Выбираем сервер
     const backend = driver[context.getters.backend]
+    // Если у нас есть контекст,
+    // подпихиваем соотв. параметры
+    if (context.getters.context.length) {
+      params.context = context.getters.context.slice(0)
+    }
     // Делаем, собственно, запрос
     return lastPromise({
       type: 'getEntries',
-      promise: backend.getEntries(payload)
+      promise: backend.getEntries({ params })
     })
     .then(response => {
-      // Создаём итемы
-      const entries = response.entries.map(e => new Entry(e))
+      const entries = removeContext(response.entries, context.getters.context)
+      // Запоминаем контекст
+      if (response.context) {
+        context.commit('setContext', { context: response.context })
+      }
       // Запоминаем паджинацию
       if (response.pagination) {
         if (!response.pagination.group) {
@@ -79,8 +114,8 @@ const actions = {
           context.commit('setGroupPagination', response.pagination)
         }
       }
+      // Показываем записи
       context.commit('clearEntries')
-      // Запоминаем
       context.commit('addEntries', { entries })
       return entries
     }).catch(error => {
@@ -92,11 +127,13 @@ const actions = {
   },
 
   postEntries (context, payload) {
+    const postEntries = addContext(payload.entries, context.getters.context)
     return driver[context.getters.backend]
-      .postEntries(payload.entries.map(entry => entry.serialize()))
+      .postEntries(postEntries.map(entry => entry.serialize()))
       .then(entries => {
-        context.commit('addEntries', { entries })
-        return entries
+        const postedEntries = removeContext(entries, context.getters.context)
+        context.commit('addEntries', { entries: postedEntries })
+        return postedEntries
       })
   },
 
@@ -104,9 +141,11 @@ const actions = {
     // Изменяем записи сразу же, не дожидаясь ответа сервера
     context.commit('removeEntries', { entries: payload.remove })
     context.commit('addEntries', { entries: payload.add })
+    // Если бы контекст, добавляем его
+    const entries = addContext(payload.add, context.getters.context)
     // Отправляем на сервер
     return driver[context.getters.backend]
-      .patchEntries(payload.add.map(entry => entry.serialize()))
+      .patchEntries(entries.map(entry => entry.serialize()))
   },
 
   deleteEntries (context, payload) {
@@ -119,7 +158,15 @@ const actions = {
     context.commit('removeEntries', { entries: payload.deleteEntries })
     return context
       .dispatch('deleteEntries', { entries: payload.deleteEntries })
-      .then(() => context.dispatch('getEntries', { params: payload.getParams }))
+      .then(() => {
+        // Если у нас есть контекст,
+        // подпихиваем соотв. параметры
+        const params = payload.params
+        if (context.getters.context.length) {
+          params.context = context.getters.context.slice(0)
+        }
+        context.dispatch('getEntries', { params: payload.getParams })
+      })
   }
 }
 

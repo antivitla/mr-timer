@@ -1,5 +1,6 @@
 <template lang="pug">
   .view
+    span.text-muted(v-if="!isMonths") {{ label('noResultsLabel') }}
     group-item(
       v-for="month in filterGroupChildren(Months.children)"
       :key="month.name"
@@ -15,6 +16,7 @@
   import { filterGroupChildren } from '@/utils/group'
   import groupItem from '@/components/items/group-item'
   import viewPagination from '@/components/views/view-pagination'
+  import i18nLabel from '@/mixins/i18n-label'
   import viewHelper from '@/mixins/view-helper'
   import bus from '@/event-bus'
 
@@ -29,12 +31,18 @@
       this.getEntries({ params: this.viewGetParams() })
       bus.$emit('scroll-top')
     },
+    computed: {
+      isMonths () {
+        return Months.children.length
+      }
+    },
     methods: {
       ...mapActions([
         'getEntries'
       ])
     },
     mixins: [
+      i18nLabel,
       viewHelper
     ],
     components: {

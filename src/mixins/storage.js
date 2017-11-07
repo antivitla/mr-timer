@@ -12,10 +12,12 @@ export default {
     const onMutations = {
       'setAuthorized': () => {
         this.setBackend({ backend: 'mitaba' })
+        this.clearContext()
         this.getEntries()
       },
       'setNotAuthorized': () => {
         this.setBackend({ backend: 'local' })
+        this.clearContext()
         this.getEntries()
       }
     }
@@ -35,7 +37,8 @@ export default {
   },
   methods: {
     ...mapMutations([
-      'setBackend'
+      'setBackend',
+      'clearContext'
     ]),
     ...mapActions([
       'getEntries'

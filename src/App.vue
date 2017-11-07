@@ -6,10 +6,11 @@
 
     //- Top nav
     app-navbar.top(slot="page")
-      div(slot="left") Context
+      context-nav(slot="left")
       toggle-sidebar#toggle-sidebar-top(
         slot="right"
         :title="tipToggleSidebarTop")
+        span(v-if="isAuthorized") {{ userName }}&emsp;
         span.icon-button
           i.material-icons menu
     //- Timer
@@ -51,6 +52,7 @@
   import filterEntries from '@/components/other/filter-entries'
   import bulkActions from '@/components/other/bulk-actions'
   import pricePerHour from '@/components/other/price-per-hour'
+  import contextNav from '@/components/other/context-nav'
   import timer from '@/components/timer'
 
   // Store
@@ -134,7 +136,8 @@
         'currentView',
         'isAuthorized',
         'isCurrencySymbolBefore',
-        'availableViewsAsOptions'
+        'availableViewsAsOptions',
+        'userName'
       ])
     },
     methods: {
@@ -162,6 +165,7 @@
       filterEntries,
       bulkActions,
       pricePerHour,
+      contextNav,
       viewHelp,
       viewTasks,
       viewYears,
@@ -205,5 +209,5 @@
   // Hide toggle-sidebar-top
   .sidebar-active
     #toggle-sidebar-top
-      display none
+      // display none
 </style>
