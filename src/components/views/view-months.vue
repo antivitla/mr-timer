@@ -10,11 +10,12 @@
       @offset="onChangeOffset")
 </template>
 <script>
-  import { mapGetters, mapMutations, mapActions } from 'vuex'
+  import { mapActions } from 'vuex'
   import { Months } from '@/store/groups/months'
   import { filterGroupChildren } from '@/utils/group'
   import groupItem from '@/components/items/group-item'
   import viewPagination from '@/components/views/view-pagination'
+  import viewHelper from '@/mixins/view-helper'
   import bus from '@/event-bus'
 
   export default {
@@ -25,50 +26,17 @@
       }
     },
     mounted () {
-      this.getEntries({
-        params: {
-          last: 'months',
-          limit: this.paginationMonths.limit,
-          offset: 0
-        }
-      })
+      this.getEntries({ params: this.viewGetParams() })
       bus.$emit('scroll-top')
     },
-    computed: {
-      ...mapGetters([
-        'paginationMonths'
-      ])
-    },
     methods: {
-      onChangeLimit (limit) {
-        this.setMonthsPagination({ limit })
-        this.getEntries({
-          params: {
-            last: 'months',
-            limit,
-            offset: this.paginationMonths.offset
-          }
-        })
-        bus.$emit('scroll-top')
-      },
-      onChangeOffset (offset) {
-        this.setMonthsPagination({ offset })
-        this.getEntries({
-          params: {
-            last: 'months',
-            limit: this.paginationMonths.limit,
-            offset
-          }
-        })
-        bus.$emit('scroll-top')
-      },
-      ...mapMutations([
-        'setMonthsPagination'
-      ]),
       ...mapActions([
         'getEntries'
       ])
     },
+    mixins: [
+      viewHelper
+    ],
     components: {
       groupItem,
       viewPagination

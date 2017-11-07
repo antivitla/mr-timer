@@ -10,11 +10,12 @@
       @offset="onChangeOffset")
 </template>
 <script>
-  import { mapGetters, mapMutations, mapActions } from 'vuex'
+  import { mapActions } from 'vuex'
   import { Days } from '@/store/groups/days'
   import { filterGroupChildren } from '@/utils/group'
   import groupItem from '@/components/items/group-item'
   import viewPagination from '@/components/views/view-pagination'
+  import viewHelper from '@/mixins/view-helper'
   import bus from '@/event-bus'
 
   export default {
@@ -25,50 +26,17 @@
       }
     },
     mounted () {
-      this.getEntries({
-        params: {
-          last: 'days',
-          limit: this.paginationDays.limit,
-          offset: 0
-        }
-      })
+      this.getEntries({ params: this.viewGetParams() })
       bus.$emit('scroll-top')
     },
-    computed: {
-      ...mapGetters([
-        'paginationDays'
-      ])
-    },
     methods: {
-      onChangeLimit (limit) {
-        this.setDaysPagination({ limit })
-        this.getEntries({
-          params: {
-            last: 'days',
-            limit,
-            offset: this.paginationDays.offset
-          }
-        })
-        bus.$emit('scroll-top')
-      },
-      onChangeOffset (offset) {
-        this.setDaysPagination({ offset })
-        this.getEntries({
-          params: {
-            last: 'days',
-            limit: this.paginationDays.limit,
-            offset
-          }
-        })
-        bus.$emit('scroll-top')
-      },
-      ...mapMutations([
-        'setDaysPagination'
-      ]),
       ...mapActions([
         'getEntries'
       ])
     },
+    mixins: [
+      viewHelper
+    ],
     components: {
       groupItem,
       viewPagination

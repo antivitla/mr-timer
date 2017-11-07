@@ -18,6 +18,7 @@
   import viewPagination from '@/components/views/view-pagination'
   // import { taskDelimiter } from '@/store/ui'
   import i18nLabel from '@/mixins/i18n-label'
+  import viewHelper from '@/mixins/view-helper'
   import bus from '@/event-bus'
 
   export default {
@@ -45,13 +46,7 @@
       this.unsubscribe()
     },
     mounted () {
-      this.getEntries({
-        params: {
-          limit: this.paginationEntries.limit,
-          offset: 0,
-          filter: (this.isFilter ? this.filter : null)
-        }
-      })
+      this.getEntries({ params: this.viewGetParams() })
       bus.$emit('scroll-top')
     },
     computed: {
@@ -68,30 +63,7 @@
       ])
     },
     methods: {
-      onChangeLimit (limit) {
-        this.setEntriesPagination({ limit })
-        this.getEntries({
-          params: {
-            limit,
-            offset: this.paginationEntries.offset,
-            filter: (this.isFilter ? this.filter : null)
-          }
-        })
-        bus.$emit('scroll-top')
-      },
-      onChangeOffset (offset) {
-        this.setEntriesPagination({ offset })
-        this.getEntries({
-          params: {
-            limit: this.paginationEntries.limit,
-            offset,
-            filter: (this.isFilter ? this.filter : null)
-          }
-        })
-        bus.$emit('scroll-top')
-      },
       ...mapMutations([
-        'setEntriesPagination',
         'clearSelected',
         'clearFilter',
         'setFilter'
@@ -101,7 +73,8 @@
       ])
     },
     mixins: [
-      i18nLabel
+      i18nLabel,
+      viewHelper
     ],
     components: {
       storageItem,

@@ -46,28 +46,32 @@
   import { Days } from '@/store/groups/days'
   import { Months } from '@/store/groups/months'
   import { Years } from '@/store/groups/years'
+  import { Tasks } from '@/store/groups/tasks'
   import { Storage } from '@/store/storage'
   import moment from 'moment'
   import i18nLabel from '@/mixins/i18n-label'
+  import viewHelper from '@/mixins/view-helper'
   import capitalize from '@/utils/capitalize'
 
-  function labelItem ({ type, offset, days, months, years, date }) {
+  function labelItem ({ type, offset, value }) {
     if (type === 'entries') {
       return offset + 1
     }
-    if (type === 'days' && days && days.length) {
-      return moment(date(days[0])).format('LL').replace(' г.', '')
+    if (value) {
+      if (type === 'days') {
+        return moment(value).format('LL').replace(' г.', '')
+      } else if (type === 'months') {
+        return moment(value).format('MMMM YYYY')
+      } else if (type === 'years') {
+        return moment(value).format('YYYY')
+      } else {
+        return value
+      }
     }
-    if (type === 'months' && months && months.length) {
-      return moment(date(months[0])).format('MMMM YYYY')
-    }
-    if (type === 'years' && years && years.length) {
-      return moment(date(years[0])).format('YYYY')
-    }
-    return 'Unknown item'
+    return 'Unknown value'
   }
 
-  function labelRange ({ type, offset, limit, count, items, date, rangeLabels, label }) {
+  function labelRange ({ type, offset, limit, count, items, rangeLabels, label }) {
     let range = {}
     if (type === 'entries') {
       let to = count - offset - limit
@@ -75,11 +79,18 @@
         from: count - offset,
         to: to < 1 ? 1 : to
       }
-    } else if (type !== 'entries' && items && items.length) {
-      range = rangeLabels({
-        from: moment(date(items[0])),
-        to: moment(date(items.slice(-1)[0]))
-      })
+    } else if (items && items.length) {
+      if (type === 'days' || type === 'months' || type === 'years') {
+        range = rangeLabels({
+          from: moment(items[0]),
+          to: moment(items.slice(-1)[0])
+        })
+      } else if (type === 'tasks') {
+        range = rangeLabels({
+          from: items[0],
+          to: items.slice(-1)[0]
+        })
+      }
     }
     return label.replace('%0', range.from).replace('%1', range.to)
   }
@@ -90,25 +101,25 @@
       offsetOnly: Boolean,
       limitOnly: Boolean
     },
-    data () {
-      return {
-        pagination: {
-          entries: () => this.paginationEntries,
-          days: () => this.paginationDays,
-          months: () => this.paginationMonths,
-          years: () => this.paginationYears
-        }
-      }
-    },
     computed: {
+      currentViewItems () {
+        const items = {
+          entries: Storage.entries,
+          days: Days.children,
+          months: Months.children,
+          years: Years.children,
+          tasks: Tasks.children
+        }
+        return items[this.currentView] ? items[this.currentView] : []
+      },
       currentOffset () {
-        return this.pagination[this.type]().offset
+        return this.currentPagination.offset
       },
       currentLimit () {
-        return this.pagination[this.type]().limit
+        return this.currentPagination.limit
       },
       currentCount () {
-        return this.pagination[this.type]().count
+        return this.currentPagination.count
       },
       currentExist () {
         return Storage.entries.length
@@ -126,81 +137,31 @@
         return labelItem({
           type: this.type,
           offset: this.currentOffset,
-          date: item => item.name,
-          days: Days.children,
-          months: Months.children,
-          years: Years.children
+          value: this.currentViewItems[0] && this.currentViewItems[0].name
         })
       },
       laterItemLabel () {
         return labelItem({
           type: this.type,
           offset: this.currentOffset + 1,
-          date: item => item,
-          days: this.paginationDays.previous,
-          months: this.paginationMonths.previous,
-          years: this.paginationYears.previous
+          value: this.currentPagination.previous[0]
         })
       },
       earlierItemLabel () {
         return labelItem({
           type: this.type,
           offset: this.currentOffset - 1,
-          date: item => item,
-          days: this.paginationDays.next,
-          months: this.paginationMonths.next,
-          years: this.paginationYears.next
+          value: this.currentPagination.next[0]
         })
       },
       currentRange () {
-        const items = {
-          entries: Storage.entries,
-          days: Days.children,
-          months: Months.children,
-          years: Years.children
-        }
-        return labelRange({
-          type: this.type,
-          offset: this.currentOffset,
-          limit: this.currentLimit,
-          date: item => item.name,
-          items: items[this.type],
-          count: this.currentCount,
-          rangeLabels: this[this.type + 'RangeLabels'],
-          label: this.label('pagination.range' + capitalize(this.type), false)
-        })
+        return this.generalRange(this.currentViewItems.map(i => i.name))
       },
       laterRange () {
-        const items = {
-          days: this.paginationDays.previous,
-          months: this.paginationMonths.previous,
-          years: this.paginationYears.previous
-        }
-        return labelRange({
-          type: this.type,
-          offset: this.currentOffset,
-          limit: this.currentLimit,
-          date: item => item,
-          items: items[this.type],
-          rangeLabels: this[this.type + 'RangeLabels'],
-          label: this.label('pagination.range' + capitalize(this.type), false)
-        })
+        return this.generalRange(this.currentPagination.previous)
       },
       earlierRange () {
-        const items = {
-          days: this.paginationDays.next,
-          months: this.paginationMonths.next,
-          years: this.paginationYears.next
-        }
-        return labelRange({
-          type: this.type,
-          offset: this.currentOffset,
-          limit: this.currentLimit,
-          date: item => item,
-          items: items[this.type],
-          rangeLabels: this[this.type + 'RangeLabels'],
-          label: this.label('pagination.range' + capitalize(this.type), false)
-        })
+        return this.generalRange(this.currentPagination.next)
       },
       labelAll () {
         return `${this.label('pagination.all', false)} ${this.labelNumber(this.currentCount)}`
@@ -224,10 +185,10 @@
         }
       },
       ...mapGetters([
-        'paginationEntries',
         'paginationDays',
         'paginationMonths',
         'paginationYears',
+        'paginationTasks',
         'paginationOptions',
         'locale'
       ])
@@ -248,13 +209,23 @@
         this.$emit('offset', 0)
       },
       labelNumber (items) {
-        const all = {
-          entries: 'pagination.numberEntries',
-          days: 'pagination.numberDays',
-          months: 'pagination.numberMonths',
-          years: 'pagination.numberYears'
-        }
-        return this.labelFormat(all[this.type], { [this.type]: items })
+        return this.labelFormat(`pagination.number${capitalize(this.type)}`, {
+          [this.type]: items
+        })
+      },
+      generalRange (items) {
+        return labelRange({
+          type: this.type,
+          offset: this.currentOffset,
+          limit: this.currentLimit,
+          count: this.currentCount,
+          items,
+          rangeLabels: this.currentViewRangeLabels,
+          label: this.label('pagination.range' + capitalize(this.type), false)
+        })
+      },
+      currentViewRangeLabels (payload) {
+        return this[`${this.currentView}RangeLabels`](payload)
       },
       daysRangeLabels ({ from, to }) {
         const result = {
@@ -300,10 +271,14 @@
           from: from.format('YYYY'),
           to: to.format('YYYY')
         }
+      },
+      tasksRangeLabels ({ from, to }) {
+        return { from, to }
       }
     },
     mixins: [
-      i18nLabel
+      i18nLabel,
+      viewHelper
     ]
   }
 </script>

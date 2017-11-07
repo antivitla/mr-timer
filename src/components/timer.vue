@@ -31,7 +31,7 @@
   // import taskContext from '@/components/other/task-context'
   import { Storage } from '@/store/storage'
   import { taskDelimiter } from '@/store/ui'
-  import currentViewGetParams from '@/mixins/current-view-get-params'
+  import viewHelper from '@/mixins/view-helper'
   import capitalize from '@/utils/capitalize'
   import { duration, durationFraction } from '@/utils/duration'
 
@@ -197,7 +197,7 @@
           const details = this.details.length ? this.details.slice(0) : [this.placeholder]
           this.startTimerAndGetEntries({
             entry: new Entry({ details }),
-            getParams: this.getParams()
+            getParams: this.viewGetParams()
           })
         } else {
           this.stopTimer()
@@ -300,7 +300,7 @@
       ])
     },
     mixins: [
-      currentViewGetParams
+      viewHelper
     ],
     components: {
       listInput

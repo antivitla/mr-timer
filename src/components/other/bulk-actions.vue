@@ -17,7 +17,7 @@
   import capitalize from 'lodash/capitalize'
   import { translate } from '@/store/i18n'
   import { Selected } from '@/store/selected'
-  import currentViewGetParams from '@/mixins/current-view-get-params'
+  import viewHelper from '@/mixins/view-helper'
 
   export default {
     data () {
@@ -51,7 +51,7 @@
       deleteSelectedEntries () {
         this.deleteAndGetEntries({
           deleteEntries: Selected.entries.slice(0),
-          getParams: this.getParams()
+          getParams: this.viewGetParams()
         })
         this.clearSelected()
       },
@@ -64,7 +64,7 @@
       ])
     },
     mixins: [
-      currentViewGetParams
+      viewHelper
     ]
   }
 </script>

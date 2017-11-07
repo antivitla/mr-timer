@@ -103,6 +103,7 @@
           if (mutation.payload.view !== 'storage') {
             this.clearSelected()
             this.clearFilter()
+            this.clearPagination()
           }
         }
       })
@@ -136,7 +137,8 @@
       ...mapMutations([
         'setCurrentView',
         'clearSelected',
-        'clearFilter'
+        'clearFilter',
+        'clearPagination'
       ])
     },
     mixins: [

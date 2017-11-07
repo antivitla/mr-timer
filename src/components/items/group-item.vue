@@ -124,7 +124,7 @@
   import { extractEntries, parentOfDifferentType, filterGroupChildren } from '@/utils/group'
   import { taskDelimiter } from '@/store/ui'
   import i18nLabel from '@/mixins/i18n-label'
-  import currentViewGetParams from '@/mixins/current-view-get-params'
+  import viewHelper from '@/mixins/view-helper'
   import funny from 'mr-funny'
   import funnyTemplates from '@/funny/templates'
 
@@ -262,7 +262,7 @@
             stop: new Date(),
             details
           }),
-          getParams: this.getParams()
+          getParams: this.viewGetParams()
         })
         // Мотаем чтоб увидеть старт таймера
         bus.$emit('scroll-top')
@@ -353,7 +353,7 @@
         this.stopTaskEditing()
         this.deleteAndGetEntries({
           deleteEntries: extractEntries(this.group),
-          getParams: this.getParams()
+          getParams: this.viewGetParams()
         })
       },
       filterTask () {
@@ -411,7 +411,7 @@
     },
     mixins: [
       i18nLabel,
-      currentViewGetParams
+      viewHelper
     ],
     directives: {
       longClick,
@@ -633,9 +633,15 @@
       .name
         width calc(100% - 13.25em)
 
-    .group-item[depth="1"] > .item.edit
+    .group-item[depth="1"].has-children > .item.edit
       .name
         width calc(100% - 9em)
+        textarea
+          font-weight 400
+
+    .group-item[depth="1"]:not(.has-children) > .item.edit
+      .name
+        width calc(100% - 13.25em)
         textarea
           font-weight 400
 

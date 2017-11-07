@@ -24,6 +24,13 @@ const defaultPagination = {
     offset: 0,
     next: null,
     previous: null
+  },
+  tasks: {
+    count: 0,
+    limit: 2,
+    offset: 0,
+    next: null,
+    previous: null
   }
 }
 
@@ -54,11 +61,19 @@ const state = {
     next: null,
     previous: null
   },
+  tasks: {
+    count: 0,
+    limit: 2,
+    offset: 0,
+    next: null,
+    previous: null
+  },
   options: {
     entries: { limit: [20, 50, 100] },
     days: { limit: [3, 7, 10] },
     months: { limit: [1, 3, 6] },
-    years: { limit: [1, 2, 3] }
+    years: { limit: [1, 2, 3] },
+    tasks: { limit: [1, 3, 10] }
   }
 }
 
@@ -67,6 +82,7 @@ const getters = {
   paginationDays: state => state.days,
   paginationMonths: state => state.months,
   paginationYears: state => state.years,
+  paginationTasks: state => state.tasks,
   paginationOptions: state => state.options
 }
 
@@ -83,11 +99,14 @@ const mutations = {
   setYearsPagination (state, payload) {
     Object.assign(state.years, payload)
   },
+  setTasksPagination (state, payload) {
+    Object.assign(state.tasks, payload)
+  },
   setGroupPagination (state, payload) {
     Object.assign(state[payload.group], payload)
   },
   clearPagination (state) {
-    Object.assign(state, defaultPagination)
+    Object.assign(state, JSON.parse(JSON.stringify(defaultPagination)))
   }
 }
 
