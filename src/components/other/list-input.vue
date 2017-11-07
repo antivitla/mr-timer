@@ -10,7 +10,6 @@
     v-focus-and-select-range="focusSelectionRangeOptions"
     :placeholder="placeholder")
 </template>
-
 <script>
   import autosize from 'autosize'
   import debounce from '@/utils/debounce'

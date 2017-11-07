@@ -21,7 +21,6 @@
     //-   v-if="context"
     //-   :context="context")
 </template>
-
 <script>
   import { mapGetters, mapActions, mapMutations } from 'vuex'
   import funny from 'mr-funny'
@@ -92,7 +91,6 @@
           }
         }
       })
-
       // bus.$on('start-task', payload => {
       //   this.start(payload.entry)
       //   this.$emit(this.resetFocusOnEvent)
@@ -258,7 +256,6 @@
       //   // Генерим новый плейсхолдер-заглушку задачи
       //   this.placeholder = capitalize(funnyTask(this.locale))
       // },
-
       updateDetails (event) {
         let details = parseList(event.target.value)
         this.edit.details = event.target.value
@@ -308,7 +305,6 @@
     }
   }
 </script>
-
 <style lang="stylus">
   @import '~@/assets/stylesheets/variables'
 

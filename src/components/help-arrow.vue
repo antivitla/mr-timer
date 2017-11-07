@@ -19,6 +19,7 @@
 </script>
 <style lang="stylus">
   @import '~@/assets/stylesheets/variables'
+
   .help-arrow
     position relative
     .text

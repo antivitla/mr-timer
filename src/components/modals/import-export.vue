@@ -62,7 +62,6 @@
         capitalize: capitalize
       }
     },
-
     computed: {
       exportData () {
         return JSON.stringify({
@@ -85,7 +84,6 @@
         'locale'
       ])
     },
-
     methods: {
       importMerge () {
         this.importEntries({
@@ -115,7 +113,6 @@
     }
   }
 </script>
-
 <style lang="stylus">
   @import '~@/assets/stylesheets/variables'
 

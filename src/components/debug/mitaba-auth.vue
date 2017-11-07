@@ -5,7 +5,6 @@
       p Profile:
       pre {{ userProfile }}
       p &nbsp;
-
     button.login(@click="login('facebook')")
       i.fa.fa-facebook.fa-lg
     span &emsp;
@@ -23,7 +22,6 @@
     span &emsp;
     button.login.primary(@click="logout()") Logout
 </template>
-
 <script>
   import { mapGetters, mapActions } from 'vuex'
 
@@ -33,7 +31,6 @@
         'userProfile'
       ])
     },
-
     methods: {
       login (provider) {
         this.authorizeWithProvider({ provider })
@@ -44,7 +41,6 @@
     }
   }
 </script>
-
 <style lang="stylus">
   @import '~@/assets/stylesheets/variables'
   @import '~@/assets/stylesheets/common'

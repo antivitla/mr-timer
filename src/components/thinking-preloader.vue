@@ -3,7 +3,6 @@
     img(src="static/img/cat-preloader.gif")
     span {{ thinkingLabel }}
 </template>
-
 <script>
   import { mapGetters } from 'vuex'
   import { translate } from '@/store/i18n'
@@ -22,7 +21,6 @@
         thinkingLabel: '...'
       }
     },
-
     created () {
       this.refreshThinkingLabel()
       bus.$on('batch-thinking-start', () => {
@@ -32,13 +30,11 @@
         this.refreshThinkingLabel()
       })
     },
-
     computed: {
       ...mapGetters([
         'locale'
       ])
     },
-
     methods: {
       refreshThinkingLabel () {
         const task = funnyTask(this.locale)
@@ -48,7 +44,6 @@
     }
   }
 </script>
-
 <style lang="stylus">
   @import '~@/assets/stylesheets/variables'
 

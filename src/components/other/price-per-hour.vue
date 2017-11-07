@@ -10,7 +10,6 @@
     span.symbol-after
     span.label {{ labelPerHour }}
 </template>
-
 <script>
   import { mapGetters, mapActions } from 'vuex'
   import debounce from '@/utils/debounce'
@@ -23,7 +22,9 @@
         debounceSetPrice: debounce()
       }
     },
-
+    created () {
+      this.loadRates()
+    },
     computed: {
       labelPrice () {
         return capitalize(
@@ -41,7 +42,6 @@
         'rate'
       ])
     },
-
     methods: {
       updatePrice (price) {
         if (!price) {
@@ -54,12 +54,12 @@
       },
       ...mapActions([
         'setPrice',
-        'clearPrice'
+        'clearPrice',
+        'loadRates'
       ])
     }
   }
 </script>
-
 <style lang="stylus">
   @import '~@/assets/stylesheets/variables.styl'
 
@@ -101,7 +101,7 @@
     .label:last-child
       margin-left 0.5em
 
-    input
+    input[type="text"]
       border 0
       padding 0 3px
       background-color transparent

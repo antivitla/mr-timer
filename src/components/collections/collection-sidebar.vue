@@ -20,6 +20,7 @@
 </template>
 <script>
   import { mapGetters } from 'vuex'
+
   // Components
   import toggleSidebar from '@/components/other/toggle-sidebar'
   import settingsProfile from '@/components/settings/settings-profile'
@@ -28,6 +29,7 @@
   import settingsMigration from '@/components/settings/settings-migration'
   import settingsExportImport from '@/components/settings/settings-export-import'
   import settingsSettings from '@/components/settings/settings-settings'
+
   // Tips
   import appTips from '@/mixins/app-tips'
   import i18nLabel from '@/mixins/i18n-label'

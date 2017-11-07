@@ -3,19 +3,16 @@
     span.icon-button.back(
       :class="{ 'active': !timerActive }"
       @click="upContext()"
-      :title="upContextLabel"
-    )
+      :title="upContextLabel")
       i.material-icons arrow_back
     span.name
       span {{ name }}
       span.icon-button.clear(
         :class="{ 'active': !timerActive }"
         @click="clearContext()"
-        :title="clearContextLabel"
-      )
+        :title="clearContextLabel")
         i.material-icons close
 </template>
-
 <script>
   import moment from 'moment'
   import { mapGetters, mapActions } from 'vuex'
@@ -25,7 +22,6 @@
 
   export default {
     props: ['context'],
-
     computed: {
       name () {
         let details = this.contextDetails ? this.contextDetails.join(taskDelimiter) : ''
@@ -62,7 +58,6 @@
         'contextDateValue'
       ])
     },
-
     methods: {
       upContext () {
         if (this.contextDetails) {
@@ -78,7 +73,6 @@
     }
   }
 </script>
-
 <style lang="stylus">
   @import '~@/assets/stylesheets/variables'
 

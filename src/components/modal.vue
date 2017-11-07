@@ -5,7 +5,6 @@
       v-esc-outside="closeModal")
       component(:is="modalActive")
 </template>
-
 <script>
   import { mapGetters, mapMutations } from 'vuex'
   import importExport from '@/components/modals/import-export'
@@ -19,28 +18,25 @@
         'modalActive'
       ])
     },
-
     methods: {
       ...mapMutations([
         'closeModal',
         'openModal'
       ])
     },
-
     directives: {
       clickOutside,
       escOutside
     },
-
     components: {
       importExport,
       chooseAvatar
     }
   }
 </script>
-
 <style lang="stylus">
   @import '~@/assets/stylesheets/variables'
+
   .modal-wrapper
     left 0px
     top 0px

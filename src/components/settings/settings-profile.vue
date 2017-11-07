@@ -17,6 +17,7 @@
   import { mapGetters, mapMutations } from 'vuex'
   import appTips from '@/mixins/app-tips'
   import i18nLabel from '@/mixins/i18n-label'
+
   export default {
     computed: {
       ...mapGetters([

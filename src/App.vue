@@ -22,7 +22,7 @@
       div(slot="left")
         filter-entries(v-if="isFiltersVisible")
         bulk-actions(v-if="isBulkActionsVisible")
-        div(v-if="viewModel !== 'storage'") Currency
+        price-per-hour(v-if="isPricePerHourVisible")
       div(slot="right")
         custom-switch(
           :options="availableViewsAsOptions"
@@ -50,6 +50,7 @@
   import customSwitch from '@/components/other/custom-switch'
   import filterEntries from '@/components/other/filter-entries'
   import bulkActions from '@/components/other/bulk-actions'
+  import pricePerHour from '@/components/other/price-per-hour'
   import timer from '@/components/timer'
 
   // Store
@@ -125,6 +126,9 @@
       isBulkActionsVisible () {
         return this.viewModel === 'storage' && Selected.entries.length
       },
+      isPricePerHourVisible () {
+        return this.viewModel !== 'storage'
+      },
       ...mapGetters([
         'currency',
         'currentView',
@@ -157,6 +161,7 @@
       customSwitch,
       filterEntries,
       bulkActions,
+      pricePerHour,
       viewHelp,
       viewTasks,
       viewYears,

@@ -24,6 +24,7 @@
 <script>
   import { mapGetters, mapActions } from 'vuex'
   import { translate } from '@/store/i18n'
+
   export default {
     data () {
       return {

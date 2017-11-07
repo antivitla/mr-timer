@@ -10,7 +10,6 @@
       @click="clearSelected()")
       i.material-icons block
 </template>
-
 <script>
   import { mapGetters, mapMutations, mapActions } from 'vuex'
   import pluralize from '@/utils/pluralize'
@@ -68,7 +67,6 @@
     ]
   }
 </script>
-
 <style lang="stylus">
   .bulk-actions
     display flex

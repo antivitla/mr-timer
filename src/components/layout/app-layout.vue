@@ -15,6 +15,7 @@
   import { mapGetters, mapMutations } from 'vuex'
   import clickOutside from '@/directives/click-outside'
   import escOutside from '@/directives/esc-outside'
+
   export default {
     computed: {
       appLayoutClass () {

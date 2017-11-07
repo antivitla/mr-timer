@@ -16,6 +16,7 @@
   import { locales, currencies } from '@/store/i18n'
   import capitalize from '@/utils/capitalize'
   import i18nLabel from '@/mixins/i18n-label'
+
   export default {
     data () {
       return {
@@ -66,6 +67,7 @@
 </script>
 <style lang="stylus">
   @import '~@/assets/stylesheets/core'
+
   .settings-i18n
     display flex
     flex-wrap wrap

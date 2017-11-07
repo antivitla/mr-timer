@@ -6,24 +6,20 @@
       :on-submit="submit")
     span {{ data.duration() }}
 </template>
-
 <script>
   import listInput from '@/components/list-input'
 
   export default {
     props: ['data'],
-
     data () {
       return {
         details: []
       }
     },
-
     mounted () {
       this.details = this.data.details()
       console.log(this.details)
     },
-
     computed: {
       depth () {
         let depth = 0
@@ -35,19 +31,16 @@
         return depth
       }
     },
-
     methods: {
       submit () {
         console.log('submit', this.data.details, this.data.duration())
       }
     },
-
     components: {
       listInput
     }
   }
 </script>
-
 <style lang="stylus">
   @import '~@/assets/stylesheets/variables'
 

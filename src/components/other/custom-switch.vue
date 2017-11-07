@@ -25,6 +25,7 @@
 </script>
 <style lang="stylus">
   @import '~@/assets/stylesheets/variables'
+
   .custom-switch
     font-size 14px
     a

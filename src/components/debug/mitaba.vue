@@ -11,13 +11,10 @@
         small
           span GET
           strong  /entries
-
     p
       button.primary(@click="createEntry()") Создать запись
-
     p
       pre {{ entries }}
-
     p
       button(@click="sendApiRequest('post', 'Entries')")
         small
@@ -35,7 +32,6 @@
           strong  /entries
     p
       pre {{ response }}
-
 </template>
 
 <script>
@@ -56,13 +52,11 @@
         entries: []
       }
     },
-
     computed: {
       ...mapGetters([
         'locale'
       ])
     },
-
     methods: {
       getEndpointByName (name) {
         Mitaba[`get${name}`]().then(response => {
@@ -72,7 +66,6 @@
           this.response = `${JSON.stringify(error, null, '  ')}`
         })
       },
-
       sendApiRequest (method, name, params = {}) {
         if (method === 'post') {
           params = this.entries
@@ -96,15 +89,12 @@
           this.response = `${JSON.stringify(error, null, '  ')}`
         })
       },
-
       createEntry () {
         this.entries.push(this.randomEntry())
       },
-
       clearEntries () {
         this.entries = []
       },
-
       randomEntry () {
         const nest = Math.ceil(Math.random() * 3 + 1)
         const details = []
@@ -120,7 +110,6 @@
     }
   }
 </script>
-
 <style lang="stylus">
   @import '~@/assets/stylesheets/variables'
   @import '~@/assets/stylesheets/core'

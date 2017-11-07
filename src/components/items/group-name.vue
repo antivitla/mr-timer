@@ -6,7 +6,6 @@
     span(v-else) {{ displayName }}
     span.weekend(v-if="weekend && group.type === 'day'") {{ label('weekend', false) }}
 </template>
-
 <script>
   import moment from 'moment'
   import { mapGetters } from 'vuex'
@@ -104,7 +103,6 @@
       font-size 87.5%
     .weekend
       position relative
-      // vertical-align middle
       top 3px
       margin-left 10px
       font-size 14px

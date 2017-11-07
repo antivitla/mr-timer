@@ -67,7 +67,6 @@
         @long-click="startEdit('duration')") {{ duration }}
       span.cost(
         v-if="price") {{ cost }}
-
       span.actions
         //- a.icon-button.start-task(
         //-   @click.stop.prevent="startTask()"
@@ -99,7 +98,6 @@
       :key="child.name"
       :group="child")
 </template>
-
 <script>
   import { mapGetters, mapMutations, mapActions } from 'vuex'
   import moment from 'moment'
@@ -425,7 +423,6 @@
     }
   }
 </script>
-
 <style lang="stylus">
   @import '~@/assets/stylesheets/variables.styl'
 
