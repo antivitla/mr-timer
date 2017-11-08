@@ -28,6 +28,7 @@
         custom-switch(
           :options="availableViewsAsOptions"
           v-model="viewModel")
+        icon-preloader(v-if="viewGetPreloader || false" icon="refresh")
     //- Views
     component(:is="viewComponent[currentView]" slot="page")
     //- Footer
@@ -53,6 +54,7 @@
   import bulkActions from '@/components/other/bulk-actions'
   import pricePerHour from '@/components/other/price-per-hour'
   import contextNav from '@/components/other/context-nav'
+  import iconPreloader from '@/components/other/icon-preloader'
   import timer from '@/components/timer'
 
   // Store
@@ -72,6 +74,7 @@
 
   // Other
   import bodyScrollTopOn from '@/directives/body-scroll-top-on'
+  import bus from '@/event-bus'
 
   // Mixins
   import auth from '@/mixins/auth'
@@ -93,7 +96,8 @@
           storage: viewStorage
         },
         Selected,
-        filter: []
+        filter: [],
+        viewGetPreloader: false
       }
     },
     created () {
@@ -106,13 +110,20 @@
           if (mutation.payload.view !== 'storage') {
             this.clearSelected()
             this.clearFilter()
-            this.clearPagination()
+            this.clearPaginationOffset()
           }
         }
       })
       // Init i18n
       this.activateLocale({ locale: this.locale })
       this.activateCurrency({ currency: this.currency })
+      // Init view preloaders
+      bus.$on('get-entries-pending', () => {
+        this.viewGetPreloader = true
+      })
+      bus.$on('get-entries-complete', () => {
+        this.viewGetPreloader = false
+      })
     },
     beforeDestroy () {
       this.unsubscribe()
@@ -148,7 +159,7 @@
         'setCurrentView',
         'clearSelected',
         'clearFilter',
-        'clearPagination'
+        'clearPaginationOffset'
       ]),
       ...mapActions([
         'activateLocale',
@@ -173,6 +184,7 @@
       bulkActions,
       pricePerHour,
       contextNav,
+      iconPreloader,
       viewHelp,
       viewTasks,
       viewYears,
@@ -212,6 +224,13 @@
   .app-navbar.menu
     line-height 24px
     border-bottom solid titamota-color-border 1px
+    position relative
+    .icon-preloader
+      position absolute
+      left 50%
+      transform translateX(-50%)
+      bottom calc(100% + 20px)
+      color titamota-color-text-muted
 
   // Hide toggle-sidebar-top
   .sidebar-active

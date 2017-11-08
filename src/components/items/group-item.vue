@@ -157,7 +157,13 @@
     computed: {
       duration () {
         const d = this.label('duration', false)
-        return durationHuman(this.group.duration(), d.hr, d.min, d.sec)
+        const trackingEntry = this.trackingEntry
+        if (trackingEntry && trackingEntry.duration() < this.timerEntry.duration()) {
+          const duration = this.group.duration() - trackingEntry.duration() + this.timerEntry.duration()
+          return durationHuman(duration, d.hr, d.min, d.sec)
+        } else {
+          return durationHuman(this.group.duration(), d.hr, d.min, d.sec)
+        }
       },
       colorCode () {
         if (this.group.type === 'month' || this.group.type === 'day') {
@@ -194,7 +200,7 @@
             .find(entry => {
               const isEntry = entry instanceof Entry
               const isTracking = entry.id === this.timerEntry.id
-              return isEntry && isTracking
+              return isEntry && isTracking && entry
             })
         }
       },

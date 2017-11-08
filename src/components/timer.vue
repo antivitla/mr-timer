@@ -59,7 +59,9 @@
         ms: '000',
         resetFocusOnEvent: 'start-task',
         Storage: Storage,
-        timerIsQuickActivated: false
+        timerIsQuickActivated: false,
+        saveDelayMin: 0.1,
+        lastSaveDate: new Date().getTime()
       }
     },
     created () {
@@ -84,13 +86,18 @@
       this.unsubscribe = this.$store.subscribe(mutation => {
         if (mutation.type === 'tickTimer') {
           if (this.timerEntry.id !== 'new') {
-            this.patchEntries({
-              remove: [this.timerEntry],
-              add: [this.timerEntry]
-            })
+            const wait = (new Date().getTime() - this.lastSaveDate) / 60000
+            if (wait > this.saveDelayMin) {
+              this.patchEntries({
+                remove: [this.timerEntry],
+                add: [this.timerEntry]
+              })
+              this.lastSaveDate = new Date().getTime()
+            }
           }
         }
       })
+
       // bus.$on('start-task', payload => {
       //   this.start(payload.entry)
       //   this.$emit(this.resetFocusOnEvent)
@@ -198,6 +205,10 @@
             getParams: this.viewGetParams()
           })
         } else {
+          this.patchEntries({
+            remove: [this.timerEntry],
+            add: [this.timerEntry]
+          })
           this.stopTimer()
         }
       },

@@ -122,8 +122,11 @@
           .join(taskDelimiter))
       },
       duration () {
-        const d = duration(this.entry.duration())
+        let d = duration(this.entry.duration())
         if (this.entry.id === this.timerEntry.id) {
+          if (this.timerEntry.duration() > this.entry.duration()) {
+            d = duration(this.timerEntry.duration())
+          }
           return d.format('HH:mm:ss')
         } else {
           return d.format('HH:mm')

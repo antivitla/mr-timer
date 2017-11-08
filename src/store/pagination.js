@@ -107,6 +107,11 @@ const mutations = {
   },
   clearPagination (state) {
     Object.assign(state, JSON.parse(JSON.stringify(defaultPagination)))
+  },
+  clearPaginationOffset (state) {
+    Object.keys(state.options).forEach(key => {
+      state[key].offset = 0
+    })
   }
 }
 

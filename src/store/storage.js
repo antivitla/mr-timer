@@ -5,6 +5,7 @@ import Local from '@/backend/local'
 import lastPromise from '@/utils/last-promise'
 import { insertSorted } from '@/utils/sorted'
 import { taskDelimiter } from '@/store/ui'
+import bus from '@/event-bus'
 
 function removeContext (entries, context) {
   if (!context.length) {
@@ -95,6 +96,8 @@ const actions = {
     if (context.getters.context.length) {
       params.context = context.getters.context.slice(0)
     }
+    // Отсылаем событие для прелоадера
+    bus.$emit('get-entries-pending')
     // Делаем, собственно, запрос
     return lastPromise({
       type: 'getEntries',
@@ -117,11 +120,13 @@ const actions = {
       // Показываем записи
       context.commit('clearEntries')
       context.commit('addEntries', { entries })
+      bus.$emit('get-entries-complete')
       return entries
     }).catch(error => {
       if (error.response.status === 404) {
         context.commit('clearEntries')
-        context.commit('clearPagination')
+        context.commit('clearPaginationOffset')
+        bus.$emit('get-entries-complete')
       }
     })
   },

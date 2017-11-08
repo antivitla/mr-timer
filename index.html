@@ -7,10 +7,24 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Mono|Rubik:300,300italic,400,500,700&amp;subset=cyrillic">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <script src="https://use.fontawesome.com/ca31b523ef.js"></script>
+    <style>
+      body {
+        margin: 0;
+        background-color: #f8f8ff;
+      }
+      .loading-app {
+        padding: 20%;
+        text-align: center;
+        font-family: Rubik, serif;
+        font-size: 18px;
+        color: silver;
+      }
+    </style>
   </head>
   <body>
-    <div id="debug-error" style="display: none;"></div>
-    <div id="app"></div>
+    <div id="app">
+      <div class="loading-app">Loading app / Грузим байты ...</div>
+    </div>
     <!-- built files will be auto injected -->
   </body>
 </html>
