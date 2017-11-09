@@ -35,6 +35,7 @@
           @click.stop.prevent="filterTask()")
           i.material-icons search
         a.icon-button.delete(
+          v-if="!trackingEntry"
           :title="label('delete')"
           @click.stop.prevent="removeTask()")
           i.material-icons delete
@@ -81,7 +82,7 @@
           i.material-icons launch
         a.icon-button.context(
           @click.stop.prevent="setGroupAsContext()"
-          :title="label('context.setCurrent')"
+          :title="label('context.setAsCurrentTask')"
           v-if="isContextable")
           //- i.fa.fa-thumb-tack
           i.material-icons flag
@@ -236,7 +237,8 @@
         'editingTaskId',
         'editingTaskFields',
         'editingFocus',
-        'context'
+        'context',
+        'isContext'
       ])
     },
     methods: {
@@ -404,7 +406,7 @@
         if (this.currentView === 'tasks') {
           this.setTasksPagination({ offset: 0 })
         }
-        if (this.context.length) {
+        if (this.isContext) {
           this.downContextAndGetEntries({
             context: rootDetails(this.group),
             getParams: this.viewGetParams()

@@ -93,7 +93,7 @@ const actions = {
     const backend = driver[context.getters.backend]
     // Если у нас есть контекст,
     // подпихиваем соотв. параметры
-    if (context.getters.context.length) {
+    if (context.getters.isContext) {
       params.context = context.getters.context.slice(0)
     }
     // Отсылаем событие для прелоадера
@@ -166,8 +166,8 @@ const actions = {
       .then(() => {
         // Если у нас есть контекст,
         // подпихиваем соотв. параметры
-        const params = payload.params
-        if (context.getters.context.length) {
+        const params = payload.getParams
+        if (context.getters.isContext) {
           params.context = context.getters.context.slice(0)
         }
         context.dispatch('getEntries', { params: payload.getParams })

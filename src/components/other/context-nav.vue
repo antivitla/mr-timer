@@ -1,12 +1,15 @@
 <template lang="pug">
-  .context-nav(v-if="context.length")
-    span.icon-button.up(
-      @click="upContextAndGetEntries"
-      :title="label('context.up')")
-      i.material-icons arrow_back
-    span.path(:title="label('context.description')")
-      span.item(v-for="item in context") {{ item }}
-      span.icon-button.clear(
+  .context-nav(v-if="isContext")
+    //- Path to current task
+    div.path(v-if="context.length > 1")
+      span.item(
+        v-for="(item, index) in path"
+        :title="label('context.setAsCurrentTask')"
+        @click="setAsCurrentTask(item, index)") {{ item }}
+    //- Current task
+    div.task
+      span.item(:title="label('context.task')") {{ task }}
+      a.icon-button.clear(
         @click="clearContextAndGetEntries"
         :title="label('context.clear')")
         i.material-icons close
@@ -18,8 +21,15 @@
 
   export default {
     computed: {
+      path () {
+        return this.context.slice(0, -1)
+      },
+      task () {
+        return this.context.slice(-1)[0]
+      },
       ...mapGetters([
-        'context'
+        'context',
+        'isContext'
       ])
     },
     methods: {
@@ -27,13 +37,13 @@
         this.clearContext()
         this.getEntries({ params: this.viewGetParams() })
       },
-      upContextAndGetEntries () {
-        this.upContext()
+      setAsCurrentTask (item, index) {
+        this.setContext({ context: this.context.slice(0, index + 1) })
         this.getEntries({ params: this.viewGetParams() })
       },
       ...mapMutations([
         'clearContext',
-        'upContext'
+        'setContext'
       ])
     },
     mixins: [
@@ -46,35 +56,37 @@
   @import '~@/assets/stylesheets/core'
 
   .context-nav
-    font-size 24px
-    line-height 40px
-    font-weight 400
-    display flex
-    align-items flex-start
-    margin-left -24px
-    .icon-button
-      font-size inherit
-      line-height 30px
-      .material-icons
-        font-size inherit
-    .up
-      margin-right 10px
-      position relative
-      top 5px
-      color titamota-color-text-muted
-      cursor pointer
     .path
-      display inline-flex
-      flex-wrap wrap
-      color titamota-color-text
-      .clear
-        margin-left 10px
-        position relative
-        top 1px
-        color titamota-color-text-muted
+      line-height 20px
+      font-size 18px
+      font-weight 500
+      display flex
+      margin-top -20px
+      .item
         cursor pointer
-      .item + .item
-        margin-left 0.25em
-        &:before
-          content '/ '
+        opacity 0.25
+        &:hover
+          opacity 1
+        &:after
+          content ' /'
+          margin-right 0.25em
+        &:last-child:after
+          content none
+    .task
+      line-height 60px
+      display flex
+      .item
+        font-size 45px
+        font-weight 500
+        letter-spacing -1px
+
+    .clear
+      margin-left 10px
+      position relative
+      top 3px
+      opacity 0.25
+      &:hover
+        opacity 1
+      .material-icons
+        font-size 30px
 </style>

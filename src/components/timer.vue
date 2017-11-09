@@ -60,7 +60,7 @@
         resetFocusOnEvent: 'start-task',
         Storage: Storage,
         timerIsQuickActivated: false,
-        saveDelayMin: 0.1,
+        saveDelayMin: 1,
         lastSaveDate: new Date().getTime()
       }
     },
@@ -97,11 +97,6 @@
           }
         }
       })
-
-      // bus.$on('start-task', payload => {
-      //   this.start(payload.entry)
-      //   this.$emit(this.resetFocusOnEvent)
-      // })
 
       // bus.$on('update-entry', payload => {
       //   const entry = payload.entry
@@ -321,7 +316,7 @@
 
   .timer
     position relative
-    margin-bottom 90px
+    margin-bottom 60px
     transform translateX(-10px)
     width calc(100% + 20px)
 

@@ -208,10 +208,13 @@
   // Top Navbar Toggle Sidebar
   .app-navbar.top
     line-height 40px
+    min-height 60px
     margin-bottom 60px
     .toggle-sidebar
       display flex
       cursor pointer
+      margin-top 15px
+      white-space nowrap
       .material-icons
         font-size 18px
       .user-profile

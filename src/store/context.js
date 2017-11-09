@@ -3,7 +3,8 @@ const state = {
 }
 
 const getters = {
-  context: state => state.context
+  context: state => state.context,
+  isContext: state => Boolean(state.context.length)
 }
 
 const mutations = {

@@ -80,10 +80,9 @@ const ru = ({
   externalLink: 'перейти к',
   weekend: 'выходной',
   context: {
-    description: 'путь к текущей задаче',
-    up: 'выше по пути к текущей задаче',
-    clear: 'очистить текущую задачу',
-    setCurrent: 'сделать текущей задачей'
+    clear: 'убрать  контекст',
+    task: 'текущая задача',
+    setAsCurrentTask: 'сделать текущей задачей'
   },
   pagination: {
     later: 'позже',
@@ -192,10 +191,9 @@ const en = ({
   externalLink: 'go to',
   weekend: 'weekend',
   context: {
-    description: 'Path to current task',
-    up: 'up in current task path',
     clear: 'clear current task',
-    setCurrent: 'set current task'
+    task: 'current task',
+    setAsCurrentTask: 'set as current task'
   },
   pagination: {
     later: 'later',

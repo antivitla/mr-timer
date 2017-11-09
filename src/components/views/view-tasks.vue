@@ -6,7 +6,7 @@
       :key="task.name"
       :group="task")
     view-pagination(
-      v-if="!context.length"
+      v-if="!isContext"
       type="tasks"
       @limit="onChangeLimit"
       @offset="onChangeOffset")
@@ -37,7 +37,8 @@
         return Tasks.children.length
       },
       ...mapGetters([
-        'context'
+        'context',
+        'isContext'
       ])
     },
     methods: {

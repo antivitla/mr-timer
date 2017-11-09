@@ -10,7 +10,7 @@
 
   .app-navbar
     display flex
-    align-items center
+    align-items flex-start
     justify-content space-between
     box-sizing border-box
     .left
