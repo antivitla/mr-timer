@@ -84,7 +84,7 @@ const mutations = {
 
 const actions = {
   getEntries (context, payload) {
-    const params = payload ? payload.params : context.getters.currentViewParams
+    const params = JSON.parse(JSON.stringify(payload && payload.params ? payload.params : context.getters.currentViewParams))
     // Выбираем сервер
     const backend = driver[context.getters.backend]
     // Если у нас есть контекст,

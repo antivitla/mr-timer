@@ -25,25 +25,31 @@ const getters = {
 
 const actions = {
   changeCurrentViewLimit (context, payload) {
-    const view = context.getters.currentView
     const limit = payload.limit
+    if (context.getters.currentViewPagination.limit === limit) {
+      return
+    }
+    const view = context.getters.currentView
     let setPagination = `set${capitalize(view)}Pagination`
     if (view === 'storage') {
       setPagination = 'setEntriesPagination'
     }
     context.commit(setPagination, { limit })
-    context.dispatch('getEntries', { params: context.getters.currentViewParams })
+    context.dispatch('getEntries')
     bus.$emit('scroll-top')
   },
   changeCurrentViewOffset (context, payload) {
-    const view = context.getters.currentView
     const offset = payload.offset
+    if (context.getters.currentViewPagination.offset === offset) {
+      return
+    }
+    const view = context.getters.currentView
     let setPagination = `set${capitalize(view)}Pagination`
     if (view === 'storage') {
       setPagination = 'setEntriesPagination'
     }
     context.commit(setPagination, { offset })
-    context.dispatch('getEntries', { params: context.getters.currentViewParams })
+    context.dispatch('getEntries')
     bus.$emit('scroll-top')
   }
 }
