@@ -61,18 +61,16 @@ export const actions = {
         return context.getters.timerEntry
       })
   },
-
   stopTimer (context) {
     context.commit('stopTimer')
     clearTimeout(timerTimeout)
     return context.getters.timerEntry
   },
-
   startTimerAndGetEntries (context, payload) {
-    return context.dispatch('startTimer', { entry: payload.entry })
-      .then(entry => {
-        return context.dispatch('getEntries', { params: payload.getParams })
-      })
+    const entry = payload.entry
+    return context
+      .dispatch('startTimer', { entry })
+      .then(() => context.dispatch('getEntries'))
   }
 }
 

@@ -16,7 +16,6 @@
   import capitalize from 'lodash/capitalize'
   import { translate } from '@/store/i18n'
   import { Selected } from '@/store/selected'
-  import viewHelper from '@/mixins/view-helper'
 
   export default {
     data () {
@@ -48,23 +47,17 @@
         return q + ' ' + entries + ' ' + or
       },
       deleteSelectedEntries () {
-        this.deleteAndGetEntries({
-          deleteEntries: Selected.entries.slice(0),
-          getParams: this.viewGetParams()
-        })
+        const entries = Selected.entries.slice(0)
+        this.deleteAndGetEntries({ entries })
         this.clearSelected()
       },
       ...mapMutations([
         'clearSelected'
       ]),
       ...mapActions([
-        'deleteEntries',
         'deleteAndGetEntries'
       ])
-    },
-    mixins: [
-      viewHelper
-    ]
+    }
   }
 </script>
 <style lang="stylus">

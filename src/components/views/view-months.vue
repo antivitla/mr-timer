@@ -7,8 +7,8 @@
       :group="month")
     view-pagination(
       type="months"
-      @limit="onChangeLimit"
-      @offset="onChangeOffset")
+      @limit="changeCurrentViewLimit"
+      @offset="changeCurrentViewOffset")
 </template>
 <script>
   import { mapActions } from 'vuex'
@@ -17,8 +17,6 @@
   import groupItem from '@/components/items/group-item'
   import viewPagination from '@/components/views/view-pagination'
   import i18nLabel from '@/mixins/i18n-label'
-  import viewHelper from '@/mixins/view-helper'
-  import bus from '@/event-bus'
 
   export default {
     data () {
@@ -27,10 +25,6 @@
         filterGroupChildren
       }
     },
-    mounted () {
-      this.getEntries({ params: this.viewGetParams() })
-      bus.$emit('scroll-top')
-    },
     computed: {
       isMonths () {
         return Months.children.length
@@ -38,12 +32,12 @@
     },
     methods: {
       ...mapActions([
-        'getEntries'
+        'changeCurrentViewOffset',
+        'changeCurrentViewLimit'
       ])
     },
     mixins: [
-      i18nLabel,
-      viewHelper
+      i18nLabel
     ],
     components: {
       groupItem,

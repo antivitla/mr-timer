@@ -3,7 +3,6 @@
     :currency="currency"
     :is-currency-symbol-before="isCurrencySymbolBefore"
     v-body-scroll-top-on="'scroll-top'")
-
     //- Top nav
     app-navbar.top(slot="page")
       context-nav(slot="left")
@@ -17,7 +16,6 @@
     timer(slot="page")
     //- Optional
     //- section.optional(slot="page")
-      mitaba
     //- Navbar
     app-navbar.menu(slot="page")
       div(slot="left")
@@ -41,9 +39,13 @@
     //- p(slot="modal") Modals
     //- p(slot="modal") Modals 2
 </template>
-
 <script>
   import { mapGetters, mapMutations, mapActions } from 'vuex'
+  import bodyScrollTopOn from '@/directives/body-scroll-top-on'
+  import bus from '@/event-bus'
+  import Mitaba from '@/backend/mitaba'
+
+  // Components
   import appNavbar from '@/components/layout/app-navbar'
   import appLayout from '@/components/layout/app-layout'
   import toggleSidebar from '@/components/other/toggle-sidebar'
@@ -61,9 +63,6 @@
   import { appTitle } from '@/store/app-info'
   import { Selected } from '@/store/selected'
 
-  // Debug
-  import mitaba from '@/components/debug/mitaba'
-
   // Views
   import viewHelp from '@/components/views/view-help'
   import viewTasks from '@/components/views/view-tasks'
@@ -72,16 +71,9 @@
   import viewDays from '@/components/views/view-days'
   import viewStorage from '@/components/views/view-storage'
 
-  // Other
-  import bodyScrollTopOn from '@/directives/body-scroll-top-on'
-  import bus from '@/event-bus'
-
   // Mixins
-  import auth from '@/mixins/auth'
   import appTips from '@/mixins/app-tips'
   import i18nLabel from '@/mixins/i18n-label'
-  import i18nQuery from '@/mixins/i18n-query'
-  import storage from '@/mixins/storage'
 
   export default {
     data () {
@@ -102,21 +94,35 @@
     },
     created () {
       console.log(`Welcome to ${appTitle}`)
+
+      // Finish auth, if redirected
+      if (this.$route.name === 'providerAuthRedirect') {
+        this.authorizeWithMitaba({
+          provider: this.$route.params.provider,
+          code: this.$route.query.code
+        }).catch(error => {
+          console.warn(error)
+        })
+        this.$router.push({ name: 'home' })
+      }
+
+      // Init auth
+      if (this.isAuthorized) {
+        Mitaba.token = this.authToken
+        this.setBackend({ backend: 'mitaba' })
+      } else {
+        this.clearUser()
+        this.setBackend({ backend: 'local' })
+      }
+
       // Init current view
       this.viewModel = this.currentView
       this.unsubscribe = this.$store.subscribe(mutation => {
         if (mutation.type === 'setCurrentView') {
           this.viewModel = mutation.payload.view
-          if (mutation.payload.view !== 'storage') {
-            this.clearSelected()
-            this.clearFilter()
-            this.clearPaginationOffset()
-          }
         }
       })
-      // Init i18n
-      this.activateLocale({ locale: this.locale })
-      this.activateCurrency({ currency: this.currency })
+
       // Init view preloaders
       bus.$on('get-entries-pending', () => {
         this.viewGetPreloader = true
@@ -124,6 +130,10 @@
       bus.$on('get-entries-complete', () => {
         this.viewGetPreloader = false
       })
+
+      // Init i18n
+      this.activateLocale({ locale: this.$route.query.locale || this.locale })
+      this.activateCurrency({ currency: this.$route.query.currency || this.currency })
     },
     beforeDestroy () {
       this.unsubscribe()
@@ -147,31 +157,32 @@
       },
       ...mapGetters([
         'currency',
+        'locale',
         'currentView',
         'isAuthorized',
         'isCurrencySymbolBefore',
         'availableViewsAsOptions',
-        'userName'
+        'userName',
+        'authToken'
       ])
     },
     methods: {
       ...mapMutations([
         'setCurrentView',
+        'setBackend',
         'clearSelected',
         'clearFilter',
-        'clearPaginationOffset'
+        'clearUser'
       ]),
       ...mapActions([
         'activateLocale',
-        'activateCurrency'
+        'activateCurrency',
+        'authorizeWithMitaba'
       ])
     },
     mixins: [
-      auth,
       appTips,
-      i18nLabel,
-      i18nQuery,
-      storage
+      i18nLabel
     ],
     components: {
       appLayout,
@@ -191,7 +202,6 @@
       viewMonths,
       viewDays,
       viewStorage,
-      mitaba,
       timer
     },
     directives: {
@@ -199,7 +209,6 @@
     }
   }
 </script>
-
 <style lang="stylus">
   @import '~@/assets/stylesheets/core'
   @import '~@/assets/stylesheets/error'
@@ -232,7 +241,7 @@
       position absolute
       left 50%
       transform translateX(-50%)
-      bottom calc(100% + 20px)
+      bottom calc(100% + 5px)
       color titamota-color-text-muted
 
   // Hide toggle-sidebar-top

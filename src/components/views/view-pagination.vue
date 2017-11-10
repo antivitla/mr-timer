@@ -50,7 +50,6 @@
   import { Storage } from '@/store/storage'
   import moment from 'moment'
   import i18nLabel from '@/mixins/i18n-label'
-  import viewHelper from '@/mixins/view-helper'
   import capitalize from '@/utils/capitalize'
 
   function labelItem ({ type, offset, value }) {
@@ -113,13 +112,13 @@
         return items[this.currentView] ? items[this.currentView] : []
       },
       currentOffset () {
-        return this.currentPagination.offset
+        return this.currentViewPagination.offset
       },
       currentLimit () {
-        return this.currentPagination.limit
+        return this.currentViewPagination.limit
       },
       currentCount () {
-        return this.currentPagination.count
+        return this.currentViewPagination.count
       },
       currentExist () {
         return Storage.entries.length
@@ -144,24 +143,24 @@
         return labelItem({
           type: this.type,
           offset: this.currentOffset + 1,
-          value: this.currentPagination.previous[0]
+          value: this.currentViewPagination.previous[0]
         })
       },
       earlierItemLabel () {
         return labelItem({
           type: this.type,
           offset: this.currentOffset - 1,
-          value: this.currentPagination.next[0]
+          value: this.currentViewPagination.next[0]
         })
       },
       currentRange () {
         return this.generalRange(this.currentViewItems.map(i => i.name))
       },
       laterRange () {
-        return this.generalRange(this.currentPagination.previous)
+        return this.generalRange(this.currentViewPagination.previous)
       },
       earlierRange () {
-        return this.generalRange(this.currentPagination.next)
+        return this.generalRange(this.currentViewPagination.next)
       },
       labelAll () {
         return `${this.label('pagination.all', false)} ${this.labelNumber(this.currentCount)}`
@@ -185,28 +184,30 @@
         }
       },
       ...mapGetters([
-        'paginationDays',
-        'paginationMonths',
-        'paginationYears',
-        'paginationTasks',
         'paginationOptions',
+        'currentView',
+        'currentViewPagination',
         'locale'
       ])
     },
     methods: {
       changeLimit (limit) {
-        this.$emit('limit', limit)
+        this.$emit('limit', { limit })
       },
       changeOffset (direction) {
         let offset = this.currentOffset + direction * this.currentLimit
-        this.$emit('offset', offset >= 0 ? offset : 0)
+        this.$emit('offset', {
+          offset: (offset >= 0 ? offset : 0)
+        })
       },
       earliestOffset () {
         let offset = Math.floor(this.currentCount / this.currentLimit) * this.currentLimit
-        this.$emit('offset', offset >= this.currentCount ? offset - this.currentLimit : offset)
+        this.$emit('offset', {
+          offset: (offset >= this.currentCount ? offset - this.currentLimit : offset)
+        })
       },
       latestOffset () {
-        this.$emit('offset', 0)
+        this.$emit('offset', { offset: 0 })
       },
       labelNumber (items) {
         return this.labelFormat(`pagination.number${capitalize(this.type)}`, {
@@ -277,8 +278,7 @@
       }
     },
     mixins: [
-      i18nLabel,
-      viewHelper
+      i18nLabel
     ]
   }
 </script>

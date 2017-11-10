@@ -8,14 +8,12 @@ const mutations = {
       Selected.entries.push(payload.entry)
     }
   },
-
   removeSelected (state, payload) {
     const id = Selected.entries.findIndex(entry => entry.id === payload.entry.id)
     if (id > -1) {
       Selected.entries.splice(id, 1)
     }
   },
-
   clearSelected (state, payload) {
     Selected.entries = []
   }

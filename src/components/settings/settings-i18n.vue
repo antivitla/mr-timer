@@ -12,7 +12,7 @@
           :value="c.code") {{ label('currency.' + c.code) }}
 </template>
 <script>
-  import { mapActions } from 'vuex'
+  import { mapMutations, mapActions } from 'vuex'
   import { locales, currencies } from '@/store/i18n'
   import capitalize from '@/utils/capitalize'
   import i18nLabel from '@/mixins/i18n-label'
@@ -46,15 +46,20 @@
       'selectedLocale': function (locale) {
         if (locale !== this.locale) {
           this.activateLocale({ locale })
+          this.closeSidebar()
         }
       },
       'selectedCurrency': function (currency) {
         if (currency !== this.currency) {
           this.activateCurrency({ currency })
+          this.closeSidebar()
         }
       }
     },
     methods: {
+      ...mapMutations([
+        'closeSidebar'
+      ]),
       ...mapActions([
         'activateLocale',
         'activateCurrency'

@@ -30,7 +30,6 @@
   // import taskContext from '@/components/other/task-context'
   import { Storage } from '@/store/storage'
   import { taskDelimiter } from '@/store/ui'
-  import viewHelper from '@/mixins/view-helper'
   import capitalize from '@/utils/capitalize'
   import { duration, durationFraction } from '@/utils/duration'
 
@@ -60,7 +59,7 @@
         resetFocusOnEvent: 'start-task',
         Storage: Storage,
         timerIsQuickActivated: false,
-        saveDelayMin: 1,
+        saveDelayMin: 0.02,
         lastSaveDate: new Date().getTime()
       }
     },
@@ -186,19 +185,14 @@
         'locale',
         'timerDuration',
         'timerActive',
-        'timerEntry',
-        // 'contextDetails',
-        'context'
+        'timerEntry'
       ])
     },
     methods: {
       toggle () {
         if (!this.timerActive) {
           const details = this.details.length ? this.details.slice(0) : [this.placeholder]
-          this.startTimerAndGetEntries({
-            entry: new Entry({ details }),
-            getParams: this.viewGetParams()
-          })
+          this.startTimerAndGetEntries({ entry: new Entry({ details }) })
         } else {
           this.patchEntries({
             remove: [this.timerEntry],
@@ -294,7 +288,7 @@
         clearTimeout(tickTimeout)
       },
       ...mapMutations([
-        'setTimerEntry'
+        // 'setTimerEntry'
       ]),
       ...mapActions([
         'startTimerAndGetEntries',
@@ -302,12 +296,8 @@
         'patchEntries'
       ])
     },
-    mixins: [
-      viewHelper
-    ],
     components: {
       listInput
-      // taskContext
     }
   }
 </script>

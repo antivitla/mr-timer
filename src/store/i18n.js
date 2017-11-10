@@ -290,11 +290,9 @@ const actions = {
   activateLocale (context, payload) {
     context.commit('setLocale', payload)
     moment.locale(payload.locale)
-    context.commit('closeSidebar')
   },
   activateCurrency (context, payload) {
     context.commit('setCurrency', payload)
-    context.commit('closeSidebar')
   }
 }
 

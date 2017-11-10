@@ -21,27 +21,22 @@ export const Days = (new Group({
 }))
 
 export function DaysPlugin (store) {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'addEntries') {
-      // let resolvePath
-      // if (store.getters['contextDetails']) {
-      //   let contextRootPath = store.getters['contextDetails']
-      //   resolvePath = function (entry) {
-      //     return [format(entry.start)]
-      //       .concat(entry.details.slice(contextRootPath.length))
-      //   }
-      // }
+  const actions = {
+    addEntries (mutation) {
       mutation.payload.entries.forEach(entry => {
         Days.addEntry(entry)
       })
-    }
-    if (mutation.type === 'removeEntries') {
+    },
+    removeEntries (mutation) {
       mutation.payload.entries.forEach(entry => {
         Days.removeEntry(entry)
       })
-    }
-    if (mutation.type === 'clearEntries') {
+    },
+    clearEntries () {
       Days.children = []
     }
+  }
+  return store.subscribe(mutation => {
+    actions[mutation.type] && actions[mutation.type](mutation)
   })
 }

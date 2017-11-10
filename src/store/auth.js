@@ -52,7 +52,6 @@ const actions = {
     // redirect to provider auth dialog
     Mitaba.authorizeWithProvider(payload.provider)
   },
-
   authorizeWithMitaba (context, payload) {
     // set 'waiting auth from mitaba'
     context.commit('waitForMitabaAuth', payload)

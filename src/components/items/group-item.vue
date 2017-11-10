@@ -129,7 +129,6 @@
   } from '@/utils/group'
   import { taskDelimiter } from '@/store/ui'
   import i18nLabel from '@/mixins/i18n-label'
-  import viewHelper from '@/mixins/view-helper'
   import funny from 'mr-funny'
   import funnyTemplates from '@/funny/templates'
 
@@ -236,9 +235,7 @@
         'isEditingTask',
         'editingTaskId',
         'editingTaskFields',
-        'editingFocus',
-        'context',
-        'isContext'
+        'editingFocus'
       ])
     },
     methods: {
@@ -274,8 +271,7 @@
             start: new Date(),
             stop: new Date(),
             details
-          }),
-          getParams: this.viewGetParams()
+          })
         })
         // Мотаем чтоб увидеть старт таймера
         bus.$emit('scroll-top')
@@ -364,10 +360,8 @@
       },
       removeTask () {
         this.stopTaskEditing()
-        this.deleteAndGetEntries({
-          deleteEntries: extractEntries(this.group),
-          getParams: this.viewGetParams()
-        })
+        const entries = extractEntries(this.group)
+        this.deleteAndGetEntries({ entries })
       },
       filterTask () {
         let filter = []
@@ -403,20 +397,9 @@
         this.setFilter({ filter })
       },
       setGroupAsContext () {
-        if (this.currentView === 'tasks') {
-          this.setTasksPagination({ offset: 0 })
-        }
-        if (this.isContext) {
-          this.downContextAndGetEntries({
-            context: rootDetails(this.group),
-            getParams: this.viewGetParams()
-          })
-        } else {
-          this.setContextAndGetEntries({
-            context: rootDetails(this.group),
-            getParams: this.viewGetParams()
-          })
-        }
+        this.changeCurrentViewOffset({ offset: 0 })
+        this.appendContext({ context: rootDetails(this.group) })
+        this.getEntries()
         bus.$emit('scroll-top')
       },
       gotoHref (href) {
@@ -426,20 +409,19 @@
         'startTaskEditing',
         'stopTaskEditing',
         'setCurrentView',
-        'setFilter',
-        'setTasksPagination'
+        'appendContext',
+        'setFilter'
       ]),
       ...mapActions([
+        'changeCurrentViewOffset',
         'startTimerAndGetEntries',
         'deleteAndGetEntries',
         'patchEntries',
-        'setContextAndGetEntries',
-        'downContextAndGetEntries'
+        'getEntries'
       ])
     },
     mixins: [
-      i18nLabel,
-      viewHelper
+      i18nLabel
     ],
     directives: {
       longClick,

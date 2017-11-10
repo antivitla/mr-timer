@@ -1,11 +1,11 @@
 import Entry from '@/models/entry'
-import Petrov from '@/backend/petrov'
 import Mitaba from '@/backend/mitaba'
 import Local from '@/backend/local'
 import lastPromise from '@/utils/last-promise'
 import { insertSorted } from '@/utils/sorted'
 import { taskDelimiter } from '@/store/ui'
 import bus from '@/event-bus'
+// import capitalize from '@/utils/capitalize'
 
 function removeContext (entries, context) {
   if (!context.length) {
@@ -34,8 +34,7 @@ function addContext (entries, context) {
 
 const driver = {
   local: Local,
-  mitaba: Mitaba,
-  petrov: Petrov
+  mitaba: Mitaba
 }
 
 export const Storage = {
@@ -54,7 +53,6 @@ const mutations = {
   setBackend (state, payload) {
     state.backend = payload.backend
   },
-
   addEntries (state, payload) {
     payload.entries.forEach(entry => {
       insertSorted({
@@ -65,7 +63,6 @@ const mutations = {
       })
     })
   },
-
   removeEntries (state, payload) {
     payload.entries.forEach(entry => {
       let id = Storage.entries.indexOf(entry)
@@ -80,7 +77,6 @@ const mutations = {
       }
     })
   },
-
   clearEntries () {
     Storage.entries = []
   }
@@ -88,7 +84,7 @@ const mutations = {
 
 const actions = {
   getEntries (context, payload) {
-    const params = payload ? payload.params : {}
+    const params = payload ? payload.params : context.getters.currentViewParams
     // Выбираем сервер
     const backend = driver[context.getters.backend]
     // Если у нас есть контекст,
@@ -123,14 +119,13 @@ const actions = {
       bus.$emit('get-entries-complete')
       return entries
     }).catch(error => {
-      if (error.response.status === 404) {
+      if (error.response && error.response.status === 404) {
         context.commit('clearEntries')
-        context.commit('clearPaginationOffset')
+        context.commit('clearPagination')
         bus.$emit('get-entries-complete')
       }
     })
   },
-
   postEntries (context, payload) {
     const postEntries = addContext(payload.entries, context.getters.context)
     return driver[context.getters.backend]
@@ -141,7 +136,6 @@ const actions = {
         return postedEntries
       })
   },
-
   patchEntries (context, payload) {
     // Изменяем записи сразу же, не дожидаясь ответа сервера
     context.commit('removeEntries', { entries: payload.remove })
@@ -152,26 +146,17 @@ const actions = {
     return driver[context.getters.backend]
       .patchEntries(entries.map(entry => entry.serialize()))
   },
-
   deleteEntries (context, payload) {
     context.commit('removeEntries', payload)
     return driver[context.getters.backend]
       .deleteEntries(payload.entries.map(entry => ({ id: entry.id })))
   },
-
   deleteAndGetEntries (context, payload) {
-    context.commit('removeEntries', { entries: payload.deleteEntries })
+    const entries = payload.entries
+    context.commit('removeEntries', { entries })
     return context
-      .dispatch('deleteEntries', { entries: payload.deleteEntries })
-      .then(() => {
-        // Если у нас есть контекст,
-        // подпихиваем соотв. параметры
-        const params = payload.getParams
-        if (context.getters.isContext) {
-          params.context = context.getters.context.slice(0)
-        }
-        context.dispatch('getEntries', { params: payload.getParams })
-      })
+      .dispatch('deleteEntries', { entries })
+      .then(() => context.dispatch('getEntries'))
   }
 }
 

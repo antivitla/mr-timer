@@ -1,3 +1,5 @@
+import Mitaba from '@/backend/mitaba'
+
 const state = {
   key: 'local',
   guestKey: '',
@@ -66,7 +68,23 @@ const mutations = {
   }
 }
 
-const actions = {}
+const actions = {
+  getProfile (context, payload) {
+    return Mitaba.getProfile().then(profile => {
+      context.commit('setUserProfile', {
+        email: profile.email,
+        firstName: profile.first_name,
+        lastName: profile.last_name,
+        avatar: profile.avatar,
+        providers: profile.providers
+      })
+      return profile
+    }).catch(error => {
+      context.commit('setNotAuthorized')
+      throw new Error(error)
+    })
+  }
+}
 
 export default {
   state,

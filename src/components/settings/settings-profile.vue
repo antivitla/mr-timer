@@ -5,7 +5,7 @@
     div(v-if="isAuthorized")
       .email {{ userProfile.email }}
       button.logout(
-        @click.stop.prevent="logout()"
+        @click.stop.prevent="setNotAuthorized"
         :title="tipUserProfileLogout"
       )
         i.material-icons lock
@@ -27,14 +27,7 @@
       ])
     },
     methods: {
-      logout () {
-        this.setNotAuthorized()
-        this.clearUser()
-        this.closeSidebar()
-      },
       ...mapMutations([
-        'closeSidebar',
-        'clearUser',
         'setNotAuthorized'
       ])
     },

@@ -19,11 +19,9 @@ const mutations = {
     state.id = payload.id
     state.isEditing = true
   },
-
   cancelTaskEditing (state, payload) {
     state.isEditing = false
   },
-
   stopTaskEditing (state) {
     state.isEditing = false
     state.edit = null

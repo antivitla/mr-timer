@@ -1,4 +1,4 @@
-const defaultPagination = {
+const defaultState = {
   entries: {
     count: 0,
     limit: 20,
@@ -35,39 +35,6 @@ const defaultPagination = {
 }
 
 const state = {
-  entries: {
-    count: 0,
-    limit: 20,
-    offset: 0
-  },
-  days: {
-    count: 0,
-    limit: 3,
-    offset: 0,
-    next: null,
-    previous: null
-  },
-  months: {
-    count: 0,
-    limit: 3,
-    offset: 0,
-    next: null,
-    previous: null
-  },
-  years: {
-    count: 0,
-    limit: 1,
-    offset: 0,
-    next: null,
-    previous: null
-  },
-  tasks: {
-    count: 0,
-    limit: 3,
-    offset: 0,
-    next: null,
-    previous: null
-  },
   options: {
     entries: { limit: [20, 50, 100] },
     days: { limit: [3, 7, 10] },
@@ -76,6 +43,12 @@ const state = {
     tasks: { limit: [1, 3, 10] }
   }
 }
+
+function setDefaultState (target, source) {
+  Object.assign(target, JSON.parse(JSON.stringify(source)))
+}
+
+setDefaultState(state, defaultState)
 
 const getters = {
   paginationEntries: state => state.entries,
@@ -106,11 +79,13 @@ const mutations = {
     Object.assign(state[payload.group], payload)
   },
   clearPagination (state) {
-    Object.assign(state, JSON.parse(JSON.stringify(defaultPagination)))
-  },
-  clearPaginationOffset (state) {
     Object.keys(state.options).forEach(key => {
-      state[key].offset = 0
+      Object.assign(state[key], {
+        offset: 0,
+        count: 0,
+        next: null,
+        previous: null
+      })
     })
   }
 }

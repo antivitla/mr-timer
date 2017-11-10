@@ -8,8 +8,8 @@
     view-pagination(
       v-if="!isContext"
       type="tasks"
-      @limit="onChangeLimit"
-      @offset="onChangeOffset")
+      @limit="changeCurrentViewLimit"
+      @offset="changeCurrentViewOffset")
 </template>
 <script>
   import { mapGetters, mapActions } from 'vuex'
@@ -18,8 +18,6 @@
   import groupItem from '@/components/items/group-item'
   import viewPagination from '@/components/views/view-pagination'
   import i18nLabel from '@/mixins/i18n-label'
-  import viewHelper from '@/mixins/view-helper'
-  import bus from '@/event-bus'
 
   export default {
     data () {
@@ -28,27 +26,22 @@
         filterGroupChildren
       }
     },
-    mounted () {
-      this.getEntries({ params: this.viewGetParams() })
-      bus.$emit('scroll-top')
-    },
     computed: {
       isTasks () {
         return Tasks.children.length
       },
       ...mapGetters([
-        'context',
         'isContext'
       ])
     },
     methods: {
       ...mapActions([
-        'getEntries'
+        'changeCurrentViewOffset',
+        'changeCurrentViewLimit'
       ])
     },
     mixins: [
-      i18nLabel,
-      viewHelper
+      i18nLabel
     ],
     components: {
       groupItem,

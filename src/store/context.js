@@ -17,25 +17,13 @@ const mutations = {
   upContext (state) {
     state.context.pop()
   },
-  downContext (state, payload) {
+  appendContext (state, payload) {
     state.context = state.context.concat(payload.context)
-  }
-}
-
-const actions = {
-  setContextAndGetEntries (context, payload) {
-    context.commit('setContext', { context: payload.context })
-    return context.dispatch('getEntries', { params: payload.getParams })
-  },
-  downContextAndGetEntries (context, payload) {
-    context.commit('downContext', { context: payload.context })
-    return context.dispatch('getEntries', { params: payload.getParams })
   }
 }
 
 export default {
   state,
   getters,
-  mutations,
-  actions
+  mutations
 }
