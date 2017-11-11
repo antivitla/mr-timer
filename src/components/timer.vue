@@ -192,7 +192,9 @@
       toggle () {
         if (!this.timerActive) {
           const details = this.details.length ? this.details.slice(0) : [this.placeholder]
-          this.startTimerAndGetEntries({ entry: new Entry({ details }) })
+          this.startTimerAndGetEntries({
+            entry: new Entry({ details })
+          })
         } else {
           this.patchEntries({
             remove: [this.timerEntry],

@@ -100,8 +100,6 @@
         this.authorizeWithMitaba({
           provider: this.$route.params.provider,
           code: this.$route.query.code
-        }).catch(error => {
-          console.warn(error)
         })
         this.$router.push({ name: 'home' })
       }

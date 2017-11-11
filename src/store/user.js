@@ -79,9 +79,6 @@ const actions = {
         providers: profile.providers
       })
       return profile
-    }).catch(error => {
-      context.commit('setNotAuthorized')
-      throw new Error(error)
     })
   }
 }

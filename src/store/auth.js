@@ -61,21 +61,9 @@ const actions = {
         context.commit('setAuthorized', {
           authToken: auth.token
         })
-        return Mitaba.getProfile()
-      })
-      .then(profile => {
-        context.commit('setUserProfile', {
-          email: profile.email,
-          firstName: profile.first_name,
-          lastName: profile.last_name,
-          avatar: profile.avatar,
-          providers: profile.providers
-        })
-        return Promise.resolve(profile)
-      })
-      .catch(error => {
+      }).catch(error => {
+        console.warn(error)
         context.commit('setNotAuthorized')
-        return Promise.reject(error)
       })
   }
 }

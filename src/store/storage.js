@@ -145,6 +145,7 @@ const actions = {
     // Отправляем на сервер
     return driver[context.getters.backend]
       .patchEntries(entries.map(entry => entry.serialize()))
+      .then(entries => removeContext(entries, context.getters.context))
   },
   deleteEntries (context, payload) {
     context.commit('removeEntries', payload)
