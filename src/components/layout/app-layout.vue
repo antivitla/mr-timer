@@ -46,7 +46,7 @@
 
   .app-layout
     .page
-      padding-top 40px
+      padding-top 20px
       padding-bottom 20px
       padding-left 20px
       padding-right 20px

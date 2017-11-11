@@ -19,7 +19,7 @@
           :focus="editingFocus === 'details'"
           :value="edit.details"
           @input-original-event="updateDetails($event)"
-          :on-submit="submitTask")
+          :on-submit="submitEdit")
       span.duration
         span.non-editable(v-if="trackingEntry") {{ duration }}
         input(
@@ -28,7 +28,7 @@
           v-focus-and-select-all="editingFocus === 'duration'"
           :value="edit.duration"
           @input="updateDuration($event)"
-          @keyup.enter="submitTask()")
+          @keyup.enter="submitEdit()")
       span.actions
         a.icon-button.filter(
           :title="label('filterByThis')"
@@ -304,7 +304,7 @@
       updateDuration (event) {
         this.edit.duration = event.target.value
       },
-      submitTask () {
+      submitEdit () {
         // Выдираем все соотв. записи
         const entries = extractEntries(this.group)
         // Собираем изменения
@@ -436,7 +436,7 @@
   }
 </script>
 <style lang="stylus">
-  @import '~@/assets/stylesheets/variables.styl'
+  @import '~@/assets/stylesheets/variables'
 
   .group-item
     & > .item

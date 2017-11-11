@@ -1,4 +1,4 @@
-const defaultState = {
+const state = {
   entries: {
     count: 0,
     limit: 20,
@@ -31,10 +31,7 @@ const defaultState = {
     offset: 0,
     next: null,
     previous: null
-  }
-}
-
-const state = {
+  },
   options: {
     entries: { limit: [20, 50, 100] },
     days: { limit: [3, 7, 10] },
@@ -43,12 +40,6 @@ const state = {
     tasks: { limit: [1, 3, 10] }
   }
 }
-
-function setDefaultState (target, source) {
-  Object.assign(target, JSON.parse(JSON.stringify(source)))
-}
-
-setDefaultState(state, defaultState)
 
 const getters = {
   paginationEntries: state => state.entries,

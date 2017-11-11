@@ -60,9 +60,14 @@
     .path
       line-height 20px
       font-size 18px
-      font-weight 500
+      font-weight 400
       display flex
       margin-top -20px
+      @media (max-width titamota-screen-w-7)
+        font-size 14px
+        font-weight 400
+        position relative
+        top 15px
       .item
         cursor pointer
         opacity 0.25
@@ -80,6 +85,9 @@
         font-size 45px
         font-weight 500
         letter-spacing -1px
+        @media (max-width titamota-screen-w-7)
+          font-size 24px
+          letter-spacing -0.02em
 
     .clear
       margin-left 10px
@@ -90,4 +98,8 @@
         opacity 1
       .material-icons
         font-size 30px
+      @media (max-width titamota-screen-w-7)
+        top 1px
+        .material-icons
+          font-size 18px
 </style>

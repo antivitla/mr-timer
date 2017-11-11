@@ -84,7 +84,15 @@ const mutations = {
 
 const actions = {
   getEntries (context, payload) {
-    const params = JSON.parse(JSON.stringify(payload && payload.params ? payload.params : context.getters.currentViewParams))
+    const params = {}
+    // Почему-то кешируется добавление атрибута context
+    // в результат вызова context.getters.currentViewParams
+    // поэтому надо хитро создавать раздельный params
+    if (payload && payload.params) {
+      Object.assign(params, payload.params)
+    } else {
+      Object.assign(params, context.getters.currentViewParams)
+    }
     // Выбираем сервер
     const backend = driver[context.getters.backend]
     // Если у нас есть контекст,

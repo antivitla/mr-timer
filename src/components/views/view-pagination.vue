@@ -5,41 +5,46 @@
         span.text-muted {{ label('pagination.show') }}&nbsp;
         span.selectable(
           :class="{ 'active': currentLimit === currentOptions.limit[0] }"
-          @click="changeLimit(currentOptions.limit[0])") {{ labelNumber(currentOptions.limit[0]) }}
+          @click="changeLimit(currentOptions.limit[0])")
+          | {{ labelNumber(currentOptions.limit[0]) }}
         span.selectable(
           :class="{ 'active': currentLimit === currentOptions.limit[1] }"
-          @click="changeLimit(currentOptions.limit[1])") {{ labelNumber(currentOptions.limit[1]) }}
+          @click="changeLimit(currentOptions.limit[1])")
+          | {{ labelNumber(currentOptions.limit[1]) }}
         span.selectable(
           :class="{ 'active': currentLimit === currentOptions.limit[2] }"
-          @click="changeLimit(currentOptions.limit[2])") {{ labelNumber(currentOptions.limit[2]) }}
+          @click="changeLimit(currentOptions.limit[2])")
+          | {{ labelNumber(currentOptions.limit[2]) }}
         span.text-muted(v-if="currentExist && currentCount > currentLimit")
           | &nbsp;{{ label('pagination.or', false) }}&nbsp;
         span.selectable(
           v-if="currentExist && currentCount > currentLimit"
           :class="{ 'active': currentLimit === currentCount }"
-          @click="changeLimit(currentCount)") {{ labelAll }}
+          @click="changeLimit(currentCount)")
+          | {{ labelAll }}
+
     .right(v-if="!limitOnly && currentCount > 1")
       .latest(
         v-if="currentOffset > 0"
         @click="latestOffset()")
-        span {{ latestLabel }} &lArr; &ensp;
+        | {{ latestLabel }} &lArr; &ensp;
       .later(
         v-if="laterExist"
         :title="label('pagination.later')"
         @click="changeOffset(-1)")
-        span {{ label('pagination.later', false) }} &larr; &ensp;
+        | {{ label('pagination.later', false) }} &larr; &ensp;
         //- span.text-muted {{ currentLimit === 1 ? laterItemLabel : laterRange }}
       .current.text-muted {{ currentLimit === 1 ? currentItemLabel : currentRange }}
       .earlier(
         v-if="earlierExist"
         :title="label('pagination.earlier')"
         @click="changeOffset(1)")
-        span &ensp; &rarr; {{ label('pagination.earlier', false) }}
+        | &ensp; &rarr; {{ label('pagination.earlier', false) }}
         //- span.text-muted {{ currentLimit === 1 ? earlierItemLabel : earlierRange }}
       .earliest(
         v-if="currentOffset + currentLimit < currentCount"
         @click="earliestOffset()")
-        span &ensp; &rArr; {{ earliestLabel }}
+        | &ensp; &rArr; {{ earliestLabel }}
 </template>
 <script>
   import { mapGetters } from 'vuex'
@@ -291,7 +296,6 @@
     line-height 24px
     border-top solid titamota-color-border 1px
     font-size 13px
-
     .left
       display flex
       margin-left 0px
@@ -302,15 +306,12 @@
       margin-right 0px
       & > *:not(.current)
         cursor pointer
-
     .limit
       margin-left 0px
       margin-right auto
       display flex
-
     .hidden
       visibility hidden
-
     .selectable
       position relative
       padding 0px 3px
@@ -330,4 +331,6 @@
         content ' '
         background-color titamota-color-text
 
+    @media (max-width titamota-screen-w-7)
+      display none
 </style>

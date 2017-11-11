@@ -12,13 +12,13 @@
           v-focus-and-select-all="editingFocus === 'start'"
           :value="edit.start"
           @input="updateStart($event)"
-          @keyup.enter="submit()")
+          @keyup.enter="submitEdit()")
       span.details
         list-input(
           :focus="editingFocus === 'details'"
           :value="edit.details"
           @input-original-event="updateDetails($event)"
-          :on-submit="submit")
+          :on-submit="submitEdit")
       span.duration
         span.non-editable(
           v-if="isTrackingEntry") {{ duration }}
@@ -28,7 +28,7 @@
           v-focus-and-select-all="editingFocus === 'duration'"
           :value="edit.duration"
           @input="updateDuration($event)"
-          @keyup.enter="submit()")
+          @keyup.enter="submitEdit()")
       span.actions
         a.icon-button.delete(@click="deleteEntries({ entries: [entry] })")
           i.material-icons delete
@@ -87,6 +87,7 @@
           this.selected = false
         },
         'tickTimer': () => {
+          // Изменяем время текущей задачи если именно она бежит в таймере
           if (this.entry.id === this.timerEntry.id) {
             this.entry.stop = this.timerEntry.stop
           }
@@ -109,6 +110,7 @@
     },
     watch: {
       selected (value, b) {
+        // Добавление / убирание из списка выбранного
         if (value) {
           this.addSelected({ entry: this.entry })
         } else {
@@ -118,8 +120,7 @@
     },
     computed: {
       details () {
-        return decodeURIComponent(this.entry.details
-          .join(taskDelimiter))
+        return decodeURIComponent(this.entry.details.join(taskDelimiter))
       },
       duration () {
         let d = duration(this.entry.duration())
@@ -213,7 +214,7 @@
           this.setTimerStart({ start })
         }
       },
-      submit () {
+      submitEdit () {
         this.cancelEdit()
         this.clearSelected()
         const id = this.entry.id

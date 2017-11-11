@@ -6,16 +6,16 @@
     //- Top nav
     app-navbar.top(slot="page")
       context-nav(slot="left")
-      toggle-sidebar#toggle-sidebar-top(
+      toggle-sidebar(
         slot="right"
+        :class="{ 'pending': isPending }"
         :title="tipToggleSidebarTop")
-        span(v-if="isAuthorized") {{ userName }}&emsp;
-        span.icon-button
+        span.user-name(v-if="isAuthorized") {{ userName }}&ensp;
+        span.icon-button.menu
           i.material-icons menu
+        icon-preloader(icon="refresh")
     //- Timer
     timer(slot="page")
-    //- Optional
-    //- section.optional(slot="page")
     //- Navbar
     app-navbar.menu(slot="page")
       div(slot="left")
@@ -26,15 +26,12 @@
         custom-switch(
           :options="availableViewsAsOptions"
           v-model="viewModel")
-        icon-preloader(v-if="viewGetPreloader || false" icon="refresh")
     //- Views
     component(:is="viewComponent[currentView]" slot="page")
     //- Footer
     collection-footer(slot="page")
-
     //- Sidebar
     collection-sidebar(slot="sidebar")
-
     //- Modals
     //- p(slot="modal") Modals
     //- p(slot="modal") Modals 2
@@ -44,7 +41,6 @@
   import bodyScrollTopOn from '@/directives/body-scroll-top-on'
   import bus from '@/event-bus'
   import Mitaba from '@/backend/mitaba'
-
   // Components
   import appNavbar from '@/components/layout/app-navbar'
   import appLayout from '@/components/layout/app-layout'
@@ -58,11 +54,9 @@
   import contextNav from '@/components/other/context-nav'
   import iconPreloader from '@/components/other/icon-preloader'
   import timer from '@/components/timer'
-
   // Store
   import { appTitle } from '@/store/app-info'
   import { Selected } from '@/store/selected'
-
   // Views
   import viewHelp from '@/components/views/view-help'
   import viewTasks from '@/components/views/view-tasks'
@@ -70,7 +64,6 @@
   import viewMonths from '@/components/views/view-months'
   import viewDays from '@/components/views/view-days'
   import viewStorage from '@/components/views/view-storage'
-
   // Mixins
   import appTips from '@/mixins/app-tips'
   import i18nLabel from '@/mixins/i18n-label'
@@ -89,7 +82,7 @@
         },
         Selected,
         filter: [],
-        viewGetPreloader: false
+        isPending: false
       }
     },
     created () {
@@ -123,10 +116,10 @@
 
       // Init view preloaders
       bus.$on('get-entries-pending', () => {
-        this.viewGetPreloader = true
+        this.isPending = true
       })
       bus.$on('get-entries-complete', () => {
-        this.viewGetPreloader = false
+        this.isPending = false
       })
 
       // Init i18n
@@ -224,26 +217,29 @@
       white-space nowrap
       .material-icons
         font-size 18px
-      .user-profile
-        margin-right 10px;
-        .avatar
-        .logout
+        line-height 40px
+      .icon-preloader
+        display none
+        width 18px
+        color titamota-color-text
+      &.pending
+        .user-name
+          color titamota-color-text-muted
+        .icon-button.menu
+          display none
+        .icon-preloader
+          display block
+    @media (max-width titamota-screen-w-7)
+      margin-bottom 15px
+      .toggle-sidebar
+        margin-top 12px
+        .user-name
           display none
 
   // Menu Navbar
   .app-navbar.menu
     line-height 24px
     border-bottom solid titamota-color-border 1px
-    position relative
-    .icon-preloader
-      position absolute
-      left 50%
-      transform translateX(-50%)
-      bottom calc(100% + 5px)
-      color titamota-color-text-muted
-
-  // Hide toggle-sidebar-top
-  .sidebar-active
-    #toggle-sidebar-top
-      // display none
+    @media (max-width titamota-screen-w-7)
+      display none
 </style>
