@@ -1,5 +1,5 @@
 <template lang="pug">
-  .view.view-storage
+  .view.storage
     span.text-muted(v-if="!isEntries") {{ label('noResultsLabel') }}
     storage-item(
       v-for="entry in Storage.entries"

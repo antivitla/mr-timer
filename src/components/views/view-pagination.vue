@@ -2,49 +2,63 @@
   .view-pagination
     .left(v-if="!offsetOnly")
       .limit
-        span.text-muted {{ label('pagination.show') }}&nbsp;
+        span.text-muted.full {{ label('pagination.show') }}&nbsp;
         span.selectable(
           :class="{ 'active': currentLimit === currentOptions.limit[0] }"
           @click="changeLimit(currentOptions.limit[0])")
-          | {{ labelNumber(currentOptions.limit[0]) }}
+          span.full {{ labelNumber(currentOptions.limit[0]) }}
+          span.shorter {{ currentOptions.limit[0] }}
         span.selectable(
           :class="{ 'active': currentLimit === currentOptions.limit[1] }"
           @click="changeLimit(currentOptions.limit[1])")
-          | {{ labelNumber(currentOptions.limit[1]) }}
+          span.full {{ labelNumber(currentOptions.limit[1]) }}
+          span.shorter {{ currentOptions.limit[1] }}
         span.selectable(
           :class="{ 'active': currentLimit === currentOptions.limit[2] }"
           @click="changeLimit(currentOptions.limit[2])")
-          | {{ labelNumber(currentOptions.limit[2]) }}
+          span.full {{ labelNumber(currentOptions.limit[2]) }}
+          span.shorter {{ currentOptions.limit[2] }}
         span.text-muted(v-if="currentExist && currentCount > currentLimit")
           | &nbsp;{{ label('pagination.or', false) }}&nbsp;
         span.selectable(
           v-if="currentExist && currentCount > currentLimit"
           :class="{ 'active': currentLimit === currentCount }"
           @click="changeLimit(currentCount)")
-          | {{ labelAll }}
+          span.full {{ labelAll }}
+          span.shorter {{ currentCount }}
 
     .right(v-if="!limitOnly && currentCount > 1")
       .latest(
         v-if="currentOffset > 0"
+        :title="capitalize(latestLabel)"
         @click="latestOffset()")
-        | {{ latestLabel }} &lArr; &ensp;
+        span.label
+          i.material-icons first_page
+          span.full {{ latestLabel }}
       .later(
         v-if="laterExist"
         :title="label('pagination.later')"
         @click="changeOffset(-1)")
-        | {{ label('pagination.later', false) }} &larr; &ensp;
-        //- span.text-muted {{ currentLimit === 1 ? laterItemLabel : laterRange }}
-      .current.text-muted {{ currentLimit === 1 ? currentItemLabel : currentRange }}
+        span.label
+          i.material-icons chevron_left
+          span.full {{ label('pagination.later', false) }}
+      .current.text-muted
+        span.full {{ currentLimit === 1 ? currentItemLabel : currentRange }}
+        span.shorter {{ currentOffset }}
       .earlier(
         v-if="earlierExist"
         :title="label('pagination.earlier')"
         @click="changeOffset(1)")
-        | &ensp; &rarr; {{ label('pagination.earlier', false) }}
-        //- span.text-muted {{ currentLimit === 1 ? earlierItemLabel : earlierRange }}
+        span.label
+          span.full {{ label('pagination.earlier', false) }}
+          i.material-icons chevron_right
       .earliest(
         v-if="currentOffset + currentLimit < currentCount"
+        :title="capitalize(earliestLabel)"
         @click="earliestOffset()")
-        | &ensp; &rArr; {{ earliestLabel }}
+        span.label
+          span.full {{ earliestLabel }}
+          i.material-icons last_page
 </template>
 <script>
   import { mapGetters, mapMutations } from 'vuex'
@@ -291,6 +305,9 @@
       tasksRangeLabels ({ from, to }) {
         return { from, to }
       },
+      capitalize (str) {
+        return capitalize(str)
+      },
       ...mapMutations([
         'updatePagination'
       ])
@@ -344,6 +361,42 @@
         content ' '
         background-color titamota-color-text
 
-    @media (max-width titamota-screen-w-7)
+    .current
+      margin-left 15px
+      margin-right 15px
+    .label
+      display flex
+      .material-icons + *
+      * + .material-icons
+        margin 0px
+    .earliest
+      margin-left 10px
+      .material-icons
+        margin-left 3px
+    .latest
+      margin-right 10px
+      .material-icons
+        margin-right 3px
+    .shorter
       display none
+
+  @media (max-width titamota-screen-w-14)
+    .sidebar-active
+      .view-pagination
+        .full
+          display none
+
+  @media (max-width titamota-screen-w-9)
+    .view-pagination
+      .full
+        display none
+      .current .full
+        display inline
+
+  @media (max-width titamota-screen-w-7)
+    .view-pagination
+      .shorter
+        display inline
+      .current .full
+        display none
 </style>

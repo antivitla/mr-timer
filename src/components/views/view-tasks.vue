@@ -1,5 +1,5 @@
 <template lang="pug">
-  .view
+  .view.tasks
     span.text-muted(v-if="!isTasks") {{ label('noResultsLabel') }}
     group-item(
       v-for="task in filterGroupChildren(Tasks.children)"

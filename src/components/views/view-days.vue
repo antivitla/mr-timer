@@ -1,5 +1,5 @@
 <template lang="pug">
-  .view
+  .view.days
     span.text-muted(v-if="!isDays") {{ label('noResultsLabel') }}
     group-item(
       v-for="day in filterGroupChildren(Days.children)"

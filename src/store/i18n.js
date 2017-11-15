@@ -113,11 +113,19 @@ const ru = ({
     settings: 'включить элементы интерфейса',
     export: 'экспорт',
     import: 'импорт',
+    doImport: 'импортировать',
+    timer30local: 'таймер 3.0, локальный аккаунт',
+    timer31local: 'таймер 3.1, локальный аккаунт',
+    migrateAccountPlaceholder: 'имя онлайн-аккаунта для импорта',
+    emptyAccountTitle: 'не введено имя аккаунта',
+    entriesNotFound: 'не найдено записей',
+    server: 'сервер',
     json: 'JSON',
     exportPlaceholder: 'здесь будут все ваши записи после загрузки по кнопке ниже',
     importPlaceholder: 'скопируйте сюда ваши записи (например после использования экспорта ранее)',
     loadAllEntries: 'загрузить сюда все записи',
-    importEntries: 'импортировать записи'
+    importEntries: 'импортировать записи',
+    currentView: 'текущий вид'
   },
   sidebar: {
     icons: 'иконки',
@@ -234,11 +242,19 @@ const en = ({
     settings: 'toggle UI elements',
     export: 'export',
     import: 'import',
+    doImport: 'import',
+    timer30local: 'timer 3.0, local account',
+    timer31local: 'timer 3.1, local account',
+    migrateAccountPlaceholder: 'title of account for import',
+    emptyAccountTitle: 'title of account not entered',
+    entriesNotFound: 'entries not found',
+    server: 'server',
     json: 'JSON',
     exportPlaceholder: 'here will be all your entries after loading by button below',
     importPlaceholder: 'paste here your entries (may be using from previous export)',
     loadAllEntries: 'load all entries here',
-    importEntries: 'import entries'
+    importEntries: 'import entries',
+    currentView: 'current view'
   },
   sidebar: {
     icons: 'icons',

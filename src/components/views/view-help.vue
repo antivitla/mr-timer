@@ -1,5 +1,5 @@
 <template lang="pug">
-  .view
+  .view.help
     article-welcome
     article-help
 </template>

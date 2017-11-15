@@ -5,6 +5,12 @@
     div(v-if="settings.authorization && !isAuthorized")
       h4 {{ label('settings.authorization') }}
       settings-login
+    div.switch-current-view
+      h4 {{ label('settings.currentView') }}
+      select(v-model="viewModel")
+        option(
+          v-for="option in availableViewsAsOptions"
+          :value="option.value") {{ label(option.label) }}
     div(v-if="settings.l10n")
       h4 {{ label('settings.l10n') }}
       settings-i18n
@@ -19,7 +25,7 @@
       settings-settings
 </template>
 <script>
-  import { mapGetters } from 'vuex'
+  import { mapGetters, mapMutations } from 'vuex'
 
   // Components
   import toggleSidebar from '@/components/other/toggle-sidebar'
@@ -35,6 +41,28 @@
   import i18nLabel from '@/mixins/i18n-label'
 
   export default {
+    data () {
+      return {
+        viewModel: null
+      }
+    },
+    created () {
+      this.viewModel = this.currentView
+      this.unsubscribe = this.$store.subscribe(mutation => {
+        if (mutation.type === 'setCurrentView') {
+          this.viewModel = mutation.payload.view
+        }
+      })
+    },
+    beforeDestroy () {
+      this.unsubscribe()
+    },
+    watch: {
+      viewModel: function (view) {
+        this.setCurrentView({ view })
+        this.closeSidebar()
+      }
+    },
     mixins: [
       appTips,
       i18nLabel
@@ -42,7 +70,15 @@
     computed: {
       ...mapGetters([
         'isAuthorized',
-        'settings'
+        'availableViewsAsOptions',
+        'settings',
+        'currentView'
+      ])
+    },
+    methods: {
+      ...mapMutations([
+        'setCurrentView',
+        'closeSidebar'
       ])
     },
     components: {
@@ -143,4 +179,10 @@
           width 40%
         .fieldset:last-child
           width 50%
+
+  // Mobile
+  @media (min-width titamota-screen-w-7)
+    .sidebar
+      .switch-current-view
+        display none
 </style>

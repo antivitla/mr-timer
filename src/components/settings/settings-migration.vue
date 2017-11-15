@@ -8,9 +8,9 @@
         @click="migrate('timer30')")
         div
           i.fa.fa-refresh
-          |  Импортировать
+          span  {{ label('settings.doImport') }}
           strong  {{ labelNumberOfEntries(countEntries.timer30) }}
-        small Таймер 3.0, локальный аккаунт
+        small {{ label('settings.timer30local') }}
 
     //- Timer 3.1 account
     p(v-if="countEntries.timer31 && isAuthorized")
@@ -20,29 +20,29 @@
         @click="migrate('timer31')")
         div
           i.fa.fa-refresh
-          |  Импортировать
+          span  {{ label('settings.doImport') }}
           strong  {{ labelNumberOfEntries(countEntries.timer31) }}
-        small Таймер 3.1, локальный аккаунт
+        small {{ label('settings.timer31local') }}
 
     //- Petrov account
     p.input-group.vertical
       input(
         type="text"
         v-model="petrovAccount"
-        placeholder="Имя онлайн-аккаунта для импорта")
+        :placeholder="label('settings.migrateAccountPlaceholder')")
       button.with-preloader(
         @click="migrate('petrov')"
         :disabled="Boolean(!petrovAccount || !countEntries.petrovAccount || waitingMigrate.petrov)"
         :preloader="waitingMigrate.petrov")
         div(v-if="!petrovAccount")
-          | Не введено имя аккаунта
+          span {{ label('settings.emptyAccountTitle') }}
         div(v-if="petrovAccount && !countEntries.petrovAccount")
-          | Не найдено записей
+          span {{ label('settings.entriesNotFound') }}
         div(v-if="countEntries.petrovAccount")
           i.fa.fa-refresh
-          |  Импортировать
+          span  {{ label('settings.doImport') }}
           strong  {{ labelNumberOfEntries(countEntries.petrovAccount) }}
-        small Сервер <q>Petrov</q> 1.0
+        small {{ label('settings.server') }} <q>Petrov</q> 1.0
 </template>
 <script>
   import { mapGetters, mapMutations } from 'vuex'

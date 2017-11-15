@@ -75,7 +75,7 @@ a[href]
 [color]
   position relative
 [color]:before
-  content ' '
+  // content ' '
   position absolute
   left -1em
   top 50%
@@ -84,30 +84,54 @@ a[href]
   height 0.5em
   border-radius 30%
   background-color gainsboro
-[color="0"]:before
-  background-color lighten(titamota-color-jan, 20%)
-[color="1"]:before
-  background-color lighten(titamota-color-feb, 20%)
-[color="2"]:before
-  background-color lighten(titamota-color-mar, 20%)
-[color="3"]:before
-  background-color lighten(titamota-color-apr, 20%)
-[color="4"]:before
-  background-color lighten(titamota-color-may, 20%)
-[color="5"]:before
-  background-color lighten(titamota-color-jun, 20%)
-[color="6"]:before
-  background-color lighten(titamota-color-jul, 20%)
-[color="7"]:before
-  background-color lighten(titamota-color-aug, 20%)
-[color="8"]:before
-  background-color lighten(titamota-color-sep, 20%)
-[color="9"]:before
-  background-color lighten(titamota-color-oct, 20%)
-[color="10"]:before
-  background-color lighten(titamota-color-nov, 20%)
-[color="11"]:before
-  background-color lighten(titamota-color-dec, 20%)
+[color="0"]
+  color darken(titamota-color-jan, 40%)
+  &:before
+    background-color lighten(titamota-color-jan, 20%)
+[color="1"]
+  color darken(titamota-color-feb, 40%)
+  &:before
+    background-color lighten(titamota-color-feb, 20%)
+[color="2"]
+  color darken(titamota-color-mar, 40%)
+  &:before
+    background-color lighten(titamota-color-mar, 20%)
+[color="3"]
+  color darken(titamota-color-apr, 40%)
+  &:before
+    background-color lighten(titamota-color-apr, 20%)
+[color="4"]
+  color darken(titamota-color-may, 40%)
+  &:before
+    background-color lighten(titamota-color-may, 20%)
+[color="5"]
+  color darken(titamota-color-jun, 40%)
+  &:before
+    background-color lighten(titamota-color-jun, 20%)
+[color="6"]
+  color darken(titamota-color-jul, 40%)
+  &:before
+    background-color lighten(titamota-color-jul, 20%)
+[color="7"]
+  color darken(titamota-color-aug, 40%)
+  &:before
+    background-color lighten(titamota-color-aug, 20%)
+[color="8"]
+  color darken(titamota-color-sep, 40%)
+  &:before
+    background-color lighten(titamota-color-sep, 20%)
+[color="9"]
+  color darken(titamota-color-oct, 40%)
+  &:before
+    background-color lighten(titamota-color-oct, 20%)
+[color="10"]
+  color darken(titamota-color-nov, 40%)
+  &:before
+    background-color lighten(titamota-color-nov, 20%)
+[color="11"]
+  color darken(titamota-color-dec, 40%)
+  &:before
+    background-color lighten(titamota-color-dec, 20%)
 
 
 // Buttons

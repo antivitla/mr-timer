@@ -51,8 +51,7 @@
       :class="{ 'active': trackingEntry }"
       :title="startTaskLabel"
       @click="startTask()")
-      span.name(
-        :color="colorCode")
+      span.name(:color="colorCode")
         span(
           v-if="group.type === 'task'"
           v-long-click="500"
@@ -398,7 +397,10 @@
         this.setFilter({ filter })
       },
       setGroupAsContext () {
-        this.changeCurrentViewOffset({ offset: 0 })
+        this.setPagination({
+          group: this.currentView,
+          offset: 0
+        })
         this.appendContext({ context: rootDetails(this.group) })
         this.getEntriesWithCurrentParams()
         bus.$emit('scroll-top')
@@ -410,6 +412,7 @@
         'startTaskEditing',
         'stopTaskEditing',
         'setCurrentView',
+        'setPagination',
         'appendContext',
         'setFilter'
       ]),
@@ -617,6 +620,12 @@
           display flex
           align-self center
           margin-left auto
+      @media (max-width 768px)
+        .actions
+          display flex
+          .filter
+          .start-edit
+            display none
 
 
   // Root items
@@ -671,4 +680,26 @@
       float none
       margin-right 0.25em
       margin-left 0em
+
+
+  .view.days
+  .view.months
+  .view.years
+    [depth="1"] > .item
+      .duration
+        font-weight 300
+        font-size 100%
+        color titamota-color-text-muted
+      .cost
+        font-size 100%
+      .name
+        font-weight 300
+        .group-name
+          opacity 0.625
+    [depth="2"].has-children > .item
+      .name
+        font-weight 500
+      .duration
+        font-weight 500
+
 </style>

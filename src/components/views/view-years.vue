@@ -1,5 +1,5 @@
 <template lang="pug">
-  .view
+  .view.years
     span.text-muted(v-if="!isYears") {{ label('noResultsLabel') }}
     group-item(
       v-for="year in filterGroupChildren(Years.children)"
