@@ -5,13 +5,9 @@
       v-for="year in filterGroupChildren(Years.children)"
       :key="year.name"
       :group="year")
-    view-pagination(
-      type="years"
-      @limit="changeCurrentViewLimit"
-      @offset="changeCurrentViewOffset")
+    view-pagination(type="years")
 </template>
 <script>
-  import { mapActions } from 'vuex'
   import { Years } from '@/store/groups/years'
   import { filterGroupChildren } from '@/utils/group'
   import groupItem from '@/components/items/group-item'
@@ -29,12 +25,6 @@
       isYears () {
         return Years.children.length
       }
-    },
-    methods: {
-      ...mapActions([
-        'changeCurrentViewOffset',
-        'changeCurrentViewLimit'
-      ])
     },
     mixins: [
       i18nLabel

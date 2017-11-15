@@ -156,6 +156,10 @@
             }
           })
           bus.$emit('scroll-top')
+        },
+        updatePagination: mutation => {
+          this.getEntriesWithCurrentParams()
+          bus.$emit('scroll-top')
         }
       }
       this.unsubscribe = this.$store.subscribe(mutation => {

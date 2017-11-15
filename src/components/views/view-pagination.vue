@@ -47,7 +47,7 @@
         | &ensp; &rArr; {{ earliestLabel }}
 </template>
 <script>
-  import { mapGetters } from 'vuex'
+  import { mapGetters, mapMutations } from 'vuex'
   import { Days } from '@/store/groups/days'
   import { Months } from '@/store/groups/months'
   import { Years } from '@/store/groups/years'
@@ -197,22 +197,32 @@
     },
     methods: {
       changeLimit (limit) {
-        this.$emit('limit', { limit })
+        this.updatePagination({
+          group: this.currentView,
+          limit
+        })
       },
       changeOffset (direction) {
-        let offset = this.currentOffset + direction * this.currentLimit
-        this.$emit('offset', {
-          offset: (offset >= 0 ? offset : 0)
+        const unsafeOffset = this.currentOffset + direction * this.currentLimit
+        const offset = (unsafeOffset >= 0 ? unsafeOffset : 0)
+        this.updatePagination({
+          group: this.currentView,
+          offset
         })
       },
       earliestOffset () {
-        let offset = Math.floor(this.currentCount / this.currentLimit) * this.currentLimit
-        this.$emit('offset', {
-          offset: (offset >= this.currentCount ? offset - this.currentLimit : offset)
+        const unsafeOffset = Math.floor(this.currentCount / this.currentLimit) * this.currentLimit
+        const offset = (unsafeOffset >= this.currentCount ? unsafeOffset - this.currentLimit : unsafeOffset)
+        this.updatePagination({
+          group: this.currentView,
+          offset
         })
       },
       latestOffset () {
-        this.$emit('offset', { offset: 0 })
+        this.updatePagination({
+          group: this.currentView,
+          offset: 0
+        })
       },
       labelNumber (items) {
         return this.labelFormat(`pagination.number${capitalize(this.type)}`, {
@@ -280,7 +290,10 @@
       },
       tasksRangeLabels ({ from, to }) {
         return { from, to }
-      }
+      },
+      ...mapMutations([
+        'updatePagination'
+      ])
     },
     mixins: [
       i18nLabel

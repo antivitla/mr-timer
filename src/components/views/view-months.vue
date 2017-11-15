@@ -5,13 +5,9 @@
       v-for="month in filterGroupChildren(Months.children)"
       :key="month.name"
       :group="month")
-    view-pagination(
-      type="months"
-      @limit="changeCurrentViewLimit"
-      @offset="changeCurrentViewOffset")
+    view-pagination(type="months")
 </template>
 <script>
-  import { mapActions } from 'vuex'
   import { Months } from '@/store/groups/months'
   import { filterGroupChildren } from '@/utils/group'
   import groupItem from '@/components/items/group-item'
@@ -29,12 +25,6 @@
       isMonths () {
         return Months.children.length
       }
-    },
-    methods: {
-      ...mapActions([
-        'changeCurrentViewOffset',
-        'changeCurrentViewLimit'
-      ])
     },
     mixins: [
       i18nLabel

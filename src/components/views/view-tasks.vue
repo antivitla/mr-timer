@@ -7,12 +7,10 @@
       :group="task")
     view-pagination(
       v-if="!isContext"
-      type="tasks"
-      @limit="changeCurrentViewLimit"
-      @offset="changeCurrentViewOffset")
+      type="tasks")
 </template>
 <script>
-  import { mapGetters, mapActions } from 'vuex'
+  import { mapGetters } from 'vuex'
   import { Tasks } from '@/store/groups/tasks'
   import { filterGroupChildren } from '@/utils/group'
   import groupItem from '@/components/items/group-item'
@@ -32,12 +30,6 @@
       },
       ...mapGetters([
         'isContext'
-      ])
-    },
-    methods: {
-      ...mapActions([
-        'changeCurrentViewOffset',
-        'changeCurrentViewLimit'
       ])
     },
     mixins: [

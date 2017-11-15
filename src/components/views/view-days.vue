@@ -5,13 +5,9 @@
       v-for="day in filterGroupChildren(Days.children)"
       :key="day.name"
       :group="day")
-    view-pagination(
-      type="days"
-      @limit="changeCurrentViewLimit"
-      @offset="changeCurrentViewOffset")
+    view-pagination(type="days")
 </template>
 <script>
-  import { mapActions } from 'vuex'
   import { Days } from '@/store/groups/days'
   import { filterGroupChildren } from '@/utils/group'
   import groupItem from '@/components/items/group-item'
@@ -29,12 +25,6 @@
       isDays () {
         return Days.children.length
       }
-    },
-    methods: {
-      ...mapActions([
-        'changeCurrentViewOffset',
-        'changeCurrentViewLimit'
-      ])
     },
     mixins: [
       i18nLabel

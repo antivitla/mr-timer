@@ -53,6 +53,10 @@ const mutations = {
     state.pagination[payload.group] = Object.assign({}, payload)
     delete state.pagination[payload.group].group
   },
+  updatePagination (state, payload) {
+    Object.assign(state.pagination[payload.group], payload)
+    delete state.pagination[payload.group].group
+  },
   clearPagination (state) {
     Object.keys(state.options).forEach(key => {
       state.pagination[key] = Object.assign({}, state.pagination[key], {

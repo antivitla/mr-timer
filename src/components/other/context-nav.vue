@@ -15,8 +15,9 @@
         i.material-icons close
 </template>
 <script>
-  import { mapGetters, mapMutations, mapActions } from 'vuex'
+  import { mapGetters, mapMutations } from 'vuex'
   import i18nLabel from '@/mixins/i18n-label'
+  import storage from '@/mixins/storage'
 
   export default {
     computed: {
@@ -34,22 +35,20 @@
     methods: {
       clearContextAndGetEntries () {
         this.clearContext()
-        this.getEntries()
+        this.getEntriesWithCurrentParams()
       },
       setAsCurrentTask (item, index) {
         this.setContext({ context: this.context.slice(0, index + 1) })
-        this.getEntries()
+        this.getEntriesWithCurrentParams()
       },
       ...mapMutations([
         'clearContext',
         'setContext'
-      ]),
-      ...mapActions([
-        'getEntries'
       ])
     },
     mixins: [
-      i18nLabel
+      i18nLabel,
+      storage
     ]
   }
 </script>
