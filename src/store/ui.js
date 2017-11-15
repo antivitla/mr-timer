@@ -37,26 +37,7 @@ const getters = {
   settings: state => state.settings,
   sidebarActive: state => state.sidebar,
   modalActive: state => state.modal,
-  taskDelimiter: state => state.taskDelimiter,
-  currentViewPagination (state, getters) {
-    let getter = `pagination${capitalize(state.currentView)}`
-    if (state.currentView === 'storage') {
-      getter = 'paginationEntries'
-    }
-    return getters[getter]
-  },
-  currentViewParams (state, getters) {
-    const params = {
-      limit: getters.currentViewPagination.limit,
-      offset: getters.currentViewPagination.offset
-    }
-    if (getters.currentView === 'storage') {
-      params.filter = getters.filter.slice(0)
-    } else {
-      params.last = getters.currentView
-    }
-    return params
-  }
+  taskDelimiter: state => state.taskDelimiter
 }
 
 const mutations = {

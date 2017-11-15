@@ -133,7 +133,7 @@
       toggle () {
         if (!this.timerActive) {
           const details = this.details.length ? this.details.slice(0) : [this.placeholder]
-          this.startTimerAndGetEntries({
+          this.startTimer({
             entry: new Entry({ details })
           })
         } else {
@@ -191,7 +191,7 @@
         'setTimerEntry'
       ]),
       ...mapActions([
-        'startTimerAndGetEntries',
+        'startTimer',
         'stopTimer',
         'patchEntries'
       ])

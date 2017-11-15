@@ -30,7 +30,7 @@
           @input="updateDuration($event)"
           @keyup.enter="submitEdit()")
       span.actions
-        a.icon-button.delete(@click="deleteEntries({ entries: [entry] })")
+        a.icon-button.delete(@click="deleteAndGetEntries({ entries: [entry] })")
           i.material-icons delete
         a.icon-button.cancel(@click="cancelEdit()")
           i.material-icons block
@@ -67,6 +67,7 @@
   import listInput from '@/components/other/list-input'
   import customCheckbox from '@/components/other/custom-checkbox'
   import Entry from '@/models/entry'
+  import storage from '@/mixins/storage'
 
   export default {
     props: ['entry'],
@@ -239,10 +240,12 @@
         'setTimerStart'
       ]),
       ...mapActions([
-        'patchEntries',
-        'deleteEntries'
+        'patchEntries'
       ])
     },
+    mixins: [
+      storage
+    ],
     directives: {
       longClick,
       clickOutside,

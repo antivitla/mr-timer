@@ -17,9 +17,6 @@ import { DaysPlugin } from './groups/days'
 import { MonthsPlugin } from './groups/months'
 import { YearsPlugin } from './groups/years'
 import { TasksPlugin } from './groups/tasks'
-import { i18nRouterPlugin } from './plugins/i18n-router'
-import { ViewPlugin } from './plugins/view'
-import { AuthPlugin } from './plugins/auth'
 import { appName } from './app-info'
 
 Vue.use(Vuex)
@@ -45,9 +42,6 @@ export default new Vuex.Store({
     MonthsPlugin,
     TasksPlugin,
     YearsPlugin,
-    i18nRouterPlugin,
-    ViewPlugin,
-    AuthPlugin,
     createPersistedState({
       key: appName + '-store',
       paths: [

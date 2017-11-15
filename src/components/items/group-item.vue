@@ -129,6 +129,7 @@
   } from '@/utils/group'
   import { taskDelimiter } from '@/store/ui'
   import i18nLabel from '@/mixins/i18n-label'
+  import storage from '@/mixins/storage'
   import funny from 'mr-funny'
   import funnyTemplates from '@/funny/templates'
 
@@ -266,7 +267,7 @@
         if (this.group.children[0] instanceof Group) {
           details = details.concat(funnyTask(this.locale))
         }
-        this.startTimerAndGetEntries({
+        this.startTimer({
           entry: new Entry({
             start: new Date(),
             stop: new Date(),
@@ -399,7 +400,7 @@
       setGroupAsContext () {
         this.changeCurrentViewOffset({ offset: 0 })
         this.appendContext({ context: rootDetails(this.group) })
-        this.getEntries()
+        this.getEntriesWithCurrentParams()
         bus.$emit('scroll-top')
       },
       gotoHref (href) {
@@ -414,14 +415,13 @@
       ]),
       ...mapActions([
         'changeCurrentViewOffset',
-        'startTimerAndGetEntries',
-        'deleteAndGetEntries',
-        'patchEntries',
-        'getEntries'
+        'startTimer',
+        'patchEntries'
       ])
     },
     mixins: [
-      i18nLabel
+      i18nLabel,
+      storage
     ],
     directives: {
       longClick,

@@ -65,12 +65,6 @@ export const actions = {
     context.commit('stopTimer')
     clearTimeout(timerTimeout)
     return context.getters.timerEntry
-  },
-  startTimerAndGetEntries (context, payload) {
-    const entry = payload.entry
-    return context
-      .dispatch('startTimer', { entry })
-      .then(() => context.dispatch('getEntries'))
   }
 }
 

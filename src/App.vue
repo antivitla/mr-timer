@@ -67,6 +67,7 @@
   // Mixins
   import appTips from '@/mixins/app-tips'
   import i18nLabel from '@/mixins/i18n-label'
+  import storage from '@/mixins/storage'
 
   export default {
     data () {
@@ -81,7 +82,6 @@
           storage: viewStorage
         },
         Selected,
-        filter: [],
         isPending: false
       }
     },
@@ -108,10 +108,79 @@
 
       // Init current view
       this.viewModel = this.currentView
-      this.unsubscribe = this.$store.subscribe(mutation => {
-        if (mutation.type === 'setCurrentView') {
+      this.getEntriesWithCurrentParams()
+
+      // Global mutation dependencies
+      const viewsWithEntries = ['days', 'months', 'years', 'tasks', 'storage']
+      const mutations = {
+        setCurrentView: mutation => {
           this.viewModel = mutation.payload.view
+          if (mutation.payload.view !== 'storage') {
+            this.clearSelected()
+            this.clearFilter()
+            this.clearPagination()
+          }
+          if (viewsWithEntries.indexOf(mutation.payload.view) > -1) {
+            this.getEntriesWithCurrentParams()
+            bus.$emit('scroll-top')
+          }
+        },
+        setAuthorized: () => {
+          this.clearContext()
+          this.clearSelected()
+          this.clearFilter()
+          this.clearPagination()
+          this.setBackend({ backend: 'mitaba' })
+          this.getProfile()
+          this.getEntriesWithCurrentParams()
+          this.closeSidebar()
+          bus.$emit('scroll-top')
+        },
+        setNotAuthorized () {
+          this.clearUser()
+          this.clearContext()
+          this.clearSelected()
+          this.clearFilter()
+          this.clearPagination()
+          this.setBackend({ backend: 'local' })
+          this.getEntriesWithCurrentParams()
+          this.closeSidebar()
+          bus.$emit('scroll-top')
+        },
+        setFilter: mutation => {
+          this.getEntries({
+            params: {
+              limit: this.pagination.entries.limit,
+              offset: 0,
+              filter: mutation.payload.filter.map(f => f.trim()).filter(f => f)
+            }
+          })
+          bus.$emit('scroll-top')
         }
+      }
+      this.unsubscribe = this.$store.subscribe(mutation => {
+        mutations[mutation.type] && mutations[mutation.type](mutation)
+      })
+
+      // Global actions dependencies
+      const actions = {
+        activateLocale: action => {
+          const name = this.$route.name
+          const query = Object.assign({}, this.$route.query, {
+            locale: action.payload.locale
+          })
+          this.$router.push({ name, query })
+        },
+        activateCurrency: action => {
+          const name = this.$route.name
+          const query = Object.assign({}, this.$route.query, {
+            currency: action.payload.currency
+          })
+          this.$router.push({ name, query })
+        }
+      }
+      this.unsubscribeAction = this.$store.subscribeAction(action => {
+        actions[action.type] && actions[action.type](action)
       })
 
       // Init view preloaders
@@ -128,6 +197,7 @@
     },
     beforeDestroy () {
       this.unsubscribe()
+      this.unsubscribeAction()
     },
     watch: {
       'viewModel': function (view) {
@@ -154,7 +224,8 @@
         'isCurrencySymbolBefore',
         'availableViewsAsOptions',
         'userName',
-        'authToken'
+        'authToken',
+        'pagination'
       ])
     },
     methods: {
@@ -163,9 +234,14 @@
         'setBackend',
         'clearSelected',
         'clearFilter',
-        'clearUser'
+        'clearUser',
+        'clearContext',
+        'clearPagination',
+        'closeSidebar'
       ]),
       ...mapActions([
+        'getProfile',
+        'getEntries',
         'activateLocale',
         'activateCurrency',
         'authorizeWithMitaba'
@@ -173,7 +249,8 @@
     },
     mixins: [
       appTips,
-      i18nLabel
+      i18nLabel,
+      storage
     ],
     components: {
       appLayout,

@@ -58,7 +58,7 @@
   import capitalize from '@/utils/capitalize'
 
   function labelItem ({ type, offset, value }) {
-    if (type === 'entries') {
+    if (type === 'storage') {
       return offset + 1
     }
     if (value) {
@@ -77,7 +77,7 @@
 
   function labelRange ({ type, offset, limit, count, items, rangeLabels, label }) {
     let range = {}
-    if (type === 'entries') {
+    if (type === 'storage') {
       let to = count - offset - limit
       range = {
         from: count - offset,
@@ -108,7 +108,7 @@
     computed: {
       currentViewItems () {
         const items = {
-          entries: Storage.entries,
+          storage: Storage.entries,
           days: Days.children,
           months: Months.children,
           years: Years.children,
@@ -117,13 +117,13 @@
         return items[this.currentView] ? items[this.currentView] : []
       },
       currentOffset () {
-        return this.currentViewPagination.offset
+        return this.pagination[this.currentView].offset
       },
       currentLimit () {
-        return this.currentViewPagination.limit
+        return this.pagination[this.currentView].limit
       },
       currentCount () {
-        return this.currentViewPagination.count
+        return this.pagination[this.currentView].count
       },
       currentExist () {
         return Storage.entries.length
@@ -148,24 +148,24 @@
         return labelItem({
           type: this.type,
           offset: this.currentOffset + 1,
-          value: this.currentViewPagination.previous[0]
+          value: this.pagination[this.currentView].previous[0]
         })
       },
       earlierItemLabel () {
         return labelItem({
           type: this.type,
           offset: this.currentOffset - 1,
-          value: this.currentViewPagination.next[0]
+          value: this.pagination[this.currentView].next[0]
         })
       },
       currentRange () {
         return this.generalRange(this.currentViewItems.map(i => i.name))
       },
       laterRange () {
-        return this.generalRange(this.currentViewPagination.previous)
+        return this.generalRange(this.pagination[this.currentView].previous)
       },
       earlierRange () {
-        return this.generalRange(this.currentViewPagination.next)
+        return this.generalRange(this.pagination[this.currentView].next)
       },
       labelAll () {
         return `${this.label('pagination.all', false)} ${this.labelNumber(this.currentCount)}`
@@ -173,7 +173,7 @@
       latestLabel () {
         if (this.currentLimit === 1) {
           return this.labelFormat('pagination.latest', {
-            gender: this.type === 'entries' ? 'female' : 'male'
+            gender: this.type === 'storage' ? 'female' : 'male'
           })
         } else {
           return this.labelFormat('pagination.latest', { gender: 'other' })
@@ -182,16 +182,16 @@
       earliestLabel () {
         if (this.currentLimit === 1) {
           return this.labelFormat('pagination.earliest', {
-            gender: this.type === 'entries' ? 'female' : 'male'
+            gender: this.type === 'storage' ? 'female' : 'male'
           })
         } else {
           return this.labelFormat('pagination.earliest', { gender: 'other' })
         }
       },
       ...mapGetters([
+        'pagination',
         'paginationOptions',
         'currentView',
-        'currentViewPagination',
         'locale'
       ])
     },

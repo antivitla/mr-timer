@@ -6,7 +6,7 @@
       :key="entry.id"
       :entry="entry")
     view-pagination(
-      type="entries"
+      type="storage"
       @limit="changeCurrentViewLimit"
       @offset="changeCurrentViewOffset")
 </template>

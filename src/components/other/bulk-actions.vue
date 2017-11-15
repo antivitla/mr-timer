@@ -11,11 +11,12 @@
       i.material-icons block
 </template>
 <script>
-  import { mapGetters, mapMutations, mapActions } from 'vuex'
+  import { mapGetters, mapMutations } from 'vuex'
   import pluralize from '@/utils/pluralize'
   import capitalize from 'lodash/capitalize'
   import { translate } from '@/store/i18n'
   import { Selected } from '@/store/selected'
+  import storage from '@/mixins/storage'
 
   export default {
     data () {
@@ -53,11 +54,11 @@
       },
       ...mapMutations([
         'clearSelected'
-      ]),
-      ...mapActions([
-        'deleteAndGetEntries'
       ])
-    }
+    },
+    mixins: [
+      storage
+    ]
   }
 </script>
 <style lang="stylus">

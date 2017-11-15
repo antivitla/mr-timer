@@ -84,15 +84,7 @@ const mutations = {
 
 const actions = {
   getEntries (context, payload) {
-    const params = {}
-    // Почему-то кешируется добавление атрибута context
-    // в результат вызова context.getters.currentViewParams
-    // поэтому надо хитро создавать раздельный params
-    if (payload && payload.params) {
-      Object.assign(params, payload.params)
-    } else {
-      Object.assign(params, context.getters.currentViewParams)
-    }
+    const params = Object.assign({}, payload && payload.params)
     // Выбираем сервер
     const backend = driver[context.getters.backend]
     // Если у нас есть контекст,
@@ -115,11 +107,11 @@ const actions = {
       }
       // Запоминаем паджинацию
       if (response.pagination) {
-        if (!response.pagination.group) {
-          context.commit('setEntriesPagination', response.pagination)
-        } else {
-          context.commit('setGroupPagination', response.pagination)
+        const pagination = response.pagination
+        if (!pagination.group) {
+          pagination.group = 'storage'
         }
+        context.commit('setPagination', pagination)
       }
       // Показываем записи
       context.commit('clearEntries')
@@ -159,13 +151,6 @@ const actions = {
     context.commit('removeEntries', payload)
     return driver[context.getters.backend]
       .deleteEntries(payload.entries.map(entry => ({ id: entry.id })))
-  },
-  deleteAndGetEntries (context, payload) {
-    const entries = payload.entries
-    context.commit('removeEntries', { entries })
-    return context
-      .dispatch('deleteEntries', { entries })
-      .then(() => context.dispatch('getEntries'))
   }
 }
 
