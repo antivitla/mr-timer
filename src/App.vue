@@ -125,7 +125,7 @@
             bus.$emit('scroll-top')
           }
         },
-        setAuthorized: () => {
+        setAuthorized: mutation => {
           this.clearContext()
           this.clearSelected()
           this.clearFilter()
@@ -136,7 +136,7 @@
           this.closeSidebar()
           bus.$emit('scroll-top')
         },
-        setNotAuthorized () {
+        setNotAuthorized: mutation => {
           this.clearUser()
           this.clearContext()
           this.clearSelected()

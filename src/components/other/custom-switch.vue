@@ -49,4 +49,11 @@
         background-color titamota-color-text
     a + a
       margin-left 5px
+
+  .invert
+    .custom-switch
+      a:after
+        background-color titamota-color-border-invert
+      a.active:after
+        background-color titamota-color-text-invert
 </style>

@@ -32,7 +32,7 @@ function addContext (entries, context) {
   })
 }
 
-const driver = {
+export const driver = {
   local: Local,
   mitaba: Mitaba
 }

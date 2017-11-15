@@ -110,7 +110,14 @@ const ru = ({
     l10n: 'язык и валюта',
     exportImport: 'экспорт и импорт',
     migration: 'перенести данные',
-    settings: 'включить элементы интерфейса'
+    settings: 'включить элементы интерфейса',
+    export: 'экспорт',
+    import: 'импорт',
+    json: 'JSON',
+    exportPlaceholder: 'здесь будут все ваши записи после загрузки по кнопке ниже',
+    importPlaceholder: 'скопируйте сюда ваши записи (например после использования экспорта ранее)',
+    loadAllEntries: 'загрузить сюда все записи',
+    importEntries: 'импортировать записи'
   },
   sidebar: {
     icons: 'иконки',
@@ -224,7 +231,14 @@ const en = ({
     l10n: 'Language and Currency',
     migration: 'migrate data',
     exportImport: 'Export and Import',
-    settings: 'toggle UI elements'
+    settings: 'toggle UI elements',
+    export: 'export',
+    import: 'import',
+    json: 'JSON',
+    exportPlaceholder: 'here will be all your entries after loading by button below',
+    importPlaceholder: 'paste here your entries (may be using from previous export)',
+    loadAllEntries: 'load all entries here',
+    importEntries: 'import entries'
   },
   sidebar: {
     icons: 'icons',
