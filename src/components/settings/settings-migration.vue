@@ -49,6 +49,7 @@
   import debounce from 'debounce'
   import migration from '@/mixins/migration'
   import i18nLabel from '@/mixins/i18n-label'
+  import bus from '@/event-bus'
 
   export default {
     data () {
@@ -79,12 +80,18 @@
           this.countEntries.timer30 = entries.length
         })
         .catch(error => {
+          let content = error.message
+          let type
           if (error.message === '404') {
-            console.warn('Не найдены записи для таймера 3.0')
+            content = 'Timer 3.0 local entries not found'
+            console.warn(content)
           }
           if (error.message === '500') {
-            console.warn('Записи для таймера 3.0 кажется сломаны')
+            content = 'Timer 3.0 local entries are broken'
+            type = 'error'
+            console.warn(content)
           }
+          bus.$emit('toast', { content, type })
         })
       // Titomata Local Entries
       this.getEntriesFromLocalStorage('titamota-entries-local')
@@ -93,12 +100,18 @@
           this.countEntries.timer31 = entries.length
         })
         .catch(error => {
+          let content = error.message
+          let type
           if (error.message === '404') {
-            console.warn('Не найдены записи для таймера 3.1')
+            content = 'Timer 3.1 local entries not found'
+            console.warn(content)
           }
           if (error.message === '500') {
-            console.warn('Записи для таймера 3.1 кажется сломаны')
+            content = 'Timer 3.1 entries are broken'
+            type = 'error'
+            console.warn(content)
           }
+          bus.$emit('toast', { content, type })
         })
     },
     computed: {

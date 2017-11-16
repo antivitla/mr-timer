@@ -1,4 +1,5 @@
 import Mitaba from '@/backend/mitaba'
+import bus from '@/event-bus'
 
 const state = {
   key: 'local',
@@ -79,6 +80,9 @@ const actions = {
         providers: profile.providers
       })
       return profile
+    }).catch(error => {
+      const content = `Get Profile: ${error.message || error.response.statusText}`
+      bus.$emit('toast', { content, type: 'error' })
     })
   }
 }

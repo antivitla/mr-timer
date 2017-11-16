@@ -59,8 +59,10 @@
     },
     watch: {
       viewModel: function (view) {
-        this.setCurrentView({ view })
-        this.closeSidebar()
+        if (view && view !== this.currentView) {
+          this.setCurrentView({ view })
+          this.closeSidebar()
+        }
       }
     },
     mixins: [

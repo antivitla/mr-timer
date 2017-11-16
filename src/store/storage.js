@@ -119,10 +119,14 @@ const actions = {
       bus.$emit('get-entries-complete')
       return entries
     }).catch(error => {
-      if (error.response && error.response.status === 404) {
-        context.commit('clearEntries')
-        context.commit('clearPagination')
-        bus.$emit('get-entries-complete')
+      if (error.response) {
+        const content = `Get entries: ${error.response.statusText}`
+        bus.$emit('toast', { content, type: 'error' })
+        if (error.response.status === 404) {
+          context.commit('clearEntries')
+          context.commit('clearPagination')
+          bus.$emit('get-entries-complete')
+        }
       }
     })
   },

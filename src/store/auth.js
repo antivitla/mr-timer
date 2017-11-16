@@ -1,4 +1,5 @@
 import Mitaba from '@/backend/mitaba'
+import bus from '@/event-bus'
 
 export const authSteps = {
   NOT_AUTHORIZED: 'NOT_AUTHORIZED',
@@ -62,8 +63,10 @@ const actions = {
           authToken: auth.token
         })
       }).catch(error => {
-        console.warn(error)
+        console.dir(error)
         context.commit('setNotAuthorized')
+        const content = `Authorize: ${error.message || error.response.statusText}`
+        bus.$emit('toast', { content, type: 'error' })
       })
   }
 }

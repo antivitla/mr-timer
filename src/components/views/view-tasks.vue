@@ -5,9 +5,7 @@
       v-for="task in filterGroupChildren(Tasks.children)"
       :key="task.name"
       :group="task")
-    view-pagination(
-      v-if="!isContext"
-      type="tasks")
+    view-pagination(type="tasks")
 </template>
 <script>
   import { mapGetters } from 'vuex'

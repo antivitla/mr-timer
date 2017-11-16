@@ -6,6 +6,7 @@
       v-click-outside="closeSidebar"
       v-esc-outside="closeSidebar")
       slot(name="sidebar") Sidebar
+    slot(name="other")
     //- section.modal(
     //-   v-click-outside="closeModal"
     //-   v-esc-outside="closeModal")

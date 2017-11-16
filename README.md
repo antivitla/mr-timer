@@ -4,17 +4,6 @@ Time, task and money tracking, clean and thoughtful. For my fellow coders.
 
 *Powered by [vuejs](https://vuejs.org/)*
 
-### Features (roadmap)
-
-- (TODO) reports
-- view trees by days, months, years, tasks
-- (TODO) custom report and view trees
-- persist on server with zero auth
-- persist local
-- (TODO) export data
-- (TODO) integration with bitbucket, youtrack, github issues, trello
-- **chibi girls**
-
 ## Build Setup
 
 ``` bash
@@ -41,3 +30,16 @@ npm test
 ```
 
 For a detailed explanation on how things work, check out the [guide](http://vuejs-templates.github.io/webpack/) and [docs for vue-loader](http://vuejs.github.io/vue-loader).
+
+
+## Заметки о разработке / Devnotes
+
+**Картинки / Images**
+
+Статические картинки в `/static/img/` это те, которые прикрепляются как обычно, ссылкой. При компиляции к имени добавляется рандомный хеш. Путь к ним в коде необходимо делать относительным.
+
+Второй тип картинок в `/src/assets/images/` это те, которые при компиляции преобразуются в data:image-формат (хорошо для мелочей, чтоб не плодить запросы к диску). Путь к ним нужно писать как, например `~@/assets/images/example.png`.
+
+Static images in `/static/img/` are added as usual (link to file). Compiler will add random stuff to filename to battle cache. Path to such images should be relative.
+
+Another images are compiled as `data:image` (good for small images). Their path should be some kind of root path with webpack-specific stuf, for example `~@/assets/images/example.png`. You should put such images to `/src/assets/images/`.

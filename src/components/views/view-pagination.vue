@@ -364,6 +364,10 @@
     .current
       margin-left 15px
       margin-right 15px
+      max-width 200px
+      overflow hidden
+      text-overflow ellipsis
+      white-space nowrap
     .label
       display flex
       .material-icons + *

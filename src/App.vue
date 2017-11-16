@@ -32,6 +32,8 @@
     collection-footer(slot="page")
     //- Sidebar
     collection-sidebar(slot="sidebar")
+    //- Messages
+    toaster(slot="other")
     //- Modals
     //- p(slot="modal") Modals
     //- p(slot="modal") Modals 2
@@ -53,6 +55,7 @@
   import pricePerHour from '@/components/other/price-per-hour'
   import contextNav from '@/components/other/context-nav'
   import iconPreloader from '@/components/other/icon-preloader'
+  import toaster from '@/components/other/toaster'
   import timer from '@/components/timer'
   // Store
   import { appTitle } from '@/store/app-info'
@@ -205,7 +208,7 @@
     },
     watch: {
       'viewModel': function (view) {
-        if (view) {
+        if (view && view !== this.currentView) {
           this.setCurrentView({ view })
         }
       }
@@ -274,7 +277,8 @@
       viewMonths,
       viewDays,
       viewStorage,
-      timer
+      timer,
+      toaster
     },
     directives: {
       bodyScrollTopOn

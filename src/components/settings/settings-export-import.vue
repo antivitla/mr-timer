@@ -41,6 +41,7 @@
   import i18nLabel from '@/mixins/i18n-label'
   import storage from '@/mixins/storage'
   import { driver } from '@/store/storage'
+  import bus from '@/event-bus'
 
   export default {
     data () {
@@ -99,6 +100,8 @@
             })
         } catch (error) {
           this.isPending = false
+          const content = `Import entries: ${error.message}`
+          bus.$emit('toast', { content, type: 'error' })
           console.warn(error)
         }
       },
