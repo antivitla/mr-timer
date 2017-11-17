@@ -54,6 +54,36 @@ const timeFormat = {
     }
     const yy = d.getFullYear()
     return yy + '.' + mm + '.' + dd
+  },
+
+  'YYYY-MM-DD': function (ms) {
+    const d = new Date(ms)
+    let dd = d.getDate()
+    if (dd < 10) {
+      dd = ('0' + dd).substr(-2)
+    }
+    let mm = d.getMonth() + 1
+    if (mm < 10) {
+      mm = ('0' + mm).substr(-2)
+    }
+    const yy = d.getFullYear()
+    return yy + '-' + mm + '-' + dd
+  },
+
+  'YYYY-MM-01': function (ms) {
+    const d = new Date(ms)
+    let mm = d.getMonth() + 1
+    if (mm < 10) {
+      mm = ('0' + mm).substr(-2)
+    }
+    const yy = d.getFullYear()
+    return yy + '-' + mm + '-01'
+  },
+
+  'YYYY-01-01': function (ms) {
+    const d = new Date(ms)
+    const yy = d.getFullYear()
+    return yy + '-01-01'
   }
 }
 

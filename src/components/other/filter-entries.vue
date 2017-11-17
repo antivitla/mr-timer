@@ -24,6 +24,9 @@
         if (mutation.type === 'setFilter') {
           this.filterModel = mutation.payload.filter
         }
+        if (mutation.type === 'clearFilter') {
+          this.filterModel = []
+        }
       })
     },
     beforeDestroy () {

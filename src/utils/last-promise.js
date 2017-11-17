@@ -4,7 +4,7 @@ function winner ({ type, promise, result }) {
   if (!promises[type] || promises[type] === promise) {
     return Promise.resolve(result)
   } else {
-    return Promise.reject(new Error('Canceled'))
+    return Promise.reject(new Error('ignore'))
   }
 }
 

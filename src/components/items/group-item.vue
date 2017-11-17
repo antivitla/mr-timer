@@ -397,7 +397,7 @@
         this.setFilter({ filter })
       },
       setGroupAsContext () {
-        this.setPagination({
+        this.updatePagination({
           group: this.currentView,
           offset: 0
         })
@@ -412,7 +412,7 @@
         'startTaskEditing',
         'stopTaskEditing',
         'setCurrentView',
-        'setPagination',
+        'updatePagination',
         'appendContext',
         'setFilter'
       ]),

@@ -22,7 +22,7 @@
           | &nbsp;{{ label('pagination.or', false) }}&nbsp;
         span.selectable(
           v-if="currentExist && currentCount > currentLimit"
-          :class="{ 'active': currentLimit === currentCount }"
+          :class="{ 'active': currentLimit === currentCount || !currentLimit }"
           @click="changeLimit(currentCount)")
           span.full {{ labelAll }}
           span.shorter {{ currentCount }}

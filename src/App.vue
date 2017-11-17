@@ -153,7 +153,7 @@
         setFilter: mutation => {
           this.getEntries({
             params: {
-              limit: this.pagination.entries.limit,
+              limit: this.pagination.storage.limit,
               offset: 0,
               filter: mutation.payload.filter.map(f => f.trim()).filter(f => f)
             }
