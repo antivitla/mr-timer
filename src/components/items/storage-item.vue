@@ -17,7 +17,7 @@
         list-input(
           :focus="editingFocus === 'details'"
           :value="edit.details"
-          @input-original-event="updateDetails($event)"
+          @input="updateDetails($event)"
           :on-submit="submitEdit")
       span.duration
         span.non-editable(
@@ -200,7 +200,7 @@
         }
       },
       updateDetails (event) {
-        this.edit.details = event.target.value
+        this.edit.details = event.join(taskDelimiter)
       },
       updateDuration (event) {
         this.edit.duration = event.target.value
@@ -226,10 +226,16 @@
         // Collect into new entry
         const updatedEntry = new Entry({ id, start, stop, details })
         // Perform update
-        this.patchEntries({
-          remove: [this.entry],
-          add: [updatedEntry]
-        })
+        if (id === 'new') {
+          this.postEntries({
+            entries: [updatedEntry]
+          })
+        } else {
+          this.patchEntries({
+            remove: [this.entry],
+            add: [updatedEntry]
+          })
+        }
       },
       ...mapMutations([
         'stopTaskEditing',

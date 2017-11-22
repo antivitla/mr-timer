@@ -3,7 +3,7 @@
     span.label {{ label('filter') }}
     list-input(
       :value="filterModel"
-      @input-original-event="changeFilter($event.target.value)"
+      @input="changeFilter($event)"
       :debounce="200"
       :placeholder="label('filterPlaceholder')")
 </template>
@@ -16,16 +16,16 @@
   export default {
     data () {
       return {
-        filterModel: []
+        filterModel: ''
       }
     },
     created () {
       this.unsubscribe = this.$store.subscribe(mutation => {
         if (mutation.type === 'setFilter') {
-          this.filterModel = mutation.payload.filter
+          this.filterModel = mutation.payload.filter.join(taskDelimiter)
         }
         if (mutation.type === 'clearFilter') {
-          this.filterModel = []
+          this.filterModel = ''
         }
       })
     },
@@ -45,7 +45,7 @@
     },
     methods: {
       changeFilter (filter) {
-        this.filterModel = filter.split(taskDelimiter)
+        this.filterModel = filter.slice(0)
         this.setFilter({ filter: this.filterModel })
       },
       ...mapMutations([

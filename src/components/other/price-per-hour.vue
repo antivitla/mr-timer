@@ -81,7 +81,7 @@
       content '¥'
 
   .price-per-hour
-    font-size 14px
+    font-size 13px
     line-height 24px
     color titamota-color-text-muted
 

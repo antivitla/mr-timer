@@ -8,13 +8,13 @@ export const focusAndSelectAll = ({
   },
 
   update (element, { value }) {
-    if (value.focus) {
+    if (value) {
       focusAndSelect(element, 0, element.value.length)
     }
   },
 
   componentUpdated (element, { value }) {
-    if (value.focus) {
+    if (value) {
       focusAndSelect(element, 0, element.value.length)
     }
   }

@@ -105,7 +105,7 @@
   // Core
   .sidebar
     font-size 14px
-    padding 220px 40px 60px 40px
+    padding 220px 40px 20px 40px
     box-shadow inset 10px 0px 20px -10px rgba(0,0,0,0.5)
     background titamota-color-back-dark url('~@/assets/images/misty-mountains-bw.png') no-repeat center top
     background-position -30px -90px

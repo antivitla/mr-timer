@@ -28,10 +28,10 @@
           v-model="viewModel")
     //- Views
     component(:is="viewComponent[currentView]" slot="page")
-    //- Footer
-    collection-footer(slot="page")
     //- Sidebar
     collection-sidebar(slot="sidebar")
+    //- Footer
+    collection-footer(slot="sidebar")
     //- Messages
     toaster(slot="other")
     //- Modals
@@ -172,18 +172,18 @@
       // Global actions dependencies
       const actions = {
         activateLocale: action => {
-          const name = this.$route.name
-          const query = Object.assign({}, this.$route.query, {
-            locale: action.payload.locale
-          })
-          this.$router.push({ name, query })
+          // const name = this.$route.name
+          // const query = Object.assign({}, this.$route.query, {
+          //   locale: action.payload.locale
+          // })
+          // this.$router.push({ name, query })
         },
         activateCurrency: action => {
-          const name = this.$route.name
-          const query = Object.assign({}, this.$route.query, {
-            currency: action.payload.currency
-          })
-          this.$router.push({ name, query })
+          // const name = this.$route.name
+          // const query = Object.assign({}, this.$route.query, {
+          //   currency: action.payload.currency
+          // })
+          // this.$router.push({ name, query })
         }
       }
       this.unsubscribeAction = this.$store.subscribeAction(action => {
@@ -295,10 +295,16 @@
     line-height 40px
     min-height 60px
     margin-bottom 60px
+    .left
+      max-width 80%
+      @media (min-width titamota-screen-w-7)
+        max-width 70%
     .toggle-sidebar
       display flex
       cursor pointer
-      margin-top 15px
+      margin-top 13px
+      @media (max-width titamota-screen-w-7)
+        margin-top 11px
       white-space nowrap
       .material-icons
         font-size 18px

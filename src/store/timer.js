@@ -4,9 +4,11 @@ let timerTimeout
 
 function tick (context) {
   context.commit('tickTimer')
-  timerTimeout = setTimeout(() => {
-    tick(context)
-  }, context.state.delay)
+  if (context.getters.timerActive) {
+    timerTimeout = setTimeout(() => {
+      tick(context)
+    }, context.state.delay)
+  }
 }
 
 const state = {

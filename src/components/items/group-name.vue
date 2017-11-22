@@ -1,10 +1,10 @@
 <template lang="pug">
-  span.group-name
-    span(
+  .group-name
+    .with-link(
       v-if="isTaskWithLink()"
       v-html="displayHtmlName")
-    span(v-else) {{ displayName }}
-    span.weekend(v-if="weekend && group.type === 'day'") {{ label('weekend', false) }}
+    .without-link(v-else) {{ displayName }}
+    .weekend(v-if="weekend && group.type === 'day'") {{ label('weekend', false) }}
 </template>
 <script>
   import moment from 'moment'
@@ -36,8 +36,8 @@
         const name = this.group.name.replace(href, '').trim()
         const link = decodeURIComponent(href.replace(/https?:\/\//, ''))
         return (provider ? `<span class="favicon ${provider}"></span>` : '') +
-          (name ? `<span class="link-name">${name}</span>` : '') +
-          (link ? `<span class="link-url">${link}</span>` : '')
+          (name ? `<div class="link-name">${name}</div>` : '') +
+          (link ? `<div class="link-url">${link}</div>` : '')
       },
       task () {
         return this.group.name
@@ -95,9 +95,31 @@
   .group-name
     *
       vertical-align top
+    .with-link
+      position relative
+      min-height 2.86em
+      .link-name
+        overflow hidden
+        text-overflow ellipsis
+        white-space nowrap
+        @media (max-width titamota-screen-w-7)
+          width calc(100% - 4.5em)
+      .link-url
+        position absolute
+        bottom 0px
+        left 0px
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
+        @media (max-width titamota-screen-w-7)
+          width calc(100% - 0em)
+
+    .without-link
+      overflow hidden
+      text-overflow ellipsis
+      white-space nowrap
     .link-url
       opacity 0.5
-      margin-right 1em
     .link-name + .link-url
       display block
       font-size 87.5%
@@ -110,11 +132,11 @@
       background-color titamota-color-red
       color white
       padding 3px 7px
-
       border-radius 5px
     .favicon
       width 1em
       height 1em
+      float left
       display inline-block
       vertical-align top
       background-position center center

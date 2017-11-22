@@ -2,7 +2,6 @@ export const taskDelimiter = ' / '
 
 const state = {
   views: {
-    help: true,
     tasks: true,
     years: true,
     months: true,

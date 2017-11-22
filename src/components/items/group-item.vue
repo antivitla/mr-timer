@@ -18,7 +18,7 @@
           v-else
           :focus="editingFocus === 'details'"
           :value="edit.details"
-          @input-original-event="updateDetails($event)"
+          @input="updateDetails($event)"
           :on-submit="submitEdit")
       span.duration
         span.non-editable(v-if="trackingEntry") {{ duration }}
@@ -30,10 +30,6 @@
           @input="updateDuration($event)"
           @keyup.enter="submitEdit()")
       span.actions
-        a.icon-button.filter(
-          :title="label('filterByThis')"
-          @click.stop.prevent="filterTask()")
-          i.material-icons search
         a.icon-button.delete(
           v-if="!trackingEntry"
           :title="label('delete')"
@@ -43,6 +39,10 @@
           :title="label('cancel')"
           @click.stop.prevent="stopTaskEditing()")
           i.material-icons block
+        a.icon-button.filter(
+          :title="label('filterByThis')"
+          @click.stop.prevent="filterTask()")
+          i.material-icons search
 
     //- Read
 
@@ -51,13 +51,13 @@
       :class="{ 'active': trackingEntry }"
       :title="startTaskLabel"
       @click="startTask()")
-      span.name(:color="colorCode")
-        span(
+      .name(:color="colorCode")
+        div(
           v-if="group.type === 'task'"
           v-long-click="500"
           @long-click="startEdit('details')")
           group-name(:group="group")
-        span(
+        div(
           v-else
           v-long-click="500"
           @long-click="startEdit('details')")
@@ -84,7 +84,7 @@
           :title="label('context.setAsCurrentTask')"
           v-if="isContextable")
           //- i.fa.fa-thumb-tack
-          i.material-icons flag
+          i.material-icons folder_open
         a.icon-button.start-edit(
           @click.stop.prevent="startEdit('details')"
           :title="label('startEdit')")
@@ -251,11 +251,12 @@
           return
         }
         // Если мы пытаемся запустить уже запущенную задачу,
-        // ничего не делать
+        // остановить её
         if (this.timerActive) {
           const timerDetails = this.timerEntry.details.join()
           const groupDetails = this.group.details().join()
           if (timerDetails === groupDetails) {
+            this.stopTimer()
             return
           }
         }
@@ -299,7 +300,7 @@
         this.startTaskEditing(payload)
       },
       updateDetails (event) {
-        this.edit.details = event.target.value
+        this.edit.details = event.join(taskDelimiter)
       },
       updateDuration (event) {
         this.edit.duration = event.target.value
@@ -334,7 +335,7 @@
             let target = update.details.target.join(taskDelimiter)
             details = entry.details
               .join(taskDelimiter)
-              .replace(new RegExp('^' + source), target)
+              .replace(source, target)
               .split(taskDelimiter)
               .filter(d => d)
               .map(d => d.trim())
@@ -419,6 +420,7 @@
       ...mapActions([
         'changeCurrentViewOffset',
         'startTimer',
+        'stopTimer',
         'patchEntries'
       ])
     },
@@ -467,7 +469,6 @@
       cursor pointer
 
     .cost
-      font-size 80%
       color titamota-color-text
       margin-left 0.375em
       position relative
@@ -487,7 +488,6 @@
         margin-left 0.25em
 
     .duration
-      font-size 80%
       color titamota-color-text-muted
       display inline-block
       cursor pointer
@@ -497,7 +497,6 @@
         width auto
       .duration
       .cost
-        font-size 100%
         line-height 1
 
     .item.edit
@@ -638,9 +637,10 @@
       font-size 32px
       line-height 42px
       font-weight 400
-      .duration
-      .cost
-        font-size 80%
+      &.edit
+        .duration
+        .cost
+          font-size 80%
       &.edit
         .name
           textarea
@@ -688,10 +688,7 @@
     [depth="1"] > .item
       .duration
         font-weight 300
-        font-size 100%
         color titamota-color-text-muted
-      .cost
-        font-size 100%
       .name
         font-weight 300
         .group-name
@@ -701,5 +698,13 @@
         font-weight 500
       .duration
         font-weight 500
+
+  [depth="1"] > .item.read
+    .with-link
+      min-height 48px
+
+  [depth="1"].has-children > .item.read
+    .with-link
+      min-height 84px
 
 </style>

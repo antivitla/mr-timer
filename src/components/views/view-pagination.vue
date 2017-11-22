@@ -394,6 +394,8 @@
     .view-pagination
       .full
         display none
+      .shorter
+        display inline
       .current .full
         display inline
 

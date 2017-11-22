@@ -139,6 +139,15 @@ const actions = {
       })
   },
   patchEntries (context, payload) {
+    if (!payload.add.every(entry => {
+      if (entry.id === 'new') {
+        bus.$emit('toast', { content: 'Patch entries: Cannot patch with id \'new\'' })
+        return false
+      }
+      return true
+    })) {
+      return false
+    }
     // Изменяем записи сразу же, не дожидаясь ответа сервера
     context.commit('removeEntries', { entries: payload.remove })
     context.commit('addEntries', { entries: payload.add })
@@ -150,6 +159,15 @@ const actions = {
       .then(entries => removeContext(entries, context.getters.context))
   },
   deleteEntries (context, payload) {
+    if (!payload.entries.every(entry => {
+      if (entry.id === 'new') {
+        bus.$emit('toast', { content: 'Delete entries: Cannot delete with id \'new\'' })
+        return false
+      }
+      return true
+    })) {
+      return false
+    }
     context.commit('removeEntries', payload)
     return driver[context.getters.backend]
       .deleteEntries(payload.entries.map(entry => ({ id: entry.id })))

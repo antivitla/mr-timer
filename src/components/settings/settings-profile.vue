@@ -3,7 +3,7 @@
     img.avatar(:src="userProfile.avatar")
     .name {{ userName }}
     div(v-if="isAuthorized")
-      .email {{ userProfile.email }}
+      .email(v-if="userName !== userProfile.email") {{ userProfile.email }}
       button.logout(
         @click.stop.prevent="setNotAuthorized"
         :title="tipUserProfileLogout"

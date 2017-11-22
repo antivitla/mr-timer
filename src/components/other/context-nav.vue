@@ -5,10 +5,10 @@
       span.item(
         v-for="(item, index) in path"
         :title="label('context.setAsCurrentTask')"
-        @click="setAsCurrentTask(item, index)") {{ item }}
+        @click="setAsCurrentTask(item, index)") {{ parseDetail(item) }}
     //- Current task
     div.task
-      span.item(:title="label('context.task')") {{ task }}
+      span.item(:title="label('context.task')") {{ parseDetail(task) }}
       a.icon-button.clear(
         @click="clearContextAndGetEntries"
         :title="label('context.clear')")
@@ -18,8 +18,14 @@
   import { mapGetters, mapMutations } from 'vuex'
   import i18nLabel from '@/mixins/i18n-label'
   import storage from '@/mixins/storage'
+  import parseDetail from '@/utils/parseDetail'
 
   export default {
+    data () {
+      return {
+        parseDetail
+      }
+    },
     computed: {
       path () {
         return this.context.slice(0, -1)
@@ -84,6 +90,10 @@
         font-size 45px
         font-weight 500
         letter-spacing -1px
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
+        display block
         @media (max-width titamota-screen-w-7)
           font-size 24px
           letter-spacing -0.02em

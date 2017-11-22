@@ -1,11 +1,9 @@
 <template lang="pug">
   .collection-footer
-    img.chibi(
-      src="../../../static/img/chibi-07.png")
     a.copyright-link(href="//github.com/antivitla/titamota" target="_blank")
       .copyright-title Titamo&#x301;ta 1.0
       .copyright-motto сделано на&nbsp;левом берегу &trade;
-      img.copyright-cat(src="~@/assets/images/cat-preloader.gif")
+      img.copyright-cat(src="~@/assets/images/cat-preloader-muted.gif")
 </template>
 <style lang="stylus">
   @import '~@/assets/stylesheets/core'
@@ -25,11 +23,11 @@
     .copyright-title
       font-size 18px
     .copyright-motto
-      font-size 14px
-      margin-top 5px
+      font-size 13px
+      margin-top 3px
     .copyright-cat
       display block
-      margin 25px auto 0px auto
+      margin 15px auto 5px auto
     .copyright-link
       text-decoration none
       color titamota-color-text
@@ -37,4 +35,13 @@
       max-width 250px
       margin-left auto
       margin-right auto
+  .sidebar
+    .collection-footer
+      padding-bottom 0px
+      padding-top 0px
+      margin-top 90px
+      .copyright-link
+        color titamota-color-text-invert
+      .copyright-motto
+        opacity 0.5
 </style>

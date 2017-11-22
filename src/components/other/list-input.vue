@@ -4,8 +4,8 @@
     rows="1"
     ref="textarea"
     @input="updateValue($event)"
-    @keydown.enter="keepValue($event)"
-    @keyup.enter="onSubmit"
+    @keydown.enter.prevent.stop="keepValue($event)"
+    @keyup.enter.prevent.stop="onSubmit"
     :value="joinedList"
     v-focus-and-select-range="focusSelectionRangeOptions"
     :placeholder="placeholder")
@@ -19,7 +19,7 @@
 
   function parseList (list) {
     return (typeof list === 'string' ? list.split(taskDelimiter) : list)
-      .map(item => item.replace(/\n/g, '').trim())
+      .map(item => item.replace(/\n/g, '').replace(/\/\s?$/, '').trim())
       .filter(item => item)
   }
 
@@ -33,14 +33,17 @@
         cachedEnter: ''
       }
     },
-    props: [
-      'value',
-      'placeholder',
-      'debounce',
-      'onSubmit',
-      'focus',
-      'resetFocusOn'
-    ],
+    props: {
+      value: String,
+      placeholder: String,
+      debounce: {
+        type: Number,
+        default: 0
+      },
+      onSubmit: Function,
+      focus: Boolean,
+      resetFocusOn: String
+    },
     mounted () {
       autosize(this.$el)
       bus.$on(this.resetFocusOn, () => {
@@ -52,6 +55,9 @@
           setTimeout(() => {
             autosize.update(this.$el)
           }, 10)
+        }
+        if (t === 'startTimer') {
+          this.doNotUpdate = false
         }
       })
     },
@@ -80,9 +86,6 @@
           jl = String(this.value)
         }
         return jl
-      },
-      delay () {
-        return this.debounce ? parseInt(this.debounce, 10) : 0
       },
       focusSelectionRangeOptions () {
         if (!this.focusedOnce) {
@@ -119,11 +122,11 @@
         const prev = parseList(this.value)
         if (list.join(taskDelimiter) !== prev.join(taskDelimiter)) {
           // Use delayed update..
-          if (this.delay) {
+          if (this.debounce) {
             this.debounceUpdate(() => {
               this.$emit('input', list)
               this.$emit('input-original-event', $event)
-            }, this.delay)
+            }, this.debounce)
           } else {
             // ...or not
             this.$emit('input', list)
@@ -133,11 +136,15 @@
       },
       keepValue (event) {
         this.doNotUpdate = true
+        this.dropSelection()
         if (event.target.value) {
           this.cachedEnter = event.target.value
         } else {
           event.target.value = this.cachedEnter
         }
+      },
+      dropSelection () {
+        this.$el.setSelectionRange(this.$el.value.length, this.$el.value.length)
       }
     },
     directives: {

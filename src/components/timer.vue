@@ -9,7 +9,7 @@
       span.ms {{ ms }}
     list-input(
       :value="edit.details"
-      @input-original-event="updateDetails($event)"
+      @input="updateDetails($event)"
       :debounce="50"
       :on-submit="toggle"
       :focus="timerActive"
@@ -31,12 +31,6 @@
     return funny.phrase(funnyTemplates[locale].base)
   }
 
-  function parseList (list) {
-    return (typeof list === 'string' ? list.split(taskDelimiter) : list)
-      .map(item => item.replace(/\n/g, '').trim())
-      .filter(item => item)
-  }
-
   export default {
     data () {
       return {
@@ -49,7 +43,7 @@
         resetFocusOnEvent: 'start-task',
         Storage: Storage,
         timerIsQuickActivated: false,
-        saveDelayMin: 0.02,
+        saveDelayMin: 0.5,
         lastSaveDate: new Date().getTime(),
         tickTimeout: undefined
       }
@@ -137,10 +131,16 @@
             entry: new Entry({ details })
           })
         } else {
-          this.patchEntries({
-            remove: [this.timerEntry],
-            add: [this.timerEntry]
-          })
+          if (this.timerEntry.id === 'new') {
+            this.postEntries({
+              entries: [this.timerEntry]
+            })
+          } else {
+            this.patchEntries({
+              remove: [this.timerEntry],
+              add: [this.timerEntry]
+            })
+          }
           this.stopTimer()
         }
       },
@@ -163,9 +163,9 @@
         this.stopTick()
       },
       updateDetails (event) {
-        let details = parseList(event.target.value)
-        this.edit.details = event.target.value
-        this.details = details
+        let details = event.slice(0)
+        this.edit.details = event.join(taskDelimiter)
+        this.details = details.slice(0)
         // If timer running, changes to task name
         // will replace active entry's details
         if (this.timerActive) {
@@ -173,10 +173,17 @@
             details = [capitalize(funnyTask(this.locale))]
           }
           const entry = new Entry(Object.assign({}, this.timerEntry, { details }))
-          this.patchEntries({
-            remove: [this.timerEntry],
-            add: [entry]
-          })
+          if (entry.id === 'new') {
+            this.postEntries({
+              entries: [entry]
+            }).then(() => {
+            })
+          } else {
+            this.patchEntries({
+              remove: [this.timerEntry],
+              add: [entry]
+            })
+          }
         }
       },
       tick () {

@@ -16,7 +16,15 @@ const getters = {
   userKey: state => state.key,
   userGuestKey: state => state.guestKey,
   userMode: state => state.mode,
-  userName: state => `${state.firstName} ${state.lastName}`,
+  userName: state => {
+    if (state.firstName && state.lastName) {
+      return `${state.firstName} ${state.lastName}`
+    } else if (!state.firstName && !state.lastName) {
+      return state.email
+    } else {
+      return state.firstName || state.lastName
+    }
+  },
   userProfile (state) {
     const fields = [
       'avatar',
@@ -52,9 +60,7 @@ const mutations = {
       'providers'
     ]
     fields.forEach(f => {
-      if (payload[f]) {
-        state[f] = payload[f]
-      }
+      state[f] = payload[f]
     })
   },
   clearUser (state) {

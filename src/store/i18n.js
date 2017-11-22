@@ -41,7 +41,9 @@ const ru = ({
     months: 'месяцы',
     days: 'дни',
     years: 'годы',
-    help: 'помощь'
+    help: 'помощь',
+    report: 'отчёт',
+    timer: 'таймер'
   },
   time: {
     at: 'в'
@@ -167,7 +169,9 @@ const en = ({
     months: 'months',
     days: 'days',
     years: 'years',
-    help: 'help'
+    help: 'help',
+    report: 'report',
+    timer: 'timer'
   },
   time: {
     at: 'at'
