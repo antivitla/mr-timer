@@ -11,17 +11,18 @@
       @keyup.esc="stopTaskEditing()"
       v-click-outside="stopTaskEditing"
       v-esc-outside="stopTaskEditing")
-      span.name
-        span.non-editable(v-if="group.type !== 'task'")
-          group-name(:group="group")
+      .name(:class="{ 'non-editable': group.type !== 'task' }")
+        group-name(
+          v-if="group.type !== 'task'"
+          :group="group")
         list-input(
           v-else
           :focus="editingFocus === 'details'"
           :value="edit.details"
           @input="updateDetails($event)"
           :on-submit="submitEdit")
-      span.duration
-        span.non-editable(v-if="trackingEntry") {{ duration }}
+      .duration
+        .non-editable(v-if="trackingEntry") {{ duration }}
         input(
           v-else
           type="text"
@@ -29,7 +30,7 @@
           :value="edit.duration"
           @input="updateDuration($event)"
           @keyup.enter="submitEdit()")
-      span.actions
+      .actions
         a.icon-button.delete(
           v-if="!trackingEntry"
           :title="label('delete')"
@@ -48,26 +49,30 @@
 
     .item.read(
       v-else
-      :class="{ 'active': trackingEntry }"
-      :title="startTaskLabel"
-      @click="startTask()")
-      .name(:color="colorCode")
-        div(
+      v-long-click="500"
+      @long-click="startEdit('details')"
+      :class="{ 'active': trackingEntry }")
+      .title(
+        :title="startTaskLabel"
+        @click="startTask()")
+        .name(
           v-if="group.type === 'task'"
+          :color="colorCode"
           v-long-click="500"
           @long-click="startEdit('details')")
           group-name(:group="group")
-        div(
+        .name(
           v-else
+          :color="colorCode"
           v-long-click="500"
           @long-click="startEdit('details')")
           group-name(:group="group")
-      span.duration(
-        v-long-click="500"
-        @long-click="startEdit('duration')") {{ duration }}
-      span.cost(
-        v-if="price") {{ cost }}
-      span.actions
+        .duration(
+          v-if="duration"
+          v-long-click="500"
+          @long-click="startEdit('duration')") {{ duration }}
+        .cost(v-if="price") {{ cost }}
+      .actions
         //- a.icon-button.start-task(
         //-   @click.stop.prevent="startTask()"
         //-   :title="startTaskLabel"
@@ -443,268 +448,263 @@
 <style lang="stylus">
   @import '~@/assets/stylesheets/variables'
 
+  // Normal screens
   .group-item
-    & > .item
-      margin 6px auto
-      padding-top 4px
-      padding-bottom 4px
-      font-size 18px
-      line-height 24px
+
+    // Nested shift
     .group-item
       margin-left 20px
-      .group-item
-        & > .item
-          margin 5px auto
-          font-size 14px
-          line-height 20px
 
-    .item
-      display flex
-      flex-wrap wrap
-      align-items baseline
-
-    .name
-      margin-right 0.5em
-      width 100%
-      cursor pointer
-
-    .cost
-      color titamota-color-text
-      margin-left 0.375em
-      position relative
-      padding-left 1em
-      display inline-block
-      white-space nowrap
-      &:after
-        content '='
-        margin-right 0.375
-        position absolute
-        display block
-        color titamota-color-text-muted
-        left 0px
-        top 0px
-      &:before
-        float right
-        margin-left 0.25em
-
-    .duration
-      color titamota-color-text-muted
-      display inline-block
-      cursor pointer
-
-    @media (min-width 768px)
-      .name
-        width auto
-      .duration
-      .cost
-        line-height 1
-
-    .item.edit
+    // Layout Read
+    & > .item.read
       display flex
       align-items flex-start
-      flex-direction column
-      position relative
-      padding-top 0px
-      padding-bottom 0px
-      .name
-        width calc(100% + 8px)
-        margin 0 0 0.5em -8px
-        .non-editable
-          padding-top 4px
-          padding-bottom 4px
-          padding-left 8px
-          padding-right 8px
-          display block
-          box-sizing box-sizing
-        textarea
-          width 100%
-          font-size inherit
-          border none
-          padding 4px 8px
-          margin 0px
-          position relative
+      justify-content space-between
+      margin-top 5px
+      margin-bottom 5px
+      padding-top 4px
+      padding-bottom 4px
+      font-size 14px
+      line-height 20px
+      .title
+        display flex
+        box-sizing border-box
+        padding-right 20px
+        .name
           box-sizing border-box
-          resize none
-          border-radius 5px
-          line-height inherit
-          display block
-          background-color white
-          color titamota-color-text
-          &:focus
-            background-color titamota-color-back-dark
-            color titamota-color-text-invert-highlight
-      .duration
-        width 6.5em
-        margin 0 0 0 -8px
-        line-height inherit
-        font-size inherit
-        .non-editable
-          padding-top 4px
-          padding-bottom 4px
-          padding-left 8px
-          padding-right 8px
-          display block
-          box-sizing box-sizing
-        textarea
-        input
-          text-align left
-          display block
-          width 100%
-          font-size inherit
-          font-family PT Mono, monospace
-          box-sizing border-box
-          padding 4px 8px
-          margin 0
-          border none
-          line-height inherit
-          border-radius 5px
-          resize none
-          background-color white
-          color titamota-color-text
-          &:focus
-            background-color titamota-color-back-dark
-            color titamota-color-text-invert-highlight
+          padding-right 0.625em
       .actions
         display flex
-        padding 4px
-        justify-content flex-end
-        position absolute
-        right 0px
-        bottom 0px
 
-      @media (min-width 768px)
-        flex-direction row
-        .name
-          width calc(100% - 15em)
-          margin 0 0 0 -8px
-        .duration
-          margin-left 0.5em
-          input
-            text-align center
-        .actions
-          margin-left auto
-          position static
-
-    .icon-button
-      font-size 140%
-      cursor pointer
-      input[type="checkbox"]
-        margin-left 0.2em
-    .icon-button + .icon-button
-      margin-left 7px
-
-    .item.active
-      color titamota-color-red
-      font-weight 500
-      .duration
-        color titamota-color-red
-        font-weight 400
-
-    .item.read
-      display flex
-      cursor pointer
-      position relative
+    // Show actions Read
+    & > .item.read
       .actions
-        position absolute
-        right 0px
-        top 0px
-        padding 4px
-        display none
-        a[href]
-          color titamota-color-text
-          text-decoration none
+        visibility hidden
       &:hover
         background-color titamota-color-back-light-darker
         .actions
-          display flex
-          align-self center
-          margin-left auto
-      @media (max-width 768px)
-        .actions
-          display flex
-          .filter
-          .start-edit
-            display none
+          visibility visible
 
+    // layout Edit
+    & > .item.edit
+      display flex
+      align-items flex-start
+      margin-top 5px
+      margin-bottom 5px
+      font-size 14px
+      line-height 20px
+      .name
+        margin-left -8px
+        &.non-editable
+          padding-left 8px
+          padding-right 8px
+          padding-top 4px
+          padding-bottom 4px
+          box-sizing border-box
+        textarea
+          display block
+          box-sizing border-box
+          resize none
+          width 100%
+          padding 4px 8px
+          border-radius 5px
+          border 0px
+          line-height inherit
+          font-size inherit
+          background-color white
+      .duration
+        width 6.5em
+        padding-left 0.75em
+        input
+          display block
+          width 100%
+          box-sizing border-box
+          border-radius 5px
+          border 0px
+          text-align center
+          padding 4px 8px
+          line-height inherit
+          font-size inherit
+          font-family 'PT Sans', monospace
+          background-color white
+      .actions
+        display flex
+        padding-top 4px
+        padding-bottom 4px
+        margin-left auto
+        margin-right 0px
 
-  // Root items
+  // Colors and other simple stylings
+  .group-item
+    .item.read .title
+      cursor pointer
+    .item.edit textarea:focus
+    .item.edit input:focus
+      background-color titamota-color-back-dark
+      color titamota-color-text-invert-highlight
+    .item.edit .name
+      width calc(100% - 15em)
+    .item.read .duration
+      color titamota-color-text-muted
+      white-space nowrap
+      padding-right 0.375em
+    .item.read .actions a[href]
+      color titamota-color-text
+      text-decoration none
+    .item.read .actions .icon-button
+    .item.edit .actions .icon-button
+      padding-left 5px
+    .item.read .cost
+      color titamota-color-text
+      position relative
+      padding-left 1em
+      white-space nowrap
+      &:after
+        content '='
+        position absolute
+        display block
+        left 0px
+        top 0px
+
+  // Depth === 1 with children
   .group-item[depth="1"].has-children
-    margin-bottom 40px
     margin-top 40px
+    margin-bottom 40px
     &:first-child
       margin-top 0px
-    & > .item
+    &:last-child
+      margin-bottom 0px
+    & > .item.read
       font-size 32px
       line-height 42px
       font-weight 400
-      &.edit
-        .duration
-        .cost
-          font-size 80%
-      &.edit
-        .name
-          textarea
-            font-weight 400
-
-  @media (min-width 768px)
-    .group-item[depth="2"] > .item.edit
+    & > .item.edit
+      font-size 32px
+      line-height 42px
+      font-weight 400
+      .duration
+        width 5.5em
       .name
-        width calc(100% - 13.25em)
-
-    .group-item[depth="1"].has-children > .item.edit
-      .name
-        width calc(100% - 9em)
+        width calc(100% - 9.625em)
         textarea
           font-weight 400
 
-    .group-item[depth="1"]:not(.has-children) > .item.edit
+  // Depth === 1 with link
+  .group-item[depth="1"].has-children > .item.read .with-link
+    padding-bottom 42px
+
+  // Depth === 1 without children equals depth 2
+  .group-item[depth="1"]:not(.has-children)
+  .group-item[depth="2"]
+    & > .item.read
+      font-size 18px
+      line-height 24px
+    & > .item.edit
+      font-size 18px
+      line-height 24px
       .name
         width calc(100% - 13.25em)
-        textarea
-          font-weight 400
 
-  [currency="rub"]
-    .cost:before
-      content '₽'
-  [currency="usd"]
-    .cost:before
-      content '$'
-  [currency="eur"]
-    .cost:before
-      content '€'
-  [currency="cny"]
-    .cost:before
-      content '¥'
-  [is-currency-symbol-before="true"]
-    .cost:before
-      float none
-      margin-right 0.25em
-      margin-left 0em
+  // Depth === 2 and Depth === 1 without children with link
+  .group-item[depth="1"]:not(.has-children)
+  .group-item[depth="2"]
+    & > .item.read .with-link
+      padding-bottom 26px
 
-
+  // Time-based views fixes
   .view.days
   .view.months
   .view.years
     [depth="1"] > .item
+      .name
       .duration
+      .cost
         font-weight 300
+      .duration
         color titamota-color-text-muted
       .name
-        font-weight 300
-        .group-name
-          opacity 0.625
+        opacity 0.625
     [depth="2"].has-children > .item
       .name
-        font-weight 500
       .duration
+      .cost
         font-weight 500
 
-  [depth="1"] > .item.read
-    .with-link
-      min-height 48px
+  // Currency reference
+  [currency="rub"]
+    .group-item .item.read .cost:before
+        content '₽'
+  [currency="usd"]
+    .group-item .item.read .cost:before
+      content '$'
+  [currency="eur"]
+    .group-item .item.read .cost:before
+      content '€'
+  [currency="cny"]
+    .group-item .item.read .cost:before
+      content '¥'
+  [is-currency-symbol-before="true"]
+    .group-item .item.read .cost:before
+      margin-right 0.2em
+  [currency]:not([is-currency-symbol-before])
+    .group-item .item.read .cost
+      padding-right 0.875em
+      &:before
+        position absolute
+        right 0px
+        top 0px
+        margin-right 0px
 
-  [depth="1"].has-children > .item.read
-    .with-link
-      min-height 84px
+  // Small screens
+  @media (max-width titamota-screen-w-7)
+    .group-item
 
+      // Layout read
+      & > .item.read
+        .title
+          flex-wrap wrap
+          .name
+            width 100%
+
+      // Show actions read
+      & > .item.read
+        .actions
+          visibility visible
+          .filter
+          .start-edit
+            display none
+
+      // Layout edit
+      & > .item.edit
+        flex-direction column
+        position relative
+        .name
+          width calc(100% + 8px)
+        .duration
+          padding-left 0px
+          margin-top 5px
+          margin-left -8px
+          input
+            text-align left
+        .actions
+          position absolute
+          bottom 0px
+          right 0px
+
+    // Depth === 1 with children
+    .group-item[depth="1"].has-children
+      & > .item.edit
+        .name
+          width calc(100% + 8px)
+        .duration
+          margin-top 10px
+
+    // Depth === 2 && Depth === 1 without children
+    .group-item[depth="1"]:not(.has-children)
+    .group-item[depth="2"]
+      & > .item.edit
+        .name
+          width calc(100% + 8px)
+        .duration
+          margin-top 7px
 </style>

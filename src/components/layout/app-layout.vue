@@ -67,8 +67,8 @@
         padding-right 60px
       @media (min-width 1366px)
         padding-top 60px
-        padding-left calc(50vw - 600px)
-        padding-right calc(50vw - 600px)
+        // padding-left calc(50vw - 600px)
+        // padding-right calc(50vw - 600px)
 
     .sidebar
       position fixed

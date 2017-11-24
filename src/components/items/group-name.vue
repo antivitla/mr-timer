@@ -35,7 +35,7 @@
         })
         const name = this.group.name.replace(href, '').trim()
         const link = decodeURIComponent(href.replace(/https?:\/\//, ''))
-        return (provider ? `<span class="favicon ${provider}"></span>` : '') +
+        return (provider ? `<div class="favicon ${provider}"></div>` : '') +
           (name ? `<div class="link-name">${name}</div>` : '') +
           (link ? `<div class="link-url">${link}</div>` : '')
       },
@@ -93,56 +93,33 @@
   @import '~@/assets/stylesheets/variables'
 
   .group-name
-    *
-      vertical-align top
+
+    // Layout icon + name
+    .link-name
+      display inline
+
+    // Take out link from flow and cut to 1 line
     .with-link
       position relative
-      min-height 2.86em
-      .link-name
-        overflow hidden
-        text-overflow ellipsis
-        white-space nowrap
-        @media (max-width titamota-screen-w-7)
-          width calc(100% - 4.5em)
-      .link-url
-        position absolute
-        bottom 0px
-        left 0px
-        white-space nowrap
-        overflow hidden
-        text-overflow ellipsis
-        @media (max-width titamota-screen-w-7)
-          width calc(100% - 0em)
-
-    .without-link
+      padding-bottom 20px
+    .link-url
+      position absolute
+      left 0px
+      bottom 0px
+      max-width 50vw
       overflow hidden
       text-overflow ellipsis
       white-space nowrap
-    .link-url
-      opacity 0.5
-    .link-name + .link-url
-      display block
-      font-size 87.5%
-    .weekend
-      position relative
-      top 3px
-      margin-left 10px
-      font-size 14px
-      font-weight 500
-      background-color titamota-color-red
-      color white
-      padding 3px 7px
-      border-radius 5px
+
+    // Icons
     .favicon
-      width 1em
+      width 1.375em
       height 1em
-      float left
       display inline-block
       vertical-align top
-      background-position center center
+      background-position left center
       background-size contain
       background-repeat no-repeat
-      margin-right 0.375em
       position relative
       top 0.125em
       &.undefined
@@ -159,4 +136,10 @@
         background-image url('~@/assets/images/bitbucket.svg')
       &.atlassian
         background-image url('~@/assets/images/atlassian.svg')
+
+    // Small stylings
+    .link-url
+      color titamota-color-text-muted
+      font-size 80%
+      font-weight 400
 </style>
