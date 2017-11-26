@@ -10,22 +10,27 @@
         slot="right"
         :class="{ 'pending': isPending }"
         :title="tipToggleSidebarTop")
-        span.user-name(v-if="isAuthorized") {{ userName }}&ensp;
+        span.user-name(v-if="isAuthorized") {{ userName }}
         span.icon-button.menu
           i.material-icons menu
         icon-preloader(icon="refresh")
     //- Timer
     timer(slot="page")
+    //- Timeline
+    timeline(slot="page")
+    //- Debug Bdckend
+    mitaba(slot="page")
     //- Navbar
     app-navbar.menu(slot="page")
       div(slot="left")
         filter-entries(v-if="isFiltersVisible")
         bulk-actions(v-if="isBulkActionsVisible")
         price-per-hour(v-if="isPricePerHourVisible")
-      div(slot="right")
+      div(slot="right" style="display: flex;")
         custom-switch(
           :options="availableViewsAsOptions"
           v-model="viewModel")
+        get-report
     //- Views
     component(:is="viewComponent[currentView]" slot="page")
     //- Sidebar
@@ -35,8 +40,7 @@
     //- Messages
     toaster(slot="other")
     //- Modals
-    //- p(slot="modal") Modals
-    //- p(slot="modal") Modals 2
+    modal-report(slot="modal" v-if="currentModal === 'report'")
 </template>
 <script>
   import { mapGetters, mapMutations, mapActions } from 'vuex'
@@ -56,7 +60,11 @@
   import contextNav from '@/components/other/context-nav'
   import iconPreloader from '@/components/other/icon-preloader'
   import toaster from '@/components/other/toaster'
+  import getReport from '@/components/other/get-report'
   import timer from '@/components/timer'
+  import timeline from '@/components/timeline'
+  import mitaba from '@/components/mitaba'
+  import modalReport from '@/components/modals/modal-report'
   // Store
   import { appTitle } from '@/store/app-info'
   import { Selected } from '@/store/selected'
@@ -172,6 +180,7 @@
       // Global actions dependencies
       const actions = {
         activateLocale: action => {
+          document.documentElement.setAttribute('lang', action.payload.locale)
           // const name = this.$route.name
           // const query = Object.assign({}, this.$route.query, {
           //   locale: action.payload.locale
@@ -232,7 +241,8 @@
         'availableViewsAsOptions',
         'userName',
         'authToken',
-        'pagination'
+        'pagination',
+        'currentModal'
       ])
     },
     methods: {
@@ -278,7 +288,11 @@
       viewDays,
       viewStorage,
       timer,
-      toaster
+      timeline,
+      mitaba,
+      toaster,
+      getReport,
+      modalReport
     },
     directives: {
       bodyScrollTopOn
@@ -313,6 +327,10 @@
         display none
         width 18px
         color titamota-color-text
+      .user-name
+        padding-right 15px
+        position relative
+        top 1px
       &.pending
         .user-name
           color titamota-color-text-muted

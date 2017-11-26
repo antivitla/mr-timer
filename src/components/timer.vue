@@ -14,6 +14,7 @@
       :on-submit="toggle"
       :focus="timerActive"
       :reset-focus-on="resetFocusOnEvent"
+      :drop-selection-on="dropSelectionOnEvent"
       :placeholder="placeholder")
 </template>
 <script>
@@ -26,6 +27,7 @@
   import { taskDelimiter } from '@/store/ui'
   import capitalize from '@/utils/capitalize'
   import { duration, durationFraction } from '@/utils/duration'
+  import bus from '@/event-bus'
 
   function funnyTask (locale) {
     return funny.phrase(funnyTemplates[locale].base)
@@ -41,11 +43,13 @@
         placeholder: '',
         ms: '000',
         resetFocusOnEvent: 'start-task',
+        dropSelectionOnEvent: 'drop-selection',
         Storage: Storage,
         timerIsQuickActivated: false,
         saveDelayMin: 0.5,
         lastSaveDate: new Date().getTime(),
-        tickTimeout: undefined
+        tickTimeout: undefined,
+        dropSelectionDelay: 3000
       }
     },
     created () {
@@ -56,7 +60,10 @@
       const actions = {
         'startTimer': action => {
           this.onStart(action.payload.entry)
-          this.$emit(this.resetFocusOnEvent)
+          bus.$emit(this.resetFocusOnEvent)
+          this.dropSelectionTimeoutId = setTimeout(() => {
+            bus.$emit(this.dropSelectionOnEvent)
+          }, this.dropSelectionDelay)
         },
         'stopTimer': action => {
           this.onStop()
@@ -232,6 +239,7 @@
       border-bottom solid 4px titamota-color-border
       background-color titamota-color-back-gray
       position relative
+      z-index 1
       &:active
         border-bottom-width 0px
         border-top solid 4px darken(titamota-color-red, 20%)
@@ -313,6 +321,7 @@
         width 200px
         bottom 0px
         height auto
+        z-index 1
         border-top-right-radius 0px
         border-bottom-right-radius 0px
 

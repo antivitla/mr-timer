@@ -49,28 +49,29 @@
 
     .item.read(
       v-else
-      v-long-click="500"
+      v-long-click="375"
       @long-click="startEdit('details')"
       :class="{ 'active': trackingEntry }")
       .title(
         :title="startTaskLabel"
         @click="startTask()")
+        i.material-icons.timer-clock(v-if="trackingEntry") timer
         .name(
           v-if="group.type === 'task'"
           :color="colorCode"
-          v-long-click="500"
-          @long-click="startEdit('details')")
+          v-long-click="375"
+          @long-click.prevent.stop="startEdit('details')")
           group-name(:group="group")
         .name(
           v-else
           :color="colorCode"
-          v-long-click="500"
-          @long-click="startEdit('details')")
+          v-long-click="375"
+          @long-click.prevent.stop="startEdit('details')")
           group-name(:group="group")
         .duration(
           v-if="duration"
-          v-long-click="500"
-          @long-click="startEdit('duration')") {{ duration }}
+          v-long-click="375"
+          @long-click.prevent.stop="startEdit('duration')") {{ duration }}
         .cost(v-if="price") {{ cost }}
       .actions
         //- a.icon-button.start-task(
@@ -472,7 +473,7 @@
         padding-right 20px
         .name
           box-sizing border-box
-          padding-right 0.625em
+          padding-right 0.5em
       .actions
         display flex
 
@@ -548,6 +549,10 @@
       color titamota-color-text-muted
       white-space nowrap
       padding-right 0.375em
+    .item.edit .duration .non-editable
+      padding-top 4px
+      padding-bottom 4px
+      padding-left 8px
     .item.read .actions a[href]
       color titamota-color-text
       text-decoration none
@@ -565,6 +570,65 @@
         display block
         left 0px
         top 0px
+
+  // Active item
+  .group-item
+    .item.active
+      color titamota-color-text
+      font-weight 500
+      .duration
+      .cost
+        color titamota-color-text
+        font-weight 500
+      .title
+        position relative
+        .timer-clock
+          position absolute
+          left -28px
+          font-size 24px
+          top -2px
+          width 24px
+          height 24px
+          & + .name
+            margin-left 0px
+          &:before
+            content ' '
+            position absolute
+            left 12px
+            top 11px
+            transform translateX(-50%) translateY(-50%)
+            border-radius 50%
+            width 10px
+            height 10px
+            background-color titamota-color-back-light
+            z-index 1
+          &:after
+            content ' '
+            width 2px
+            height 6px
+            background-color titamota-color-text
+            position absolute
+            transform-origin 50% 80%
+            left 11px
+            top 6px
+            z-index 2
+            animation tick 12s steps(12, end) infinite
+  .group-item[depth="2"] > .item.read
+  .group-item[depth="1"]:not(.has-children) > .item.read
+    .timer-clock
+      &:before
+        top 13px
+      &:after
+        top 8px
+  .group-item[depth="1"].has-children > .item.read
+    .timer-clock
+      top 0px
+      left -30px
+      &:before
+        top 22px
+      &:after
+        top 17px
+
 
   // Depth === 1 with children
   .group-item[depth="1"].has-children

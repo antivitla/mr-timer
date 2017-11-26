@@ -81,6 +81,7 @@ const ru = ({
   standby: 'подождите немного',
   externalLink: 'перейти к',
   weekend: 'выходной',
+  getReport: 'сформировать отчёт используя текущий вид',
   context: {
     clear: 'убрать  контекст',
     task: 'текущая задача',
@@ -113,6 +114,10 @@ const ru = ({
     exportImport: 'экспорт и импорт',
     migration: 'перенести данные',
     settings: 'включить элементы интерфейса',
+    displayOptions: 'внешний вид',
+    positionOnScreen: 'расположение',
+    setFullWidth: 'на всю ширину',
+    setCenterView: 'в центре',
     export: 'экспорт',
     import: 'импорт',
     doImport: 'импортировать',
@@ -127,7 +132,8 @@ const ru = ({
     importPlaceholder: 'скопируйте сюда ваши записи (например после использования экспорта ранее)',
     loadAllEntries: 'загрузить сюда все записи',
     importEntries: 'импортировать записи',
-    currentView: 'текущий вид'
+    currentView: 'текущий вид',
+    warningContext: 'ВНИМАНИЕ! Импортируемые записи попадут внутрь текущего контекста'
   },
   sidebar: {
     icons: 'иконки',
@@ -209,6 +215,7 @@ const en = ({
   standby: 'please stand by',
   externalLink: 'go to',
   weekend: 'weekend',
+  getReport: 'create report from current view',
   context: {
     clear: 'clear current task',
     task: 'current task',
@@ -244,6 +251,10 @@ const en = ({
     migration: 'migrate data',
     exportImport: 'Export and Import',
     settings: 'toggle UI elements',
+    displayOptions: 'display options',
+    positionOnScreen: 'align',
+    setFullWidth: 'full width',
+    setCenterView: 'center',
     export: 'export',
     import: 'import',
     doImport: 'import',
@@ -258,7 +269,8 @@ const en = ({
     importPlaceholder: 'paste here your entries (may be using from previous export)',
     loadAllEntries: 'load all entries here',
     importEntries: 'import entries',
-    currentView: 'current view'
+    currentView: 'current view',
+    warningContext: 'WARNING! All imported items will gain current context'
   },
   sidebar: {
     icons: 'icons',

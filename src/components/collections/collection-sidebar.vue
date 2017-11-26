@@ -1,6 +1,10 @@
 <template lang="pug">
   .collection-sidebar.invert
     toggle-sidebar(:title="tipToggleSidebarInSidebar")
+    //- div(v-if="settings.reports || true")
+    //-   h4 Отчёты
+    //-   p Сформировать отчёт из текущего вида
+    //-   p &nbsp;
     settings-profile(v-if="settings.profile")
     div(v-if="settings.authorization && !isAuthorized")
       h4 {{ label('settings.authorization') }}
@@ -11,11 +15,18 @@
         option(
           v-for="option in availableViewsAsOptions"
           :value="option.value") {{ label(option.label) }}
+    div(v-if="settings.displayOptions")
+      h4 {{ label('settings.displayOptions') }}
+      settings-display
     div(v-if="settings.l10n")
       h4 {{ label('settings.l10n') }}
       settings-i18n
     div(v-if="settings.migration")
       h4 {{ label('settings.migration') }}
+      p(v-if="isContext" style="position: relative; top: -7px;")
+        small
+          | {{ label('settings.warningContext') }} &ensp;
+          q {{ parseDetail(contextString) }}
       settings-migration
     div(v-if="settings.exportImport")
       h4 {{ label('settings.exportImport') }}
@@ -26,6 +37,7 @@
 </template>
 <script>
   import { mapGetters, mapMutations } from 'vuex'
+  import { taskDelimiter } from '@/store/ui'
 
   // Components
   import toggleSidebar from '@/components/other/toggle-sidebar'
@@ -35,15 +47,20 @@
   import settingsMigration from '@/components/settings/settings-migration'
   import settingsExportImport from '@/components/settings/settings-export-import'
   import settingsSettings from '@/components/settings/settings-settings'
+  import settingsDisplay from '@/components/settings/settings-display'
 
   // Tips
   import appTips from '@/mixins/app-tips'
   import i18nLabel from '@/mixins/i18n-label'
 
+  // Utils
+  import parseDetail from '@/utils/parseDetail'
+
   export default {
     data () {
       return {
-        viewModel: null
+        viewModel: null,
+        parseDetail
       }
     },
     created () {
@@ -70,11 +87,16 @@
       i18nLabel
     ],
     computed: {
+      contextString () {
+        return this.context.join(taskDelimiter)
+      },
       ...mapGetters([
         'isAuthorized',
         'availableViewsAsOptions',
         'settings',
-        'currentView'
+        'currentView',
+        'isContext',
+        'context'
       ])
     },
     methods: {
@@ -90,7 +112,8 @@
       settingsI18n,
       settingsMigration,
       settingsExportImport,
-      settingsSettings
+      settingsSettings,
+      settingsDisplay
     }
   }
 </script>

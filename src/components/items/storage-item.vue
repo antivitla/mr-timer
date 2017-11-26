@@ -40,13 +40,16 @@
       :class="{ 'selected': selected }"
       @click="toggleSelectEntry()")
       span.start(
-        v-long-click="500"
+        v-long-click="375"
         @long-click="startEdit('start')") {{ start }}
       span.details(
-        v-long-click="500"
-        @long-click="startEdit('details')") {{ details }}
+        v-long-click="375"
+        @long-click="startEdit('details')")
+        span.timer-clock
+          i.material-icons(v-if="isTrackingEntry") timer
+        span {{ details }}
       span.duration(
-        v-long-click="500"
+        v-long-click="375"
         @long-click="startEdit('duration')") {{ duration }}
       span.actions
         span.icon-button.select(v-if="Selected.entries.length")
@@ -374,6 +377,8 @@
       .details
         width calc(100% + 8px)
         margin 0 0 0.5em -8px
+        .material-icons
+          display none
         textarea
           width 100%
           font-size inherit
@@ -463,17 +468,17 @@
           position static
 
     &.active
-      color titamota-color-red
+      color titamota-color-text
       .start
       .duration
         font-weight 700
-        color titamota-color-red
+        color titamota-color-text
       .details
         font-weight 500
       .start input
       .details textarea
       .duration input
-        color titamota-color-red
+        color titamota-color-text
         &:focus
           color lighten(titamota-color-red, 10%)
       .start input
@@ -481,4 +486,43 @@
         font-weight bold
       .details textarea
         font-weight 500
+
+      .details
+        .timer-clock
+          display inline-block
+          height 0px
+          width 28px
+          vertical-align middle
+          position relative
+          i.material-icons
+            position absolute
+            left 0px
+            top -12px
+            font-size 24px
+            width 24px
+            height 24px
+            display inline-block
+            // float left
+            &:before
+              content ' '
+              position absolute
+              left 12px
+              top 11px
+              transform translateX(-50%) translateY(-50%)
+              border-radius 50%
+              width 10px
+              height 10px
+              background-color titamota-color-back-light
+              z-index 1
+            &:after
+              content ' '
+              width 2px
+              height 6px
+              background-color titamota-color-text
+              position absolute
+              transform-origin 50% 80%
+              left 11px
+              top 6px
+              z-index 2
+              animation tick 12s steps(12, end) infinite
 </style>

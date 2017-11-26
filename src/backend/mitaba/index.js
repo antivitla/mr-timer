@@ -66,6 +66,7 @@ const apiConfig = {
   base: `https://mitaba.ru/api/`,
   profile: 'profile/?avatar_size=120',
   entries: 'entries/',
+  timeline: 'timeline/',
   petrov: 'petrov/',
   social: 'login/social/token_user/'
 }
@@ -144,6 +145,8 @@ class Mitaba {
       .then(this._parseSuccessResponse)
   }
 
+  // Entries
+
   postEntries (entries) {
     return this.resource
       .post(this.config.api.entries, entries, this._protectedConfig())
@@ -160,6 +163,33 @@ class Mitaba {
     return this.resource
       .delete(this.config.api.entries, this._protectedConfig({ data: entries }))
   }
+
+  // Events
+
+  getTimelineEvents ({ params } = {}) {
+    return this.resource
+      .get(this.config.api.timeline, this._protectedConfig({ params }))
+      .then(this._parseSuccessResponse)
+  }
+
+  postTimelineEvents (events) {
+    return this.resource
+      .post(this.config.api.timeline, events, this._protectedConfig())
+      .then(this._parseSuccessResponse)
+  }
+
+  patchTimelineEvents (events) {
+    return this.resource
+      .patch(this.config.api.timeline, events, this._protectedConfig())
+      .then(this._parseSuccessResponse)
+  }
+
+  deleteTimelineEvents (events) {
+    return this.resource
+      .delete(this.config.api.timeline, this._protectedConfig({ data: events }))
+  }
+
+  // Private
 
   _protectedConfig (config) {
     if (!this.token) {

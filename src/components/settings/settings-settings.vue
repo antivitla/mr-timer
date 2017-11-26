@@ -39,7 +39,8 @@
           months: false,
           days: false,
           storage: false,
-          help: false
+          help: false,
+          displayOptions: false
         }
       }
     },
@@ -71,6 +72,11 @@
       'models.exportImport': function () {
         this.setAvailableSettings({
           exportImport: this.models.exportImport
+        })
+      },
+      'models.displayOptions': function () {
+        this.setAvailableSettings({
+          displayOptions: this.models.displayOptions
         })
       },
       'models.tasks': function () {

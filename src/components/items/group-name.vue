@@ -4,7 +4,7 @@
       v-if="isTaskWithLink()"
       v-html="displayHtmlName")
     .without-link(v-else) {{ displayName }}
-    .weekend(v-if="weekend && group.type === 'day'") {{ label('weekend', false) }}
+    .weekend(v-if="weekend && group.type === 'day'") {{ label('weekend') }}
 </template>
 <script>
   import moment from 'moment'
@@ -142,4 +142,19 @@
       color titamota-color-text-muted
       font-size 80%
       font-weight 400
+    .without-link
+    .weekend
+      display inline
+    .weekend
+      background-color titamota-color-red
+      color white
+      display inline-block
+      vertical-align middle
+      line-height 30px
+      font-size 16px
+      font-weight 500
+      padding 0px 10px
+      border-radius 5px
+      margin-left 20px
+      margin-top -2px
 </style>

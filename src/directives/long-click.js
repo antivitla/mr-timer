@@ -1,4 +1,9 @@
-let spinnerTimeout
+
+let spinnerTimeoutId
+
+document.addEventListener('mouseup', function () {
+  removeTimerSpinner()
+})
 
 export function setTimerSpinner (x, y) {
   removeTimerSpinner()
@@ -9,8 +14,8 @@ export function setTimerSpinner (x, y) {
   document.body.appendChild(div)
 }
 
-export function removeTimerSpinner () {
-  clearTimeout(spinnerTimeout)
+export function removeTimerSpinner (data) {
+  clearTimeout(spinnerTimeoutId)
   const timers = document.querySelectorAll('.long-click')
   timers.forEach(timer => {
     timer.remove()
@@ -18,25 +23,20 @@ export function removeTimerSpinner () {
 }
 
 function handleMouseDown (data, event) {
-  // Set spinner timeout
-  spinnerTimeout = setTimeout(() => {
-    setTimerSpinner(event.clientX, event.clientY)
-  }, data.spinnerDelay)
-  // Set reaction timeout
-  data.timeout = setTimeout(() => {
+  setTimerSpinner(event.clientX, event.clientY)
+  spinnerTimeoutId = setTimeout(() => {
     data.ready = true
   }, data.delay)
 }
 
 function handleMouseUp (data, event) {
-  removeTimerSpinner()
+  removeTimerSpinner(data)
   if (data.ready) {
     this.dispatchEvent(new CustomEvent('long-click'))
     event.preventDefault()
     event.stopImmediatePropagation()
     event.stopPropagation()
   }
-  clearTimeout(data.timeout)
 }
 
 function handleClick (data, event) {
@@ -50,24 +50,20 @@ export default {
   bind (element, { value }, vnode) {
     const data = {
       ready: false,
-      delay: 500,
-      timeout: null,
-      spinnerDelay: 125,
-      spinnerTimeout: null
+      delay: 375
     }
+    data.delay = value
     element.handleMouseDown = handleMouseDown.bind(element, data)
     element.handleMouseUp = handleMouseUp.bind(element, data)
     element.handleClick = handleClick.bind(element, data)
     element.addEventListener('mousedown', element.handleMouseDown)
     element.addEventListener('mouseup', element.handleMouseUp)
     element.addEventListener('click', element.handleClick)
-    document.addEventListener('mouseup', removeTimerSpinner)
   },
 
   unbind (element) {
     element.removeEventListener('mousedown', element.handleMouseDown)
     element.removeEventListener('mouseup', element.handleMouseUp)
     element.removeEventListener('click', element.handleClick)
-    document.removeEventListener('mouseup', removeTimerSpinner)
   }
 }

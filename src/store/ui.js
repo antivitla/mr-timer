@@ -1,3 +1,4 @@
+import { freezeElement, meltElement } from '@/utils/freeze-element'
 export const taskDelimiter = ' / '
 
 const state = {
@@ -9,20 +10,23 @@ const state = {
     storage: true
   },
   currentView: 'tasks',
+  currentModal: null,
   settings: {
     profile: true,
     authorization: true,
+    displayOptions: true,
     l10n: true,
     migration: false,
     exportImport: false
   },
   sidebar: false,
-  modal: null,
+  fullWidth: false,
   taskDelimiter
 }
 
 const getters = {
   currentView: state => state.currentView,
+  currentModal: state => state.currentModal,
   views: state => state.views,
   availableViewsAsOptions: state => {
     return Object
@@ -32,8 +36,8 @@ const getters = {
   },
   settings: state => state.settings,
   sidebarActive: state => state.sidebar,
-  modalActive: state => state.modal,
-  taskDelimiter: state => state.taskDelimiter
+  taskDelimiter: state => state.taskDelimiter,
+  fullWidth: state => state.fullWidth
 }
 
 const mutations = {
@@ -49,14 +53,11 @@ const mutations = {
   closeSidebar (state) {
     state.sidebar = false
   },
-  toggleModal (state) {
-    state.modal = !state.modal
-  },
   openModal (state, payload) {
-    state.modal = payload.modal
+    state.currentModal = payload.modal
   },
   closeModal (state) {
-    state.modal = null
+    state.currentModal = null
   },
   toggleAvailableViews (state, payload) {
     state.views[payload.view] = !state.views[payload.view]
@@ -69,11 +70,26 @@ const mutations = {
   },
   setAvailableSettings (state, payload) {
     Object.assign(state.settings, payload)
+  },
+  setFullWidth (state, payload) {
+    state.fullWidth = payload.fullWidth
+  }
+}
+
+const actions = {
+  openModal (context, payload) {
+    context.commit('openModal', payload)
+    freezeElement(document.body)
+  },
+  closeModal (context) {
+    context.commit('closeModal')
+    meltElement(document.body)
   }
 }
 
 export default {
   state,
   getters,
-  mutations
+  mutations,
+  actions
 }

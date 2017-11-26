@@ -30,7 +30,11 @@
         focusOnActive: false,
         focusedOnce: false,
         doNotUpdate: false,
-        cachedEnter: ''
+        cachedEnter: '',
+        handlers: {
+          onResetFocus: () => { this.focusedOnce = false },
+          onDropSelection: () => { this.dropSelection() }
+        }
       }
     },
     props: {
@@ -42,13 +46,18 @@
       },
       onSubmit: Function,
       focus: Boolean,
-      resetFocusOn: String
+      resetFocusOn: String,
+      dropSelectionOn: {
+        type: String,
+        default: 'drop-selection'
+      }
+    },
+    created () {
+      bus.$on(this.resetFocusOn, this.handlers.onResetFocus)
+      bus.$on(this.dropSelectionOn, this.handlers.onDropSelection)
     },
     mounted () {
       autosize(this.$el)
-      bus.$on(this.resetFocusOn, () => {
-        this.focusedOnce = false
-      })
       this.unsubscribe = this.$store.subscribe(mutation => {
         let t = mutation.type
         if (t === 'setContext' || t === 'clearContext') {
@@ -62,6 +71,8 @@
       })
     },
     beforeDestroy () {
+      bus.$off(this.resetFocusOn, this.handlers.onResetFocus)
+      bus.$off(this.dropSelectionOn, this.handlers.onDropSelection)
       this.unsubscribe()
     },
     watch: {
@@ -144,7 +155,7 @@
         }
       },
       dropSelection () {
-        this.$el.setSelectionRange(this.$el.value.length, this.$el.value.length)
+        this.$el.setSelectionRange(this.$el.selectionEnd, this.$el.selectionEnd)
       }
     },
     directives: {
