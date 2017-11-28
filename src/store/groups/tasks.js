@@ -11,37 +11,22 @@ export const Tasks = (new Group({
 }))
 
 export function TasksPlugin (store) {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'addEntry') {
-      // Если есть контекст (это ветка дерева)
-      // и если текущий узел это именно задача
-      // (а может быть и месяц, день), то
-      // работа для нас
-      let resolvePath
-      if (store.getters['contextDetails']) {
-        // Нам надо получить путь задачи, но так как
-        // контекстом может быть и время (месяц, день),
-        // нужно выцеплять именно узлы задач. При этом
-        // мы могли уже внутри контекста находиться,
-        // а там уже укороченные пути, поэтому нам нужно
-        // заново понять полный путь задачи контекста
-        let contextRootPath = store.getters['contextDetails']
-        // При вставке задачи в дерево, мы используем "путь" записи.
-        // У каждого дерева он свой, но для дерева "только задачи"
-        // важны только "детали" (массив имен записи).
-        // Чтоб построить дерево отбрасывая корни контекста,
-        // укорачиваем путь
-        resolvePath = function (entry) {
-          return entry.details.slice(contextRootPath.length)
-        }
-      }
-      Tasks.addEntry(mutation.payload.entry, 0, resolvePath)
-    }
-    if (mutation.type === 'removeEntry') {
-      Tasks.removeEntry(mutation.payload.entry)
-    }
-    if (mutation.type === 'clearEntries') {
+  const actions = {
+    addEntries (mutation) {
+      mutation.payload.entries.forEach(entry => {
+        Tasks.addEntry(entry)
+      })
+    },
+    removeEntries (mutation) {
+      mutation.payload.entries.forEach(entry => {
+        Tasks.removeEntry(entry)
+      })
+    },
+    clearEntries () {
       Tasks.children = []
     }
+  }
+  return store.subscribe(mutation => {
+    actions[mutation.type] && actions[mutation.type](mutation)
   })
 }

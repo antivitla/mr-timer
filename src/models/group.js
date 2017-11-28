@@ -2,6 +2,7 @@ import sortedIndexBy from 'lodash/sortedIndexBy'
 import uuid from 'uuid/v1'
 import Entry from './entry'
 import { taskDelimiter } from '@/store/ui'
+import bus from '@/event-bus'
 
 function safeGetAtIndex (id, array) {
   if (array.length > id) {
@@ -79,7 +80,7 @@ export default class Group {
   }
 
   // Путь и есть уникальный id
-  uid () {
+  get id () {
     return this.path().join(taskDelimiter)
   }
 
@@ -129,7 +130,7 @@ export default class Group {
   // в результате образовавшиеся
   removeEntry (entry) {
     const id = this.children.findIndex(item => {
-      return item.uid() === entry.uid()
+      return item.id === entry.id
     })
     if (id > -1) {
       this.children.splice(id, 1)
@@ -158,7 +159,9 @@ export default class Group {
         this.children, child, item => -lastUpdated(item))
       this.children.splice(id, 0, child)
     } else {
-      console.warn(`Попытка добавить дубликат в ${this.path()}`, child)
+      const content = `Add child to group: duplicate in ${this.path()}`
+      console.warn(content, child)
+      bus.$emit('toast', { content, type: 'error' })
     }
   }
 

@@ -47,11 +47,9 @@ const mutations = {
       }
     })
   },
-
   setRates (state, payload) {
     state.rates = payload.rates
   },
-
   clearPrice (state) {
     Object.keys(state.price).forEach(code => {
       state.price[code] = null
@@ -87,7 +85,6 @@ const actions = {
       context.commit('setPrice', { currency, price })
     }
   },
-
   clearPrice ({ commit }) {
     commit('clearPrice')
   }

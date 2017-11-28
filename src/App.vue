@@ -1,602 +1,364 @@
 <template lang="pug">
-  .app(
-    :class="{ 'timer-active': timerActive, 'sidebar-active': sidebarActive, 'modal-active': modalActive }"
-    :lang="locale"
+  app-layout(
     :currency="currency"
     :is-currency-symbol-before="isCurrencySymbolBefore"
-    v-body-scrolltop-on="scrollTopEvents")
-    .page(:class="{ 'modal-active': modalActive }")
-      main
-        nav.app-menu(:class="{ 'with-context': context }")
-          div.left
-            task-context(
-              v-if="context"
-              :context="context")
-          div.right
-            div.toggle-sidebar(@click.stop.prevent="toggleSidebar")
-              span.account {{ userKey }}
-              span.icon-button
-                i.material-icons menu
-
-        //- Timer control
-        timer
-
-        //- Mitaba API debug
-        mitaba
-
-        //- Petrov API debug
-        petrov
-
-
-        //- View navigation
-        nav.view-menu
-          price-per-hour(
-            v-if="currentView !== 'storage' && currentView !== 'help' && isEntries"
-          )
-          .filter-entries(
-            v-if="currentView === 'storage' && !isSelectedEntries && isEntries"
-          )
-            span.label {{ filterLabel }}
-            list-input(
-              v-model="filter"
-              :debounce="50"
-              :placeholder="filterPlaceholderLabel")
-          batch-actions(
-            v-if="currentView === 'storage' && isSelectedEntries")
-          div.view-switch
-            a(
-              v-for="view in getViewsAvailable()"
-              :class="{ active: currentView === view }"
-              @click="setCurrentView({ view })") {{ viewLabel(view) }}
-
-        section.help.view(v-if="currentView === 'help'")
-          help-article
-
-        //- Tasks view
-        section.tasks.view(v-if="currentView === 'tasks'")
-          p.no-tasks(v-if="!isEntries && !isThinking") {{ noTasksLabel }}
-          thinking-preloader(v-if="isThinking")
-          group-item(
-            v-for="task in filterGroupChildren(Tasks.children)"
-            :key="task.name"
-            :group="task")
-
-        //- Years view
-        section.years.view(v-if="currentView === 'years'")
-          p.no-tasks(v-if="!isEntries && !isThinking") {{ noTasksLabel }}
-          thinking-preloader(v-if="isThinking")
-          group-item(
-            v-for="year in filterGroupChildren(Years.children)"
-            :key="year.name"
-            :group="year")
-
-        //- Months view
-        section.months.view(v-if="currentView === 'months'")
-          p.no-tasks(v-if="!isEntries && !isThinking") {{ noTasksLabel }}
-          thinking-preloader(v-if="isThinking")
-          group-item(
-            v-for="month in filterGroupChildren(Months.children)"
-            :key="month.name"
-            :group="month")
-
-        //- Days view
-        section.days.view(v-if="currentView === 'days'")
-          p.no-tasks(v-if="!isEntries && !isThinking") {{ noTasksLabel }}
-          thinking-preloader(v-if="isThinking")
-          group-item(
-            v-for="day in filterGroupChildren(Days.children)"
-            :key="day.name"
-            :group="day")
-
-        //- Storage view
-        section.storage.view(v-if="currentView === 'storage'")
-          p.no-results(
-            v-if="!filteredEntries.length && !isThinking"
-          ) {{ noResultsLabel }}
-          thinking-preloader(v-if="isThinking")
-          storage-item(
-            v-else
-            v-for="entry in filteredEntries"
-            :key="entry.uid()"
-            :entry="entry")
-
-      //- Footer
-      site-footer(v-if="isEntries")
-
-    //- Настройки
-    sidebar
-
-    //- Попапы
-    modal(v-if="modalActive")
+    v-body-scroll-top-on="'scroll-top'")
+    //- Top nav
+    app-navbar.top(slot="page")
+      context-nav(slot="left")
+      toggle-sidebar(
+        slot="right"
+        :class="{ 'pending': isPending }"
+        :title="tipToggleSidebarTop")
+        span.user-name(v-if="isAuthorized") {{ userName }}
+        span.icon-button.menu
+          i.material-icons menu
+        icon-preloader(icon="refresh")
+    //- Timer
+    timer(slot="page")
+    //- Timeline
+    //- timeline(slot="page")
+    //- view-report(slot="page" :source="Months.children")
+    //- Debug Bdckend
+    //- mitaba(slot="page")
+    //- Navbar
+    app-navbar.menu(slot="page")
+      div(slot="left")
+        filter-entries(v-if="isFiltersVisible")
+        bulk-actions(v-if="isBulkActionsVisible")
+        price-per-hour(v-if="isPricePerHourVisible")
+      div(slot="right" style="display: flex;")
+        custom-switch(
+          :options="availableViewsAsOptions"
+          v-model="viewModel")
+        get-report
+    //- Views
+    component(:is="viewComponent[currentView]" slot="page")
+    //- Sidebar
+    collection-sidebar(slot="sidebar")
+    //- Footer
+    collection-footer(slot="sidebar")
+    //- Messages
+    toaster(slot="other")
+    //- Modals
+    modal-report(slot="modal" v-if="currentModal === 'report'")
 </template>
-
 <script>
-  import { mapMutations, mapGetters, mapActions } from 'vuex'
-  import moment from 'moment'
-  import timer from '@/components/timer'
-  import petrov from '@/components/petrov'
-  import mitaba from '@/components/mitaba'
-  import pricePerHour from '@/components/price-per-hour'
-  import groupItem from '@/components/group-item'
-  import storageItem from '@/components/storage-item'
-  import siteFooter from '@/components/site-footer'
-  import batchActions from '@/components/batch-actions'
-  import listInput from '@/components/list-input'
-  import taskContext from '@/components/task-context'
-  import helpArticle from '@/components/help-article'
-  import sidebar from '@/components/sidebar'
-  import modal from '@/components/modal'
-  import thinkingPreloader from '@/components/thinking-preloader'
-  import Group from '@/models/group'
-  import { Tasks } from '@/store/groups/tasks'
-  import { Years } from '@/store/groups/years'
-  import { Months } from '@/store/groups/months'
-  import { Days } from '@/store/groups/days'
-  import { Storage } from '@/store/storage'
-  import { Selektion } from '@/store/selection'
-  import { translate, locales, currencies } from '@/store/i18n'
-  import capitalize from 'lodash/capitalize'
-  import { timeEditable } from '@/utils/time'
-  import { filterGroupChildren } from '@/utils/group'
-  import debounce from '@/utils/debounce'
+  import { mapGetters, mapMutations, mapActions } from 'vuex'
+  import bodyScrollTopOn from '@/directives/body-scroll-top-on'
   import bus from '@/event-bus'
-  import bodyScrolltopOn from '@/directives/body-scrolltop-on'
+  import Mitaba from '@/backend/mitaba'
+  // Components
+  import appNavbar from '@/components/layout/app-navbar'
+  import appLayout from '@/components/layout/app-layout'
+  import toggleSidebar from '@/components/other/toggle-sidebar'
+  import collectionSidebar from '@/components/collections/collection-sidebar'
+  import collectionFooter from '@/components/collections/collection-footer'
+  import customSwitch from '@/components/other/custom-switch'
+  import filterEntries from '@/components/other/filter-entries'
+  import bulkActions from '@/components/other/bulk-actions'
+  import pricePerHour from '@/components/other/price-per-hour'
+  import contextNav from '@/components/other/context-nav'
+  import iconPreloader from '@/components/other/icon-preloader'
+  import toaster from '@/components/other/toaster'
+  import getReport from '@/components/other/get-report'
+  import timer from '@/components/timer'
+  import timeline from '@/components/timeline'
+  import mitaba from '@/components/mitaba'
+  import modalReport from '@/components/modals/modal-report'
+  // Store
+  import { appTitle } from '@/store/app-info'
+  import { Selected } from '@/store/selected'
+  // Views
+  import viewHelp from '@/components/views/view-help'
+  import viewTasks from '@/components/views/view-tasks'
+  import viewYears from '@/components/views/view-years'
+  import viewMonths from '@/components/views/view-months'
+  import viewDays from '@/components/views/view-days'
+  import viewStorage from '@/components/views/view-storage'
+  import viewReport from '@/components/views/view-report'
+  // Mixins
+  import appTips from '@/mixins/app-tips'
+  import i18nLabel from '@/mixins/i18n-label'
+  import storage from '@/mixins/storage'
+  // Items
+  import { Days } from '@/store/groups/days'
+  import { Months } from '@/store/groups/months'
+  import { Tasks } from '@/store/groups/tasks'
 
   export default {
     data () {
       return {
-        Tasks,
-        Years,
-        Months,
+        viewModel: '',
+        viewComponent: {
+          help: viewHelp,
+          tasks: viewTasks,
+          years: viewYears,
+          months: viewMonths,
+          days: viewDays,
+          storage: viewStorage
+        },
+        Selected,
+        isPending: false,
         Days,
-        Storage,
-        Selektion,
-        filterGroupChildren,
-        scrollTopEvents: [
-          'start-task',
-          'filter-entries',
-          'set-context'
-        ],
-        filter: [],
-        locales,
-        currencies,
-        debounceRefreshView: debounce(),
-        isThinking: false
+        Months,
+        Tasks
       }
     },
-
     created () {
-      this.refreshAppWithUserData(this.detectUserKey())
-      this.refreshLocale()
-      this.loadRates()
-      // bus.$on('open-modal', this.openModal.bind(this))
-      // bus.$on('close-modal', this.closeModal.bind(this))
-      // filter entries (switch to storage and set filter)
-      bus.$on('filter-entries', (payload) => {
-        this.setCurrentView({ view: 'storage' })
-        this.filter = payload.filter
-      })
-      // Clear filter on view switch
-      this.$store.subscribe(mutation => {
-        if (mutation.type === 'setCurrentView' && mutation.payload.view !== 'storage') {
-          this.filter = []
-        }
-      })
-      // Clear selection on view switch
-      this.$store.subscribe(mutation => {
-        if (mutation.type === 'setCurrentView' &&
-          mutation.type !== this.currentView) {
-          this.selectionClear()
-        }
-      })
-      // Thinking toggle
-      bus.$on('batch-thinking-start', () => {
-        this.isThinking = true
-      })
-      bus.$on('batch-thinking-done', () => {
-        this.isThinking = false
-      })
-      bus.$on('load-entries-start', () => {
-        this.isThinking = true
-      })
-      bus.$on('load-entries-done', () => {
-        this.isThinking = false
-      })
-    },
+      console.log(`Welcome to ${appTitle}`)
 
-    watch: {
-      '$route' (to, from) {
-        if (to.params.user !== from.params.user) {
-          const user = to.params.user ? to.params.user : 'local'
-          this.refreshAppWithUserData(user)
+      // Finish auth, if redirected
+      if (this.$route.name === 'providerAuthRedirect') {
+        this.authorizeWithMitaba({
+          provider: this.$route.params.provider,
+          code: this.$route.query.code
+        })
+        this.$router.push({ name: 'home' })
+      }
+
+      // Init auth
+      if (this.isAuthorized) {
+        Mitaba.token = this.authToken
+        this.setBackend({ backend: 'mitaba' })
+      } else {
+        this.clearUser()
+        this.setBackend({ backend: 'local' })
+      }
+
+      // Init current view
+      this.viewModel = this.currentView
+      this.getEntriesWithCurrentParams()
+
+      // Global mutation dependencies
+      const viewsWithEntries = ['days', 'months', 'years', 'tasks', 'storage']
+      const mutations = {
+        setCurrentView: mutation => {
+          this.viewModel = mutation.payload.view
+          if (mutation.payload.view !== 'storage') {
+            this.clearSelected()
+            this.clearFilter()
+            this.clearPagination()
+          }
+          if (viewsWithEntries.indexOf(mutation.payload.view) > -1) {
+            this.getEntriesWithCurrentParams()
+            bus.$emit('scroll-top')
+          }
+        },
+        setAuthorized: mutation => {
+          this.clearContext()
+          this.clearSelected()
+          this.clearFilter()
+          this.clearPagination()
+          this.setBackend({ backend: 'mitaba' })
+          this.getProfile()
+          this.getEntriesWithCurrentParams()
+          this.closeSidebar()
+          bus.$emit('scroll-top')
+        },
+        setNotAuthorized: mutation => {
+          this.clearUser()
+          this.clearContext()
+          this.clearSelected()
+          this.clearFilter()
+          this.clearPagination()
+          this.setBackend({ backend: 'local' })
+          this.getEntriesWithCurrentParams()
+          this.closeSidebar()
+          bus.$emit('scroll-top')
+        },
+        setFilter: mutation => {
+          this.getEntries({
+            params: {
+              limit: this.pagination.storage.limit,
+              offset: 0,
+              filter: mutation.payload.filter.map(f => f.trim()).filter(f => f)
+            }
+          })
+          bus.$emit('scroll-top')
+        },
+        updatePagination: mutation => {
+          this.getEntriesWithCurrentParams()
+          bus.$emit('scroll-top')
         }
-        this.refreshLocale()
-        this.refreshCurrency()
+      }
+      this.unsubscribe = this.$store.subscribe(mutation => {
+        mutations[mutation.type] && mutations[mutation.type](mutation)
+      })
+
+      // Global actions dependencies
+      const actions = {
+        activateLocale: action => {
+          document.documentElement.setAttribute('lang', action.payload.locale)
+          // const name = this.$route.name
+          // const query = Object.assign({}, this.$route.query, {
+          //   locale: action.payload.locale
+          // })
+          // this.$router.push({ name, query })
+        },
+        activateCurrency: action => {
+          // const name = this.$route.name
+          // const query = Object.assign({}, this.$route.query, {
+          //   currency: action.payload.currency
+          // })
+          // this.$router.push({ name, query })
+        }
+      }
+      this.unsubscribeAction = this.$store.subscribeAction(action => {
+        actions[action.type] && actions[action.type](action)
+      })
+
+      // Init view preloaders
+      bus.$on('get-entries-pending', () => {
+        this.isPending = true
+      })
+      bus.$on('get-entries-complete', () => {
+        this.isPending = false
+      })
+
+      // Init i18n
+      this.activateLocale({ locale: this.$route.query.locale || this.locale })
+      this.activateCurrency({ currency: this.$route.query.currency || this.currency })
+    },
+    beforeDestroy () {
+      this.unsubscribe()
+      this.unsubscribeAction()
+    },
+    watch: {
+      'viewModel': function (view) {
+        if (view && view !== this.currentView) {
+          this.setCurrentView({ view })
+        }
       }
     },
-
     computed: {
-      filteredEntries () {
-        let filtered
-        if (!this.filter || !this.filter.length) {
-          filtered = Storage.entries
-        } else {
-          filtered = Storage.entries.filter(entry => {
-            const str = timeEditable
-              .stringify(entry.start) +
-              ' ' +
-              entry.details.join('/')
-            return this.filter.every(f => {
-              return str.toLowerCase().match(f.toLowerCase())
-            })
-          })
-        }
-        return filtered
+      isFiltersVisible () {
+        return this.viewModel === 'storage' && !Selected.entries.length
       },
-      filterLabel () {
-        return capitalize(translate[this.locale].filter)
+      isBulkActionsVisible () {
+        return this.viewModel === 'storage' && Selected.entries.length
       },
-      filterPlaceholderLabel () {
-        return translate[this.locale].filterPlaceholder
-      },
-      noResultsLabel () {
-        return capitalize(translate[this.locale].noResultsLabel)
-      },
-      noTasksLabel () {
-        return capitalize(translate[this.locale].noTasksLabel)
-      },
-      isEntries () {
-        return Storage.entries.length
-      },
-      isSelectedEntries () {
-        return Selektion.entries.length
-      },
-      isDays () {
-        return Days.children.length > 1
-      },
-      isMonths () {
-        return Months.children.length > 1
-      },
-      isYears () {
-        return Years.children.length > 1
-      },
-      isTasks () {
-        return Storage.entries.length > 1
-      },
-      isNestedTasks () {
-        return Tasks.children.find(child => {
-          return child.children.find(g => g instanceof Group)
-        })
+      isPricePerHourVisible () {
+        return this.viewModel !== 'storage'
       },
       ...mapGetters([
-        'userKey',
-        'userMode',
-        'userGuestKey',
-        'locale',
         'currency',
-        'isCurrencySymbolBefore',
+        'locale',
         'currentView',
-        'timerActive',
-        'sidebarActive',
-        'modalActive',
-        'viewsAvailable',
-        'context'
+        'isAuthorized',
+        'isCurrencySymbolBefore',
+        'availableViewsAsOptions',
+        'userName',
+        'authToken',
+        'pagination',
+        'currentModal'
       ])
     },
-
     methods: {
-      detectUserKey () {
-        if (this.$route.params && this.$route.params.user) {
-          return this.$route.params.user
-        } else {
-          return 'local'
-        }
-      },
-      detectLocale () {
-        const l = Object.keys(locales).find(code => {
-          return this.$route.query.locale === code
-        })
-        return l || this.locale || 'ru'
-      },
-      detectCurrency () {
-        const c = Object.keys(currencies).find(code => {
-          return this.$route.query.currency === code
-        })
-        return c || this.currency || 'rub'
-      },
-      refreshAppWithUserData (userKey) {
-        this.clearEntries()
-        this.setUserKey({ key: userKey })
-        this.loadEntries()
-      },
-      refreshLocale () {
-        const locale = this.detectLocale()
-        this.setLocale({ locale })
-        moment.locale(locale)
-      },
-      refreshCurrency () {
-        const currency = this.detectCurrency()
-        this.setCurrency({ currency })
-      },
-      viewLabel (view) {
-        return capitalize(translate[this.locale].view[view])
-      },
-      getViewsAvailable () {
-        let views = Object
-          .keys(this.viewsAvailable)
-          .filter(key => this.viewsAvailable[key])
-        // check current view
-        this.debounceRefreshView(() => {
-          if (views.indexOf(this.currentView) < 0) {
-            this.setCurrentView({
-              view: views.slice(-1)[0]
-            })
-          }
-        }, 500)
-        return views
-      },
       ...mapMutations([
-        'clearEntries',
-        'clearUser',
-        'setUserKey',
-        'setLocale',
-        'setCurrency',
         'setCurrentView',
-        'selectionClear',
-        'toggleSidebar'
+        'setBackend',
+        'clearSelected',
+        'clearFilter',
+        'clearUser',
+        'clearContext',
+        'clearPagination',
+        'closeSidebar'
       ]),
       ...mapActions([
-        'loadEntries',
-        'loadRates'
+        'getProfile',
+        'getEntries',
+        'activateLocale',
+        'activateCurrency',
+        'authorizeWithMitaba'
       ])
     },
-
-    directives: {
-      bodyScrolltopOn
-    },
-
+    mixins: [
+      appTips,
+      i18nLabel,
+      storage
+    ],
     components: {
-      petrov,
-      mitaba,
-      timer,
+      appLayout,
+      appNavbar,
+      toggleSidebar,
+      collectionSidebar,
+      collectionFooter,
+      customSwitch,
+      filterEntries,
+      bulkActions,
       pricePerHour,
-      groupItem,
-      storageItem,
-      siteFooter,
-      batchActions,
-      listInput,
-      taskContext,
-      helpArticle,
-      sidebar,
-      modal,
-      thinkingPreloader
+      contextNav,
+      iconPreloader,
+      viewHelp,
+      viewTasks,
+      viewYears,
+      viewMonths,
+      viewDays,
+      viewStorage,
+      viewReport,
+      timer,
+      timeline,
+      mitaba,
+      toaster,
+      getReport,
+      modalReport
+    },
+    directives: {
+      bodyScrollTopOn
     }
   }
 </script>
-
 <style lang="stylus">
-  @import 'assets/stylesheets/variables'
-  @import 'assets/stylesheets/common'
-  @import 'directives/long-click'
+  @import '~@/assets/stylesheets/core'
+  @import '~@/assets/stylesheets/error'
+  @import '~@/directives/long-click'
 
-  body
-    margin 0
-    padding 0
-    background-color titamota-color-back-light
-    position relative
-
-  .page-wrapper
-    position relative
-
-  .page
-    background-color titamota-color-back-light
-    padding-top 20px
-    padding-bottom 20px
-    padding-left 20px
-    padding-right 20px
-    box-sizing border-box
-    opacity 1
-    transition all 0.3s ease-out
-    @media (min-width 480px)
-      padding-left 30px
-      padding-right 30px
-    @media (min-width 768px)
-      padding-top 60px
-      padding-left 60px
-      padding-right 60px
-    @media (min-width 1366px)
-      // padding-left 140px
-      // padding-right 140px
-
-  .view-menu
-    display flex
-    flex-direction column
-    align-items center
-    border-bottom solid 1px titamota-color-line
-
-    @media (min-width 768px)
-      flex-direction row
-      max-width 1000px
-      margin-left auto
-      margin-right auto
-      .price-per-hour
-        display block
-        margin-bottom 0px
-      .view-switch
-        margin-left auto
-
-    .price-per-hour
-      margin-bottom 20px
-      display none
-
-    .view-switch
-      line-height 24px
-      display inline-flex
-      text-align right
-      a
-        padding 0 3px
-        margin-left 5px
-        cursor pointer
-        font-size 13px;
-        display inline-block
-        position relative
-        &:after
-          position absolute
-          left 0
-          bottom -2px
-          height 3px
-          display block
-          width 100%
-          background-color #dcdcdc
-        &:hover:after
-          content ' '
-        &.active:after
-          content ' '
-          background-color titamota-color-text
-
-  .filter-entries
-    display flex
-    font-size 14px
-    line-height 24px
-    width 100%
-    margin 20px auto 40px auto
-    flex-direction column
-    text-align center
-    .label
-      margin-right 0.5em
-    textarea
-      font-size inherit
-      line-height 20px
-      padding 2px 0px
-      display block
-      border: none
-      margin 0
-      border-radius 5px
-      background-color white
-      resize none
-      font-weight 500
-      width 100%
-      text-align center
-      &::placeholder
-        font-weight 400
-        color lighten(titamota-color-text-muted, 20%)
-  .no-results
-  .no-tasks
-    color titamota-color-text-muted
-    text-align center
-  .view-menu
-    .filter-entries
-      display none
-
-  @media (min-width 768px)
-    .filter-entries
-      display none
-    .view-menu
-      .filter-entries
-        display flex
-        flex-direction row
-        margin 0
-        textarea
-          width calc(50%)
-          text-align left
-          background-color transparent
-
-  section.tasks
-  section.months
-  section.storage
-  section.days
-  section.years
-    margin 20px auto 20px auto
-
-  section.view > * {
-    max-width 1000px
-    margin-left auto
-    margin-right auto
-  }
-
-  section.storage
-    .details
-      font-size 14px
-    .read
-      .duration
-        margin-left auto
-        margin-right 2em
-        text-align right
-
-  main
-    // max-width 1000px
-    margin-left auto
-    margin-right auto
-
-  .timer
-    margin-bottom 60px
-    margin-left -5px
-    width calc(100% + 10px)
-    @media (min-width 768px)
-      max-width 1020px
-      margin-left auto
-      margin-right auto
-      margin-bottom 90px
-
-  .app-menu
-    box-sizing border-box
-    margin-bottom 80px
-    display flex
-    align-items center
-    justify-content space-between
+  // Top Navbar Toggle Sidebar
+  .app-navbar.top
     line-height 40px
-    @media (min-width 768px)
-      max-width 1000px
-      margin-left auto
-      margin-right auto
-    &.with-context
-      @media (min-width 768px)
-        margin-bottom 80px
+    min-height 60px
+    margin-bottom 60px
     .left
-      font-size 36px
-      .task-context
-        display none
-        font-size inherit
-        margin-left -1.375em
-        .name
-          font-weight 500
-          white-space normal
-          padding-right 1em
-        .clear
-        .back
-          font-size 87.5%
-          line-height 30px
-        .clear
-          color titamota-color-text-muted
-        .back
-        .name
-          opacity 0.5
-          color titamota-color-text-muted
-        @media (min-width 768px)
-          display flex
-    .right
-      margin-left auto
+      max-width 80%
+      @media (min-width titamota-screen-w-7)
+        max-width 70%
     .toggle-sidebar
       display flex
       cursor pointer
+      margin-top 13px
+      @media (max-width titamota-screen-w-7)
+        margin-top 11px
+      white-space nowrap
       .material-icons
         font-size 18px
-      .account
-        font-size 14px
-        margin-right 10px
-
-  .app
-    .page
-      transform translateX(0px)
-      filter blur(0px) grayscale(0%)
-      opacity 1
-    &.sidebar-active .page
-      transform translateX(-50vw)
-      pointer-events none
+        line-height 40px
+      .icon-preloader
+        display none
+        width 18px
+        color titamota-color-text
+      .user-name
+        padding-right 15px
+        position relative
+        top 1px
+      &.pending
+        .user-name
+          color titamota-color-text-muted
+        .icon-button.menu
+          display none
+        .icon-preloader
+          display block
+    @media (max-width titamota-screen-w-7)
+      margin-bottom 15px
       .toggle-sidebar
-        visibility hidden
-    &.modal-active .page
-      filter blur(10px) grayscale(100%)
-      opacity 0.25
-      pointer-events none
+        margin-top 12px
+        .user-name
+          display none
+
+  // Menu Navbar
+  .app-navbar.menu
+    line-height 24px
+    border-bottom solid titamota-color-border 1px
+    @media (max-width titamota-screen-w-7)
+      display none
 </style>

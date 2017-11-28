@@ -19,23 +19,22 @@ export const Years = (new Group({
 }))
 
 export function YearsPlugin (store) {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'addEntry') {
-      let resolvePath
-      if (store.getters['contextDetails']) {
-        let contextRootPath = store.getters['contextDetails']
-        resolvePath = function (entry) {
-          return [format(entry.start)]
-            .concat(entry.details.slice(contextRootPath.length))
-        }
-      }
-      Years.addEntry(mutation.payload.entry, 0, resolvePath)
-    }
-    if (mutation.type === 'removeEntry') {
-      Years.removeEntry(mutation.payload.entry)
-    }
-    if (mutation.type === 'clearEntries') {
+  const actions = {
+    addEntries (mutation) {
+      mutation.payload.entries.forEach(entry => {
+        Years.addEntry(entry)
+      })
+    },
+    removeEntries (mutation) {
+      mutation.payload.entries.forEach(entry => {
+        Years.removeEntry(entry)
+      })
+    },
+    clearEntries () {
       Years.children = []
     }
+  }
+  return store.subscribe(mutation => {
+    actions[mutation.type] && actions[mutation.type](mutation)
   })
 }

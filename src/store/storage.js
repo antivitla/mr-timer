@@ -1,340 +1,178 @@
 import Entry from '@/models/entry'
-import Petrov from '@/petrov'
-import sortedIndexBy from 'lodash/sortedIndexBy'
-import appName from './app-name'
-import bus from '@/event-bus'
+import Mitaba from '@/backend/mitaba'
+import Local from '@/backend/local'
+import lastPromise from '@/utils/last-promise'
+import { insertSorted } from '@/utils/sorted'
 import { taskDelimiter } from '@/store/ui'
+import bus from '@/event-bus'
+// import capitalize from '@/utils/capitalize'
 
-export const Storage = ({
-  entries: [],
-  all: []
-})
+function removeContext (entries, context) {
+  if (!context.length) {
+    return entries.map(entry => new Entry(entry))
+  }
+  return entries.map(entry => {
+    const reg = new RegExp(`^${context.join(taskDelimiter)}`)
+    const details = entry.details.join(taskDelimiter)
+      .replace(reg, '')
+      .split(taskDelimiter)
+      .map(d => d.trim())
+      .filter(d => d)
+    return new Entry(Object.assign({}, entry, { details }))
+  })
+}
+
+function addContext (entries, context) {
+  if (!context.length) {
+    return entries.map(entry => new Entry(entry))
+  }
+  return entries.map(entry => {
+    const details = context.concat(entry.details).slice(0)
+    return new Entry(Object.assign({}, entry, { details }))
+  })
+}
+
+export const driver = {
+  local: Local,
+  mitaba: Mitaba
+}
+
+export const Storage = {
+  entries: []
+}
 
 const state = {
-  localStorageKey: appName + '-entries'
+  backend: 'local'
 }
 
 const getters = {
-  //
+  backend: state => state.backend
 }
 
-export const mutations = {
-  addEntry (state, payload) {
-    // current (context) entries
-    const id = sortedIndexBy(
-      Storage.entries,
-      payload.entry,
-      item => -item.start)
-    Storage.entries.splice(id, 0, payload.entry)
-
-    // all entries
-    const found = Storage.all.find(entry => {
-      return entry.uid() === payload.entry.uid()
+const mutations = {
+  setBackend (state, payload) {
+    state.backend = payload.backend
+  },
+  addEntries (state, payload) {
+    payload.entries.forEach(entry => {
+      insertSorted({
+        child: entry,
+        children: Storage.entries,
+        compare: (a, b) => a.start - b.start,
+        dir: 1
+      })
     })
-    if (found) {
-      found.start = payload.entry.start
-      found.stop = payload.entry.stop
-      found.details = payload.entry.details.slice(0)
-      found._uid = payload.entry._uid
-    } else {
-      const allid = sortedIndexBy(
-        Storage.all,
-        payload.entry,
-        item => -item.start)
-      Storage.all.splice(allid, 0, payload.entry)
-    }
   },
-
-  removeEntry (state, payload) {
-    // current (context) entries
-    let id = Storage.entries.indexOf(payload.entry)
-    if (id < 0) {
-      id = Storage.entries.findIndex(entry => {
-        return entry.uid() === payload.entry.uid()
-      })
-    }
-    if (id > -1) {
-      Storage.entries.splice(id, 1)
-    }
-
-    // all entries
-    let allid = Storage.all.indexOf(payload.entry)
-    if (allid < 0) {
-      allid = Storage.all.findIndex(entry => {
-        return entry.uid() === payload.entry.uid()
-      })
-    }
-    if (allid > -1) {
-      Storage.all.splice(allid, 1)
-    }
+  removeEntries (state, payload) {
+    payload.entries.forEach(entry => {
+      let id = Storage.entries.indexOf(entry)
+      // Попробуем найти по id
+      if (id < 0) {
+        id = Storage.entries.findIndex(entry2 => {
+          return entry.id === entry2.id
+        })
+      }
+      if (id > -1) {
+        Storage.entries.splice(id, 1)
+      }
+    })
   },
-
-  clearEntries (state, payload) {
+  clearEntries () {
     Storage.entries = []
   }
 }
 
-export const actions = ({
+const actions = {
   getEntries (context, payload) {
-    return new Promise((resolve, reject) => {
-      // Грузиться с удалённого аккаунта?
-      if (context.getters['userKey'] !== 'local') {
-        Petrov.get(context.getters['userKey'])
-          .catch(() => {
-            // Если на найден аккаунт, создаём его
-            return Petrov.post(context.getters['userKey'])
-          })
-          .then(res => {
-            // Теперь точно есть аккаунт
-            context.commit('setUserMode', {
-              mode: res.mode
-            })
-            context.commit('setUserGuestKey', {
-              guestKey: res.guest_code
-            })
-            // ...хоть с данными хоть без
-            let entries = []
-            if (res.data && res.data.trim()) {
-              try {
-                entries = JSON.parse(res.data).entries
-                  .map(e => new Entry(e))
-              } catch (error) {
-                throw new Error('Error parsing remote data ' + error)
-              }
-            }
-            resolve({ entries })
-          })
-          .catch(error => {
-            reject(error)
-          })
-      } else {
-        // Или грузиться локально?
-        let entries = []
-        try {
-          const key = context.state.localStorageKey + '-local'
-          const saved = localStorage[key]
-          if (saved) {
-            entries = JSON.parse(localStorage[key]).entries
-              .map(e => new Entry(e))
-          }
-        } catch (error) {
-          reject(error)
+    const params = Object.assign({}, payload && payload.params)
+    // Выбираем сервер
+    const backend = driver[context.getters.backend]
+    // Если у нас есть контекст,
+    // подпихиваем соотв. параметры
+    if (context.getters.isContext) {
+      params.context = context.getters.context.slice(0)
+    }
+    // Отсылаем событие для прелоадера
+    bus.$emit('get-entries-pending')
+    // Делаем, собственно, запрос
+    return lastPromise({
+      type: 'getEntries',
+      promise: backend.getEntries({ params })
+    })
+    .then(response => {
+      const entries = removeContext(response.entries, context.getters.context)
+      // Запоминаем контекст
+      if (response.context) {
+        context.commit('setContext', { context: response.context })
+      }
+      // Запоминаем паджинацию
+      if (response.pagination) {
+        const pagination = response.pagination
+        if (!pagination.group) {
+          pagination.group = 'storage'
         }
-        resolve({ entries })
+        context.commit('setPagination', pagination)
       }
-    })
-  },
-
-  loadEntries (context, payload) {
-    bus.$emit('load-entries-start')
-    return context.dispatch('getEntries')
-      .then(res => {
-        context.dispatch('batchAddEntries', {
-          entries: res.entries,
-          context: payload ? payload.context : null
-        })
-        .then(() => {
-          bus.$emit('load-entries-done')
-        })
-      })
-  },
-
-  saveEntries (context) {
-    return new Promise((resolve, reject) => {
-      // local save
-      const lskey = context.state.localStorageKey
-      const ukey = context.getters['userKey']
-      const key = `${lskey}-${ukey}`
-      const raw = JSON.stringify({
-        entries: Storage.all
-      })
-      localStorage.setItem(key, raw)
-      // remote save
-      if (context.getters['userKey'] !== 'local') {
-        Petrov.put(context.getters['userKey'], {
-          entries: Storage.all
-        })
-        .then(() => {
-          resolve()
-        })
-        .catch(error => {
-          reject(error)
-        })
-      } else {
-        resolve()
+      // Показываем записи
+      context.commit('clearEntries')
+      context.commit('addEntries', { entries })
+      bus.$emit('get-entries-complete')
+      return entries
+    }).catch(error => {
+      if (error.response && error.response.status === 404) {
+        context.commit('clearEntries')
+        context.commit('clearPagination')
+      } else if (error.message !== 'ignore') {
+        bus.$emit('toast', { content: error.message || error.response.statusText })
       }
+      bus.$emit('get-entries-complete')
     })
   },
-
-  createEntry (context, payload) {
-    const entry = new Entry(Object.assign(payload.entry))
-    context.commit('addEntry', { entry })
-    return context.dispatch('saveEntries')
-  },
-
-  updateEntry (context, payload) {
-    return new Promise((resolve, reject) => {
-      const updatedEntry = new Entry(Object.assign(
-          {},
-          payload.entry,
-          payload.update))
-      context.commit('removeEntry', {
-        entry: payload.entry
+  postEntries (context, payload) {
+    const postEntries = addContext(payload.entries, context.getters.context)
+    return driver[context.getters.backend]
+      .postEntries(postEntries.map(entry => entry.serialize()))
+      .then(entries => {
+        const postedEntries = removeContext(entries, context.getters.context)
+        context.commit('addEntries', { entries: postedEntries })
+        return postedEntries
       })
-      context.commit('addEntry', {
-        entry: updatedEntry
-      })
-      bus.$emit('update-entry', {
-        entry: payload.entry,
-        updatedEntry
-      })
-      context
-        .dispatch('saveEntries')
-        .then(() => {
-          resolve(updatedEntry)
-        })
-        .catch(error => {
-          reject(error)
-        })
-    })
   },
-
-  removeEntry (context, payload) {
-    context.commit('removeEntry', payload)
-    return context.dispatch('saveEntries')
-  },
-
-  batchUpdateEntries (context, payload) {
-    bus.$emit('batch-thinking-start')
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        payload.entries.forEach(entry => {
-          // Переименование
-          let details = entry.details.slice(0)
-          if (payload.update.details) {
-            let source = payload.update.details
-              .source.join(taskDelimiter)
-            let target = payload.update.details
-              .target.join(taskDelimiter)
-            details = entry.details
-              .join(taskDelimiter)
-              .replace(new RegExp('^' + source), target)
-              .split(taskDelimiter)
-              .filter(d => d)
-              .map(d => d.trim())
-              .filter(d => d)
-          }
-          // Изменение длительностей
-          let stop = entry.stop
-          if (payload.update.stop) {
-            if (payload.update.stop.add) {
-              stop = entry.stop + payload.update.stop.add
-            }
-          }
-          context.commit('removeEntry', { entry })
-          context.commit('addEntry', {
-            entry: new Entry({
-              start: entry.start,
-              stop,
-              details,
-              _uid: entry._uid
-            })
-          })
-        })
-        context
-          .dispatch('saveEntries')
-          .then(() => {
-            bus.$emit('batch-update-entries', payload)
-            bus.$emit('batch-thinking-done')
-            resolve()
-          })
-          .catch(error => {
-            reject(error)
-          })
-      }, 10)
-    })
-  },
-
-  batchRemoveEntries (context, payload) {
-    bus.$emit('batch-thinking-start')
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        payload.entries.forEach(item => {
-          const entry = item instanceof Entry ? item : new Entry(item)
-          context.commit('removeEntry', { entry })
-        })
-        context
-          .dispatch('saveEntries')
-          .then(() => {
-            bus.$emit('batch-thinking-done')
-            resolve()
-          })
-          .catch(error => {
-            reject(error)
-          })
-      }, 10)
-    })
-  },
-
-  batchAddEntries (context, payload) {
-    bus.$emit('batch-thinking-start')
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        payload.entries.forEach(item => {
-          const entry = item instanceof Entry ? item : new Entry(item)
-          context.commit('addEntry', { entry })
-        })
-        context
-          .dispatch('saveEntries')
-          .then(() => {
-            bus.$emit('batch-thinking-done')
-            resolve()
-          })
-          .catch(error => {
-            reject(error)
-          })
-      }, 10)
-    })
-  },
-
-  importEntries (context, payload) {
-    return new Promise((resolve, reject) => {
-      let entries = []
-      // JSON
-      if (payload.format === 'json') {
-        let raw
-        try {
-          raw = JSON.parse(payload.raw)
-        } catch (error) {
-          console.warn(error)
-          reject('Bad format in: ' + payload.raw)
-        }
-        if (Array.isArray(raw)) {
-          entries = raw
-        } else if (raw.entries && raw.entries.length) {
-          entries = raw.entries
-        } else {
-          console.log('Какой-то непонятный json')
-          reject('Wrong json object in: ' + payload.raw)
-        }
+  patchEntries (context, payload) {
+    if (!payload.add.every(entry => {
+      if (entry.id === 'new') {
+        bus.$emit('toast', { content: 'Patch entries: Cannot patch with id \'new\'' })
+        return false
       }
-
-      // Create imported entries
-      if (entries.length) {
-        context
-          .dispatch('batchAddEntries', { entries })
-          .then(() => {
-            resolve()
-          })
-          .catch(error => {
-            reject(error)
-          })
-      } else {
-        reject('Empty import in: ' + payload.raw)
+      return true
+    })) {
+      return false
+    }
+    // Изменяем записи сразу же, не дожидаясь ответа сервера
+    context.commit('removeEntries', { entries: payload.remove })
+    context.commit('addEntries', { entries: payload.add })
+    // Если бы контекст, добавляем его
+    const entries = addContext(payload.add, context.getters.context)
+    // Отправляем на сервер
+    return driver[context.getters.backend]
+      .patchEntries(entries.map(entry => entry.serialize()))
+      .then(entries => removeContext(entries, context.getters.context))
+  },
+  deleteEntries (context, payload) {
+    if (!payload.entries.every(entry => {
+      if (entry.id === 'new') {
+        bus.$emit('toast', { content: 'Delete entries: Cannot delete with id \'new\'' })
+        return false
       }
-    })
+      return true
+    })) {
+      return false
+    }
+    context.commit('removeEntries', payload)
+    return driver[context.getters.backend]
+      .deleteEntries(payload.entries.map(entry => ({ id: entry.id })))
   }
-})
+}
 
 export default {
   state,

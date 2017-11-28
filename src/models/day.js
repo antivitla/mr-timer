@@ -3,7 +3,7 @@ import Group from './group'
 // Name should be in YYYY-MM-DD format
 function parseStartMoment (name) {
   const yy = name.substr(0, 4) * 1
-  const mm = name.substr(5, 2) * 1
+  const mm = (name.substr(5, 2) * 1) - 1
   const dd = name.substr(-2) * 1
   const d = new Date()
   d.setYear(yy)

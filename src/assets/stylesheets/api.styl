@@ -1,13 +1,15 @@
 @import 'variables'
 
 .api-debug
-  padding 20px
-  margin 20px
+  // padding 20px
+  // margin 100px auto
 
   .method
-    margin-right 20px
+    // margin-right 20px
     &:after
       content "/"
+      font-weight 500
+      margin-left 10px
 
   .url
     display flex
@@ -17,6 +19,7 @@
     padding 0
     background-color transparent
     font-weight 500
+    box-shadow 0px 1px 0px 0px
     outline none
     &::placeholder
       color silver
@@ -29,32 +32,35 @@
     button + button
       margin-left 10px
 
-  button
-    border none
-    border-radius 3px
-    border-bottom solid 3px gainsboro
-    background-color #ececec
-    height 40px
-    padding 0 15px
-    min-width 70px
-    cursor pointer
-    outline none
-    vertical-align top
-    &[disabled]
-      opacity 0.5
-      cursor default
-      pointer-events none
+  // button
+  //   border none
+  //   border-radius 3px
+  //   border-bottom solid 3px gainsboro
+  //   background-color #ececec
+  //   height 40px
+  //   padding 0 15px
+  //   min-width 70px
+  //   cursor pointer
+  //   outline none
+  //   vertical-align top
+  //   &[disabled]
+  //     opacity 0.5
+  //     cursor default
+  //     pointer-events none
 
-    &:hover
-    &.active
-      background-color titamota-color-red
-      color white
-      border-color titamota-color-red
-    &:active
-      background-color titamota-color-red
-      color white
-      border-bottom none
-      border-top solid 3px titamota-color-red
+  //   &:hover
+  //   &.active
+  //     background-color titamota-color-red
+  //     color white
+  //     border-color darken(titamota-color-red, 20%)
+  //   &:active
+  //     background-color titamota-color-red
+  //     color white
+  //     border-bottom none
+  //     border-top solid 3px darken(titamota-color-red, 20%)
+
+  //   &.login
+  //     min-width 100px
 
   .response
     overflow-x hidden

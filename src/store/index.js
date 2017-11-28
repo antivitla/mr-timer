@@ -3,18 +3,22 @@ import Vuex from 'vuex'
 import createPersistedState from 'vuex-persistedstate'
 import storage from './storage'
 import context from './context'
+import pagination from './pagination'
 import user from './user'
 import i18n from './i18n'
 import timer from './timer'
 import ui from './ui'
 import edit from './edit'
 import money from './money'
-import selection from './selection'
+import selected from './selected'
+import auth from './auth'
+import filter from './filter'
+import report from './report'
 import { DaysPlugin } from './groups/days'
 import { MonthsPlugin } from './groups/months'
 import { YearsPlugin } from './groups/years'
 import { TasksPlugin } from './groups/tasks'
-import appName from './app-name'
+import { appName } from './app-info'
 
 Vue.use(Vuex)
 
@@ -23,13 +27,17 @@ export default new Vuex.Store({
   modules: {
     storage,
     context,
+    pagination,
     user,
     i18n,
     timer,
     ui,
     edit,
     money,
-    selection
+    selected,
+    auth,
+    filter,
+    report
   },
   plugins: [
     DaysPlugin,
@@ -42,7 +50,11 @@ export default new Vuex.Store({
         'user',
         'i18n',
         'ui',
-        'money'
+        'money',
+        'auth',
+        'pagination',
+        'context',
+        'report'
       ]
     })
   ]

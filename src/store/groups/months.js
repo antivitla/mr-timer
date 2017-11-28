@@ -5,7 +5,7 @@ import Month from '@/models/month'
 // Format to YYYY-MM
 function format (ms) {
   const d = new Date(ms)
-  return d.getFullYear() + '-' + ('0' + d.getMonth()).slice(-2)
+  return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2)
 }
 
 // Singleton to keep months tree
@@ -19,23 +19,22 @@ export const Months = (new Group({
 }))
 
 export function MonthsPlugin (store) {
-  store.subscribe((mutation, state) => {
-    if (mutation.type === 'addEntry') {
-      let resolvePath
-      if (store.getters['contextDetails']) {
-        let contextRootPath = store.getters['contextDetails']
-        resolvePath = function (entry) {
-          return [format(entry.start)]
-            .concat(entry.details.slice(contextRootPath.length))
-        }
-      }
-      Months.addEntry(mutation.payload.entry, 0, resolvePath)
-    }
-    if (mutation.type === 'removeEntry') {
-      Months.removeEntry(mutation.payload.entry)
-    }
-    if (mutation.type === 'clearEntries') {
+  const actions = {
+    addEntries (mutation) {
+      mutation.payload.entries.forEach(entry => {
+        Months.addEntry(entry)
+      })
+    },
+    removeEntries (mutation) {
+      mutation.payload.entries.forEach(entry => {
+        Months.removeEntry(entry)
+      })
+    },
+    clearEntries () {
       Months.children = []
     }
+  }
+  return store.subscribe(mutation => {
+    actions[mutation.type] && actions[mutation.type](mutation)
   })
 }

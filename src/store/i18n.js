@@ -1,3 +1,5 @@
+import moment from 'moment'
+
 export const locales = ({
   ru: {
     code: 'ru',
@@ -34,12 +36,14 @@ export const currencies = ({
 
 const ru = ({
   view: {
-    storage: 'история',
+    storage: 'хранилище',
     tasks: 'задачи',
     months: 'месяцы',
     days: 'дни',
     years: 'годы',
-    help: 'помощь'
+    help: 'помощь',
+    report: 'отчёт',
+    timer: 'таймер'
   },
   time: {
     at: 'в'
@@ -73,17 +77,84 @@ const ru = ({
   filterPlaceholder: 'разделяй через « / »',
   noResultsLabel: 'записей не найдено',
   noTasksLabel: 'задач не найдено',
-  filterByThisLabel: 'найти все записи в истории',
-  clearContext: 'очистить контекст',
-  upContext: 'выше контекст',
+  filterByThis: 'найти все записи в истории',
   standby: 'подождите немного',
   externalLink: 'перейти к',
+  weekend: 'выходной',
+  getReport: 'сформировать отчёт используя текущий вид',
+  report: {
+    total: 'всего',
+    reportOnFor: '«%0»',
+    headerDaysTasks: 'сводка по дням и задачам',
+    headerTasks: 'сводка по задачам',
+    headerDays: 'сводка по дням',
+    headerDetailedDaysTasks: 'подробная сводка по дням и задачам',
+    headerDetailedTasks: 'подробная сводка по задачам'
+  },
+  context: {
+    clear: 'убрать  контекст',
+    task: 'текущая задача',
+    setAsCurrentTask: 'сделать текущей задачей'
+  },
+  pagination: {
+    later: 'позже',
+    earlier: 'раньше',
+    all: 'все',
+    show: 'показывать',
+    or: 'или',
+    outOf: 'из',
+    rangeStorage: 'записи с %0 по %1',
+    rangeDays: '%0—%1',
+    rangeMonths: '%0—%1',
+    rangeYears: '%0—%1',
+    rangeTasks: '%0 — %1',
+    numberStorage: '{storage, plural, =0{# записей} one{# запись} few{# записи} other{# записей}}',
+    numberDays: '{days, plural, =0{# дней} one{# день} few{# дня} other{# дней}}',
+    numberMonths: '{months, plural, =0{# месяцев} one{# месяц} few{# месяца} other{# месяцев}}',
+    numberYears: '{years, plural, =0{# лет} one{# год} few{# года} other{# лет}}',
+    numberTasks: '{tasks, plural, =0{# задач} one{# задачу} few{# задачи} other{# задач}}',
+    latest: '{gender, select, male{последний} female{последняя} other{последние}}',
+    earliest: '{gender, select, male{первый} female{первая} other{первые}}'
+  },
+  settings: {
+    profile: 'профиль',
+    authorization: 'войти через',
+    l10n: 'язык и валюта',
+    exportImport: 'экспорт и импорт',
+    migration: 'перенести данные',
+    settings: 'включить элементы интерфейса',
+    displayOptions: 'внешний вид',
+    positionOnScreen: 'расположение',
+    setFullWidth: 'на всю ширину',
+    setCenterView: 'в центре',
+    export: 'экспорт',
+    import: 'импорт',
+    doImport: 'импортировать',
+    timer30local: 'таймер 3.0, локальный аккаунт',
+    timer31local: 'таймер 3.1, локальный аккаунт',
+    migrateAccountPlaceholder: 'имя онлайн-аккаунта для импорта',
+    emptyAccountTitle: 'не введено имя аккаунта',
+    entriesNotFound: 'не найдено записей',
+    server: 'сервер',
+    json: 'JSON',
+    exportPlaceholder: 'здесь будут все ваши записи после загрузки по кнопке ниже',
+    importPlaceholder: 'скопируйте сюда ваши записи (например после использования экспорта ранее)',
+    loadAllEntries: 'загрузить сюда все записи',
+    importEntries: 'импортировать записи',
+    currentView: 'текущий вид',
+    warningContext: 'ВНИМАНИЕ! Импортируемые записи попадут внутрь текущего контекста'
+  },
   sidebar: {
     icons: 'иконки',
     from: 'от',
     girls: 'девчушки',
-    l10n: 'локализация',
-    turnOn: 'включить'
+    turnOn: 'включить',
+    numberOfEntries: '{entries, plural, =0{0 записей} one{1 запись} few{# записи} other{# записей}}',
+    toggleViews: 'страницы',
+    toggleUiSettings: 'настройки'
+  },
+  profile: {
+    localAccount: 'локальный аккаунт'
   },
   currency: {
     rub: 'рубль',
@@ -97,7 +168,13 @@ const ru = ({
   exportTo: 'экспорт записей в',
   startTask: 'начать задачу',
   startEdit: 'редактировать',
-  setContext: 'сделать контекстом'
+  logout: 'выйти',
+  login: 'войти',
+  tip: {
+    'toggle-sidebar-top': 'открыть меню',
+    'toggle-sidebar-in-sidebar': 'закрыть меню',
+    'user-profile-logout': 'Выйти из своего аккаунта'
+  }
 })
 
 const en = ({
@@ -107,7 +184,9 @@ const en = ({
     months: 'months',
     days: 'days',
     years: 'years',
-    help: 'help'
+    help: 'help',
+    report: 'report',
+    timer: 'timer'
   },
   time: {
     at: 'at'
@@ -141,17 +220,87 @@ const en = ({
   filterPlaceholder: 'separate by " / "',
   noResultsLabel: 'no time records found',
   noTasksLabel: 'tasks not found',
-  filterByThisLabel: 'find all entries in history',
-  clearContext: 'clear context',
-  upContext: 'up context',
+  filterByThis: 'find all entries in history',
   standby: 'please stand by',
   externalLink: 'go to',
+  weekend: 'weekend',
+  getReport: 'create report from current view',
+  report: {
+    total: 'total',
+    reportOnFor: '"%0"',
+    headerDaysTasks: 'days and tasks summary',
+    headerTasks: 'tasks summary',
+    headerDays: 'days summary',
+    headerDetailedDaysTasks: 'detailed days and tasks summary',
+    headerDetailedTasks: 'detailed tasks summary'
+  },
+  context: {
+    clear: 'clear current task',
+    task: 'current task',
+    setAsCurrentTask: 'set as current task'
+  },
+  pagination: {
+    later: 'later',
+    earlier: 'earlier',
+    all: 'all',
+    show: 'show',
+    or: 'or',
+    outOf: 'out of',
+    from: 'from',
+    to: 'to',
+    entries: 'entries',
+    rangeStorage: 'entries from %0 to %1',
+    rangeDays: '%0—%1',
+    rangeMonths: '%0—%1',
+    rangeYears: '%0—%1',
+    rangeTasks: '%0 — %1',
+    numberStorage: '{storage, plural, =0{# entries} one{# entry} other{# entries}}',
+    numberDays: '{days, plural, =0{# days} one{# day} other{# days}}',
+    numberMonths: '{months, plural, =0{# months} one{# month} other{# months}}',
+    numberYears: '{years, plural, =0{# years} one{# year} other{# years}}',
+    numberTasks: '{tasks, plural, =0{# tasks} one{# task} other{# tasks}}',
+    latest: '{gender, select, male{latest} female{latest} other{latest}}',
+    earliest: '{gender, select, male{earliest} female{earliest} other{earliest}}'
+  },
+  settings: {
+    profile: 'profile',
+    authorization: 'login with',
+    l10n: 'Language and Currency',
+    migration: 'migrate data',
+    exportImport: 'Export and Import',
+    settings: 'toggle UI elements',
+    displayOptions: 'display options',
+    positionOnScreen: 'align',
+    setFullWidth: 'full width',
+    setCenterView: 'center',
+    export: 'export',
+    import: 'import',
+    doImport: 'import',
+    timer30local: 'timer 3.0, local account',
+    timer31local: 'timer 3.1, local account',
+    migrateAccountPlaceholder: 'title of account for import',
+    emptyAccountTitle: 'title of account not entered',
+    entriesNotFound: 'entries not found',
+    server: 'server',
+    json: 'JSON',
+    exportPlaceholder: 'here will be all your entries after loading by button below',
+    importPlaceholder: 'paste here your entries (may be using from previous export)',
+    loadAllEntries: 'load all entries here',
+    importEntries: 'import entries',
+    currentView: 'current view',
+    warningContext: 'WARNING! All imported items will gain current context'
+  },
   sidebar: {
     icons: 'icons',
     from: 'from',
     girls: 'girls',
-    l10n: 'localization',
-    turnOn: 'turn on'
+    turnOn: 'turn on',
+    numberOfEntries: '{entries, plural, =0{0 entries} one{1 entry} other{# entries}}',
+    toggleViews: 'toggle views',
+    toggleUiSettings: 'toggle UI settings'
+  },
+  profile: {
+    localAccount: 'local account'
   },
   currency: {
     rub: 'ruble',
@@ -165,7 +314,13 @@ const en = ({
   exportTo: 'export entries to',
   startTask: 'start task',
   startEdit: 'edit',
-  setContext: 'set as context'
+  logout: 'logout',
+  login: 'login',
+  tip: {
+    'toggle-sidebar-top': 'open menu',
+    'toggle-sidebar-in-sidebar': 'close menu',
+    'user-profile-logout': 'logout your account'
+  }
 })
 
 export const translate = ({
@@ -195,8 +350,19 @@ const mutations = {
   }
 }
 
+const actions = {
+  activateLocale (context, payload) {
+    context.commit('setLocale', payload)
+    moment.locale(payload.locale)
+  },
+  activateCurrency (context, payload) {
+    context.commit('setCurrency', payload)
+  }
+}
+
 export default {
   state,
   getters,
-  mutations
+  mutations,
+  actions
 }

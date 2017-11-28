@@ -34,6 +34,29 @@ export function extractEntries (item) {
   return entries
 }
 
+export function hasTasks (item) {
+  return item.children && item.children.filter(child => !(child instanceof Entry)).length
+}
+
+export function extractTasks (children, { depth = Number.POSITIVE_INFINITY, currentDepth = 0 } = {}) {
+  if (depth === 0) {
+    return children.filter(child => child.type).slice(0)
+  } else {
+    let list = []
+    children.forEach(child => {
+      if (hasTasks(child) && currentDepth < depth) {
+        list = list.concat(extractTasks(child.children, {
+          depth,
+          currentDepth: currentDepth + 1
+        }))
+      } else {
+        list.push(child)
+      }
+    })
+    return list
+  }
+}
+
 export function parentOfDifferentType (item) {
   let parent = item
   const type = item.type

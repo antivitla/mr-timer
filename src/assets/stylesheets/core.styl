@@ -1,0 +1,458 @@
+@import 'variables'
+
+body
+html
+  margin 0px
+  padding 0px
+  min-width 320px
+  background-color titamota-color-back-light
+  position relative
+
+body
+input
+textarea
+button
+select
+option
+  font-family Rubik, sans-serif
+  font-size 14px
+  line-height 20px
+  font-weight 300
+  color titamota-color-text
+  outline none
+
+h1, h2, h3, h4, h5, h6
+  font-weight 400
+  margin 20px auto
+
+strong
+  font-weight 500
+
+p
+  margin-top 20px
+  margin-bottom 20px
+  font-weight 300
+
+h4
+  font-size 16px
+  line-height 24px
+
+h2
+  font-size 32px
+  line-height 40px
+  margin-bottom 15px
+
+[lang="ru"] q:before
+  content '«'
+[lang="ru"] q:after
+  content '»'
+
+.material-icons
+  font-size 18px
+  line-height inherit
+  &.md-14
+    font-size 14px
+  &.md-16
+    font-size 16px
+  &.md-18
+    font-size 18px
+  &.md-20
+    font-size 20px
+  &.md-24
+    font-size 24px
+
+* + .material-icons
+.material-icons + *
+  margin-left 10px
+
+[valign="middle"]
+  vertical-align middle
+
+a
+  cursor pointer
+
+a[href]
+  color steelblue
+
+
+// Color marks
+
+[color]
+  position relative
+[color]:before
+  // content ' '
+  position absolute
+  left -1em
+  top 50%
+  transform translateY(-50%)
+  width 0.5em
+  height 0.5em
+  border-radius 30%
+  background-color gainsboro
+[color="0"]
+  color darken(titamota-color-jan, 40%)
+  &:before
+    background-color lighten(titamota-color-jan, 20%)
+[color="1"]
+  color darken(titamota-color-feb, 40%)
+  &:before
+    background-color lighten(titamota-color-feb, 20%)
+[color="2"]
+  color darken(titamota-color-mar, 40%)
+  &:before
+    background-color lighten(titamota-color-mar, 20%)
+[color="3"]
+  color darken(titamota-color-apr, 40%)
+  &:before
+    background-color lighten(titamota-color-apr, 20%)
+[color="4"]
+  color darken(titamota-color-may, 40%)
+  &:before
+    background-color lighten(titamota-color-may, 20%)
+[color="5"]
+  color darken(titamota-color-jun, 40%)
+  &:before
+    background-color lighten(titamota-color-jun, 20%)
+[color="6"]
+  color darken(titamota-color-jul, 40%)
+  &:before
+    background-color lighten(titamota-color-jul, 20%)
+[color="7"]
+  color darken(titamota-color-aug, 40%)
+  &:before
+    background-color lighten(titamota-color-aug, 20%)
+[color="8"]
+  color darken(titamota-color-sep, 40%)
+  &:before
+    background-color lighten(titamota-color-sep, 20%)
+[color="9"]
+  color darken(titamota-color-oct, 40%)
+  &:before
+    background-color lighten(titamota-color-oct, 20%)
+[color="10"]
+  color darken(titamota-color-nov, 40%)
+  &:before
+    background-color lighten(titamota-color-nov, 20%)
+[color="11"]
+  color darken(titamota-color-dec, 40%)
+  &:before
+    background-color lighten(titamota-color-dec, 20%)
+
+
+// Buttons
+
+button-normal()
+  background-color titamota-color-back-gray
+  border-bottom solid titamota-color-border 3px
+  color titamota-color-text
+  &:active
+    border-top solid darken(titamota-color-border, 3%) 3px
+    border-bottom-width 0px
+    background-color darken(titamota-color-back-gray, 3%)
+
+button-invert()
+  background-color lighten(titamota-color-text, 2.5%)
+  border-color darken(titamota-color-text, 20%)
+  color titamota-color-text-invert
+  &:active
+    background-color darken(titamota-color-text, 0%)
+    border-color darken(titamota-color-text, 25%)
+
+button-primary()
+  color titamota-color-text-invert-highlight
+  background-color lighten(titamota-color-text, 5%)
+  border-color darken(titamota-color-text, 15%)
+  &:active
+    border-color darken(titamota-color-text, 38%)
+    background-color titamota-color-text
+
+button-primary-invert()
+  color titamota-color-text
+  border-bottom solid darken(titamota-color-border, 25%) 3px
+  background-color darken(titamota-color-back-gray, 10%)
+  &:active
+    border-bottom-width 0px
+    border-top solid darken(titamota-color-border, 38%) 3px
+    background-color darken(titamota-color-back-gray, 20%)
+
+button-hero()
+  background-color titamota-color-red
+  color titamota-color-text-invert-highlight
+  border-color titamota-color-red-dark
+
+button-hero-invert()
+  background-color darken(titamota-color-red, 25%)
+  color alpha(titamota-color-text-invert-highlight, 75%)
+  border-color darken(titamota-color-red-dark, 38%)
+
+button
+.button
+  border 0px
+  border-radius 5px
+  font-weight 300
+  padding 10px 40px
+  cursor pointer
+  outline none
+  button-normal()
+  &[disabled]
+    pointer-events none
+    opacity 0.5
+
+  &.block
+    width 100%
+    display block
+
+  &.hero
+    button-hero()
+
+  &.primary
+    button-primary()
+
+  &.invert
+    button-invert()
+
+.invert
+  button
+  .button
+    button-invert()
+
+.invert
+  button.primary
+  .button.primary
+    button-primary-invert()
+
+.invert
+  button.hero
+  .button.hero
+    button-hero-invert()
+
+.icon-button
+  display inline-flex
+  align-items center
+  i.material-icons
+    font-size 24px
+    line-height inherit
+    display block
+  &.lg
+    font-size 24px
+    width 24px
+    height 24px
+    line-height 24px
+    text-align center
+
+// Dropdowns
+
+select
+  height 43px
+  border 0px
+  margin 0px
+  width 100%
+  border-radius 5px
+  box-sizing border-box
+  padding-left 10px
+  padding-right 10px
+  cursor pointer
+  color titamota-color-text
+  background-color titamota-color-back-gray
+  border-bottom solid titamota-color-border 3px
+  &:focus
+    border-bottom 0px
+    border-bottom-left-radius 0px
+    border-bottom-right-radius 0px
+    background-color lighten(titamota-color-back-dark, 15%)
+    color lighten(titamota-color-text-invert, 50%)
+    border-top solid darken(titamota-color-text, 20%) 3px
+  option
+    color lighten(titamota-color-text-invert, 50%)
+
+.invert
+  select
+    button-invert()
+    &:focus
+      background-color titamota-color-back-light
+      color titamota-color-text
+    option
+      color titamota-color-text
+
+
+// Inputs
+
+input[type="text"]
+  font-weight 400
+  background-color white
+  padding 0px 15px
+  border-radius 5px
+  border solid titamota-color-border 1px
+  line-height 40px
+  &::placeholder
+    color lighten(titamota-color-text-muted, 20%)
+  &.block
+    display block
+    width 100%
+
+.invert
+  input[type="text"]
+    background-color darken(titamota-color-text, 20%)
+    border-color lighten(titamota-color-text, 5%)
+    color titamota-color-text-invert
+    &:focus
+      color titamota-color-text
+      background-color titamota-color-back-light
+      border-color titamota-color-back-light
+    &::placeholder
+      color lighten(titamota-color-text, 25%)
+    &:focus::placeholder
+      color darken(titamota-color-text-muted, 10%)
+
+
+input[type="radio"]
+input[type="checkbox"]
+  width 18px
+  height 18px
+  margin 0px
+  vertical-align middle
+
+input[type="text"].inline
+  border 0px
+  height 20px
+  font-size 14px
+  border-radius 0px
+  position relative
+  flex-grow 1
+  box-shadow 0px 1px 0px 0px alpha(titamota-color-text, 25%)
+  padding 0px 3px
+* + input[type="text"].inline
+  margin-left 5px
+
+.invert
+  .custom-checkbox
+    color titamota-color-text-invert
+
+.custom-checkbox + label
+label[for]
+  cursor pointer
+
+
+// Input group
+
+.input-group
+  display flex
+  .button
+  button
+  input[type="text"]
+    width 100%
+    box-sizing border-box
+    &:first-child
+      border-top-right-radius 0px
+      border-bottom-right-radius 0px
+    &:last-child
+      border-top-left-radius 0px
+      border-bottom-left-radius 0px
+  input[type="text"]
+    flex-grow 1
+    &:first-child
+      border-right-width 0px
+    &:last-child
+      border-left-width 0px
+
+  &.vertical
+    flex-direction column
+    .button
+    button
+    input[type="text"]
+      text-align center
+      &:first-child
+        border-top-right-radius 5px
+        border-bottom-right-radius 0px
+        border-bottom-left-radius 0px
+        border-right-width 1px
+        border-bottom-width 0px
+      &:last-child
+        border-top-left-radius 0px
+        border-bottom-left-radius 5px
+        border-top-right-radius 0px
+
+
+
+
+
+// Other
+
+.switch-menu-wrapper
+  display flex
+  flex-direction column
+  align-items center
+  border-bottom solid 1px titamota-color-line
+  .switch-menu
+    line-height 24px
+    display inline-flex
+    margin-bottom 10px
+    text-align right
+    a + a
+      margin-left 5px
+    a
+      padding 0 3px
+      cursor pointer
+      font-size 13px;
+      display inline-block
+      position relative
+      &:after
+        position absolute
+        left 0
+        bottom -2px
+        height 3px
+        display block
+        width 100%
+        background-color #dcdcdc
+      &:hover:after
+        content ' '
+      &.active:after
+        content ' '
+        background-color titamota-color-text
+  @media (min-width 768px)
+    flex-direction row
+    .switch-menu
+      margin-bottom 0
+
+
+// Animation
+
+@keyframes spin
+  0%
+    transform rotate(0deg)
+  100%
+    transform rotate(360deg)
+
+
+@keyframes tick
+  0%
+    transform rotate(0deg)
+  100%
+    transform rotate(360deg)
+
+
+// Preloader
+
+.with-preloader
+  .fa-refresh
+    display none
+
+.with-preloader[preloader="true"]
+  .fa-refresh
+    animation spin 1s infinite linear
+    transform rotate(0deg)
+    display inline-block
+
+// Text
+.text-muted
+  color titamota-color-text-muted
+
+
+// Freezed
+body.freezed
+  position fixed
+  left 0px
+  right 0px
+  overflow-y scroll
+  width 100%
+  height 100vh
