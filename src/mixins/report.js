@@ -7,6 +7,12 @@ import { duration, durationHuman } from '@/utils/duration'
 import i18nLabel from '@/mixins/i18n-label'
 import Report from '@/report'
 
+function getTotalTime () {
+  return Storage.entries.reduce((total, entry) => {
+    return total + (new Date(entry.stop).getTime() - new Date(entry.start).getTime())
+  }, 0)
+}
+
 const urlRegexp = /((https?):\/\/.*?(\s|$))/
 
 function isNest (item) {
@@ -28,6 +34,131 @@ export default {
     //
     // Text Report
     //
+
+    generateTextReport (structure) {
+      const subheader = {
+        'daysTasks': this.label('report.headerDaysTasks'),
+        'tasks': this.label('report.headerTasks'),
+        'days': this.label('report.headerDays')
+      }
+      const detailedSubheader = {
+        'daysTasks': this.label('report.headerDetailedDaysTasks'),
+        'tasks': this.label('report.headerDetailedTasks')
+      }
+      let lines = []
+      structure.forEach((section, index) => {
+        if (section.type === 'text') {
+          // Text
+          if (index) {
+            lines = lines.concat([''])
+          }
+          lines = lines.concat([section.text])
+        } else if (section.type === 'header') {
+          // Header
+          if (index) {
+            lines = lines.concat(['', ''])
+          }
+          if (!section.header) {
+            lines = lines.concat(this.generateTextHeader())
+          } else {
+            const header = `${section.header}`
+            lines = lines.concat([
+              header,
+              '='.repeat(header.length)
+            ])
+          }
+        } else if (section.type === 'total') {
+          // Total
+          lines = lines.concat([
+            this.generateTextTotal()
+          ])
+        } else if (section.type === 'summary') {
+          // Summary
+          if (index) {
+            lines = lines.concat(['', ''])
+          }
+          if (parseInt(section.summary.nest, 10)) {
+            const header = `${detailedSubheader[section.summary.type]}`
+            lines = lines.concat([
+              header.concat(' '.repeat(61 - header.length)).concat(duration(getTotalTime()).format('HH:mm')),
+              '-'.repeat(66)
+            ])
+          } else {
+            const header = `${subheader[section.summary.type]}`
+            lines = lines.concat([
+              header.concat(' '.repeat(61 - header.length)).concat(duration(getTotalTime()).format('HH:mm')),
+              '-'.repeat(66)
+            ])
+          }
+          const data = Report.summary[section.summary.type]({
+            depth: parseInt(section.summary.depth, 10),
+            nest: parseInt(section.summary.nest, 10)
+          })
+          lines = lines.concat(this.generateTextSummary(data))
+        }
+      })
+      const filename = `${this.userName}.${this.context.join(' - ')}.${this.generateTextPeriod()}.report.txt`
+      return {
+        filename: filename.replace('.undefined', ''),
+        content: lines.join('\n')
+      }
+    },
+
+    generateTextTotal () {
+      const l = this.label('duration', false)
+      const total = durationHuman(getTotalTime(), l.hr, l.min, l.sec)
+      return `${this.label('report.total')}: ${total}`
+    },
+
+    generateTextHeader () {
+      const context = this.context.join(taskDelimiter)
+      const period = this.generateTextPeriod()
+      let title = this.label('report.reportOnFor').replace('%0', context)
+      if (!context) {
+        title = this.label('report.commonReport')
+      }
+      if (context) {
+        const header = `${title}${period ? ', ' + period : ''}`
+        return [
+          header,
+          '='.repeat(header.length)
+        ]
+      } else {
+        const header = `${title}${period ? ', ' + period : ''}`
+        return [
+          header,
+          '='.repeat(header.length)
+        ]
+      }
+    },
+
+    generateTextPeriod () {
+      if (Storage.entries.length) {
+        const from = moment(Storage.entries.slice(-1)[0].start)
+        const to = moment(Storage.entries[0].start)
+        if (this.locale === 'ru') {
+          if (from.year() === to.year()) {
+            if (from.month() === to.month()) {
+              return `${from.format('D')}-${to.format('D MMMM YYYY')}`
+            } else {
+              return `${from.format('D MMMM')} - ${to.format('D MMMM YYYY')}`
+            }
+          } else {
+            return `${from.format('LL')} - ${to.format('LL')}`
+          }
+        } else {
+          if (from.year() === to.year()) {
+            if (from.month() === to.month()) {
+              return `${from.format('MMMM')} ${from.format('D')}-${to.format('D YYYY')}`
+            } else {
+              return `${from.format('MMMM D')} - ${to.format('MMMM D YYYY')}`
+            }
+          } else {
+            return `${from.format('LL')} - ${to.format('LL')}`
+          }
+        }
+      }
+    },
 
     generateTextSummary (data) {
       let lines = []
@@ -54,7 +185,7 @@ export default {
     generateTextDayLine (item, isShort = false) {
       const name = moment(item.value).format('DD MMMM YYYY')
       const d = duration(item.duration).format('HH:mm')
-      const maxSpace = isShort ? 20 : 60
+      const maxSpace = isShort ? 30 : 60
       const space = (name.length < maxSpace ? ' .'.repeat(parseInt((maxSpace - name.length) * 0.5, 10)) : ' .')
       const addon = (name.length % 2 === 1 ? ' ' : '')
       return [`${name}${addon}${space} ${d}`]
@@ -91,20 +222,39 @@ export default {
     //
 
     generateMarkdownReport (structure) {
-      let lines = [].concat(this.generateMarkdownHeader())
       const subheader = {
         'daysTasks': this.label('report.headerDaysTasks'),
         'tasks': this.label('report.headerTasks'),
         'days': this.label('report.headerDays')
       }
       const detailedSubheader = {
-        'dayTasks': this.label('report.headerDetailedDaysTasks'),
+        'daysTasks': this.label('report.headerDetailedDaysTasks'),
         'tasks': this.label('report.headerDetailedTasks')
       }
-      structure.forEach(section => {
+      let lines = []
+      structure.forEach((section, index) => {
+        if (section.type === 'text') {
+          lines = lines.concat(section.text)
+        } else if (section.type === 'total') {
+          lines = lines.concat(this.generateMarkdownTotal())
+        } else if (section.type === 'header') {
+          // Header
+          if (index) {
+            lines = lines.concat([''])
+          }
+          if (!section.header) {
+            lines = lines.concat(this.generateMarkdownHeader())
+          } else {
+            const header = `${section.header}`
+            lines = lines.concat([
+              `# ${header}`,
+              ''
+            ])
+          }
+        }
         if (section.type === 'summary') {
           // Subheader
-          if (section.summary.nested) {
+          if (parseInt(section.summary.nest, 10)) {
             lines = lines.concat(['', `## ${detailedSubheader[section.summary.type]}`, ''])
           } else {
             lines = lines.concat(['', `## ${subheader[section.summary.type]}`, ''])
@@ -112,8 +262,8 @@ export default {
 
           // Table
           const data = Report.summary[section.summary.type]({
-            depth: section.summary.depth,
-            nest: section.summary.nest
+            depth: parseInt(section.summary.depth, 10),
+            nest: parseInt(section.summary.nest, 10)
           })
           lines = lines.concat(this.generateMarkdownSummary(data))
         }
@@ -125,32 +275,34 @@ export default {
       }
     },
 
+    generateMarkdownTotal () {
+      const l = this.label('duration', false)
+      const total = durationHuman(getTotalTime(), l.hr, l.min, l.sec)
+      return `${this.label('report.total')}: ${total}`
+    },
+
     generateMarkdownHeader () {
       const context = this.context.join(taskDelimiter)
       const period = this.generateMarkdownPeriod()
-      // const user = this.userName
-      const l = this.label('duration', false)
-      const total = durationHuman(Storage.entries.reduce((total, entry) => {
-        return total + (new Date(entry.stop).getTime() - new Date(entry.start).getTime())
-      }, 0), l.hr, l.min, l.sec)
-      const title = this.label('report.reportOnFor').replace('%0', context)
+      let title = this.label('report.reportOnFor').replace('%0', context)
+      if (!context) {
+        title = this.label('report.commonReport')
+      }
       if (context) {
         return [
           `# ${title}${period ? ', ' + period : ''}`,
-          '',
-          `${this.label('report.total')}: ${total}`
+          ''
         ]
       } else {
         return [
-          `# ${title}${period ? ', ' + period : ''}: ${total}`,
-          '',
-          `${this.label('report.total')}: ${total}`
+          `# ${title}${period ? ', ' + period : ''}`,
+          ''
         ]
       }
     },
 
     generateMarkdownPeriod () {
-      if (this.currentView !== 'tasks') {
+      if (Storage.entries.length) {
         const from = moment(Storage.entries.slice(-1)[0].start)
         const to = moment(Storage.entries[0].start)
         if (this.locale === 'ru') {

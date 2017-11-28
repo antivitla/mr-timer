@@ -1,56 +1,417 @@
 <template lang="pug">
   .modal.report
+    //- Close modal
     .close-modal(@click="closeModal")
       i.material-icons close
-    .format.text {{ reportText }}
-    //- textarea(:value="reportData" style="width: 100%; height: 500px; box-sizing: border-box;")
+
+    //- Structure
+    .structure
+      h3 {{ label('report.structureLabel') }}
+      draggable.structure-sections(
+        v-model="currentReportStructure"
+        :options="{ group: 'structure' }"
+        :empty-placeholder="label('report.emptyStructure')"
+        @input="changeReportStructure")
+        .section(v-for="(section, index) in currentReportStructure")
+          .handler
+            i.material-icons reorder
+          .body(v-if="section")
+            .type
+              select(
+                :value="section.type"
+                @input="changeSectionType(section, $event.target.value, index)")
+                option(
+                  v-for="option in availableStructuresAsOptions"
+                  :value="option.value") {{ label(option.label) }}
+            .text(v-if="section.type === 'text'")
+              input(
+                type="text"
+                :value="section.text"
+                :placeholder="label('report.placeholderText')")
+            .summary-type(v-if="section.type === 'summary'")
+              select(
+                :value="section.summary.type"
+                @input="changeSummaryType(section, $event.target.value, index)")
+                option(
+                  v-for="option in availableSummariesAsOptions"
+                  :value="option.value") {{ label(option.label, false) }}
+            .nest(v-if="section.summary && section.summary.type !== 'days'")
+              select(
+                :value="section.summary.nest"
+                @input="changeSummaryNest(section, $event.target.value, index)")
+                option(:value="0") {{ labelFormat('report.nest', { nest: 0 }) }}
+                option(:value="1") {{ labelFormat('report.nest', { nest: 1 }) }}
+                option(:value="2") {{ labelFormat('report.nest', { nest: 2 }) }}
+                option(:value="3") {{ labelFormat('report.nest', { nest: 3 }) }}
+            .depth(v-if="section.summary && section.summary.type !== 'days'")
+              select(
+                :value="section.summary.depth"
+                @input="changeSummaryDepth(section, $event.target.value, index)")
+                option(:value="0") {{ labelFormat('report.depth.label', { depth: 0 }) }}
+                option(:value="1") {{ labelFormat('report.depth.label', { depth: 1 }) }}
+                option(:value="2") {{ labelFormat('report.depth.label', { depth: 2 }) }}
+                option(:value="10000") {{ label('report.depth.infinite', false) }}
+          .actions
+            .remove(@click="removeSection(index)")
+              i.material-icons delete
+
+    //- Add
+    .add
+      h3 {{ label('report.addSectionLabel') }}
+      draggable.sections(
+        v-model="sectionTemplates"
+        :options="{ group: { name: 'structure', pull: 'clone', put: false } }")
+        button(
+          v-for="(section, index) in sectionTemplates"
+          :key="index"
+          @click.prevent.stop="pushSection($event, section)")
+          i.material-icons playlist_add
+          | {{ sectionTemplateLabel(section) }}
+
+    //- Report format
+    .format
+      h3 {{ label('report.formatLabel') }}
+      select(v-model="currentReportFormat")
+        option(
+          v-for="option in availableFormatsAsOptions"
+          :value="option.value") {{ label(option.label) }}
+
+    //- Preview
+    .preview
+      h3 {{ label('report.previewLabel') }}
+      .preview-content(v-if="previewVisible") {{ reportContentPreview }}
+      .preview-toggle(
+        @click="toggleReportPreview()"
+        :title="label('report.togglePreviewLabel')")
+        i.material-icons.off(v-if="!previewVisible") visibility_on
+        i.material-icons.on(v-if="previewVisible") visibility_off
+
+    //- Download
+    .download(style="text-align: center;")
+      button.primary
+        i.material-icons file_download
+        span {{ label('report.downloadLabel') }} {{ label('report.format.' + currentReportFormat) }}
 </template>
 <script>
-  import { mapGetters, mapActions } from 'vuex'
+  import { mapGetters, mapMutations, mapActions } from 'vuex'
   import reportMixin from '@/mixins/report'
-  // import Report from '@/report'
+  import draggable from 'vuedraggable'
+  import capitalize from '@/utils/capitalize'
 
   export default {
     data () {
       return {
-        reportData: '',
-        reportText: ''
+        defaultSection: {
+          header: { type: 'header' },
+          total: { type: 'total' },
+          period: { type: 'period' },
+          text: { type: 'text' },
+          summaryDays: {
+            type: 'summary',
+            summary: { type: 'days' }
+          },
+          summaryTasks: {
+            type: 'summary',
+            summary: { type: 'tasks', depth: 0, nest: 0 }
+          },
+          summaryDetailedTasks: {
+            type: 'summary',
+            summary: { type: 'tasks', depth: 0, nest: 1 }
+          },
+          summaryDaysTasks: {
+            type: 'summary',
+            summary: { type: 'daysTasks', depth: 1, nest: 0 }
+          },
+          summaryDetailedDaysTasks: {
+            type: 'summary',
+            summary: { type: 'daysTasks', depth: 1, nest: 1 }
+          }
+        },
+        sectionTemplates: [
+          { type: 'header' },
+          { type: 'total' },
+          { type: 'text' },
+          {
+            type: 'summary',
+            summary: { type: 'days' }
+          },
+          {
+            type: 'summary',
+            summary: { type: 'tasks', depth: 0, nest: 0 }
+          },
+          {
+            type: 'summary',
+            summary: { type: 'tasks', depth: 0, nest: 1 }
+          },
+          {
+            type: 'summary',
+            summary: { type: 'daysTasks', depth: 1, nest: 0 }
+          },
+          {
+            type: 'summary',
+            summary: { type: 'daysTasks', depth: 1, nest: 1 }
+          }
+        ],
+        currentReportStructure: [],
+        reportContentPreview: '',
+        previewVisible: false
       }
     },
-    created () {
-      const structure = [
-        { type: 'summary', summary: { type: 'daysTasks', nest: 1, depth: 1 } },
-        { type: 'summary', summary: { type: 'tasks', nest: 2, depth: 2 } },
-        { type: 'summary', summary: { type: 'tasks', nest: 0, depth: 1 } },
-        { type: 'summary', summary: { type: 'tasks', nest: 0, depth: 0 } },
-        { type: 'summary', summary: { type: 'days' } }
-      ]
-      const report = this.generateMarkdownReport(structure)
-      this.reportText = report.content
-      console.log(report.filename)
+    mounted () {
+      this.currentReportStructure = JSON.parse(JSON.stringify(this.reportStructure))
+      this._updateReportData()
     },
     computed: {
+      currentReportFormat: {
+        get () {
+          return this.reportFormat
+        },
+        set (format) {
+          this.setReportFormat({ format })
+          this._refreshReportPreview()
+        }
+      },
       ...mapGetters([
-        'context'
+        'context',
+        'reportFormat',
+        'reportStructure',
+        'availableFormatsAsOptions',
+        'availableStructuresAsOptions',
+        'availableSummariesAsOptions'
       ])
     },
     methods: {
+      sectionTemplateLabel (section) {
+        let key = section.type
+        if (section.type === 'summary') {
+          key = 'summary' + capitalize(section.summary.type)
+          if (section.summary.nest) {
+            key = key.replace('summary', 'summaryDetailed')
+          }
+        }
+        return this.label(`report.section.${key}`)
+      },
+      changeSectionType (section, type, index) {
+        let newSectionType = type === 'summary' ? 'summaryDaysTasks' : type
+        const newSection = JSON.parse(JSON.stringify(this.defaultSection[newSectionType]))
+        this.currentReportStructure.splice(index, 1, newSection)
+        // this.setReportSection({
+        //   section: JSON.parse(JSON.stringify(newSection)),
+        //   index
+        // })
+        this._updateReportData()
+      },
+      changeSummaryType (section, type, index) {
+        if (type === 'days') {
+          delete section.summary.nest
+          delete section.summary.depth
+        } else if (section.summary.type === 'days' && type !== 'days') {
+          section.summary.nest = 1
+          section.summary.depth = 0
+        }
+        section.summary.type = type
+        this._updateReportData()
+      },
+      changeSummaryNest (section, nest, index) {
+        section.summary.nest = nest
+        this._updateReportData()
+      },
+      changeSummaryDepth (section, depth, index) {
+        section.summary.depth = depth
+        this._updateReportData()
+      },
+      changeReportStructure (a) {
+        this._updateReportData()
+      },
+      removeSection (index) {
+        this.currentReportStructure.splice(index, 1)
+        this._updateReportData()
+      },
+      pushSection (event, section, index) {
+        if (event.target) {
+          this.currentReportStructure.push(JSON.parse(JSON.stringify(section)))
+          this._updateReportData()
+        }
+      },
+      toggleReportPreview () {
+        this.previewVisible = !this.previewVisible
+        this._refreshReportPreview()
+      },
+      _updateReportData () {
+        this.setReportStructure({
+          structure: this.currentReportStructure
+        })
+        this._refreshReportPreview()
+      },
+      _refreshReportPreview () {
+        let previewObject
+        if (this.reportFormat === 'markdown') {
+          previewObject = this.generateMarkdownReport(this.currentReportStructure)
+        } else {
+          previewObject = this.generateTextReport(this.currentReportStructure)
+        }
+        this.reportContentPreview = previewObject.content
+      },
+      ...mapMutations([
+        'setReportFormat',
+        'setReportStructure',
+        // 'setReportSection',
+        'removeReportSection'
+      ]),
       ...mapActions([
         'closeModal'
       ])
     },
     mixins: [
       reportMixin
-    ]
+    ],
+    components: {
+      draggable
+    }
   }
 </script>
 <style lang="stylus">
   @import '~@/assets/stylesheets/modal'
 
   .modal.report
-    .format.text
-      white-space pre-wrap
-      font-family 'PT Sans', monospace
-      font-size 12px
-      line-height 20px
+    max-width 960px
+    box-shadow 1px 3px 10px 0px alpha(titamota-color-text, 10%)
+
+    .structure
+      // margin-top 40px
+      text-align center
+
+      .structure-sections:empty
+        height 43px
+        background-color titamota-color-back-light
+        text-align center
+        line-height 21px
+        padding 10px
+        border-radius 5px
+        color titamota-color-text-muted
+        box-sizing border-box
+        &:before
+          content attr(empty-placeholder)
+
+      .section
+        display flex
+        margin 10px 0
+        justify-content flex-start
+        .handler
+          cursor pointer
+          margin-right 10px
+          line-height 40px
+          i.material-icons
+            font-size 24px
+        .body
+          margin-right 15px
+          flex-grow 1
+          display flex
+          flex-wrap wrap
+          .type
+            // width auto
+            // margin-right 4px
+            // margin-bottom 4px
+            select
+              font-weight 500
+          .summary-type
+            flex-grow 1
+          .summary-type
+          .nest
+          .depth
+            select
+              font-size 12px
+          .text
+            flex-grow 1
+            input
+              width 100%
+              display block
+              box-sizing border-box
+              font-weight 300
+              font-size 12px
+              padding-left 12px
+              padding-right 12px
+          & > *
+            margin-right 4px
+            margin-bottom 4px
+
+        .actions
+          margin-left auto
+          display flex
+          & > *
+            // width 30px
+            text-align center
+            // margin-left 5px
+            cursor pointer
+          .material-icons
+            font-size 24px
+            line-height 40px
+
+    .add
+      margin-top 40px
+      text-align center
+      .sections
+        display flex
+        flex-wrap wrap
+        // flex-direction column
+        // justify-content justify
+        // align-items flex-start
+        & > *
+          flex-grow 1
+          margin 2px
+          padding-left 20px
+          padding-right 20px
+          text-align left
+          font-weight 500
+          // width 100%
+
+
+    .format
+      margin-top 40px
+      text-align center
+      select
+        width auto
+
+    .preview
+      margin-top 40px
+      text-align center
+      .preview-toggle
+        width 40px
+        line-height 40px
+        height 40px
+        cursor pointer
+        margin 0px auto
+        i.material-icons
+          font-size 24px
+          width 24px
+          margin 0 auto
+          display block
+          text-align center
+      .preview-content
+        white-space pre
+        font-family PT Sans, monospace
+        text-align left
+        max-width 500px
+        font-size 14px
+        margin 40px auto
+      .preview-content + .preview-toggle
+        margin-top 20px
+
+    .download
+      margin-top 40px
+      button
+        width 100%
+        padding-left 20px
+        padding-right 20px
+        height 60px
+
+    button
+      *
+        vertical-align middle
+      i
+        margin-right 5px
+        font-size 21px
+
+    // .sortable-ghost
+      // width 100%
 </style>

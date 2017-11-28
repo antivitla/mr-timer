@@ -85,11 +85,51 @@ const ru = ({
   report: {
     total: 'всего',
     reportOnFor: '«%0»',
+    commonReport: 'отчёт по всем задачам',
     headerDaysTasks: 'сводка по дням и задачам',
     headerTasks: 'сводка по задачам',
     headerDays: 'сводка по дням',
     headerDetailedDaysTasks: 'подробная сводка по дням и задачам',
-    headerDetailedTasks: 'подробная сводка по задачам'
+    headerDetailedTasks: 'подробная сводка по задачам',
+    format: {
+      markdown: 'Markdown (.md)',
+      plaintext: 'Plain Text (.txt)',
+      spreadsheet: 'Spreadsheet (.ods)',
+      document: 'Document (.odt)',
+      html: 'HTML (.html)',
+      pdf: 'PDF (.pdf)',
+      csv: 'CSV (.csv)'
+    },
+    formatLabel: 'выбрать формат',
+    structureLabel: 'структура отчёта',
+    addSectionLabel: 'добавить раздел',
+    previewLabel: 'предпросмотр',
+    downloadLabel: 'скачать отчёт в формате',
+    placeholderText: 'введите текст заметки',
+    section: {
+      header: 'заголовок',
+      total: 'итого',
+      text: 'произвольный текст',
+      period: 'период',
+      summary: 'сводка',
+      summaryDays: 'сводка по дням',
+      summaryTasks: 'сводка по задачам',
+      summaryDetailedTasks: 'подробная сводка по задачам',
+      summaryDaysTasks: 'сводка по дням и задачам',
+      summaryDetailedDaysTasks: 'подробная сводка по дням и задачам'
+    },
+    summary: {
+      days: 'по дням',
+      tasks: 'по задачам',
+      daysTasks: 'по дням и задачам'
+    },
+    nest: '{nest, plural, =0{плоская} one{с деревом} few{с деревом глубиной #} other{с деревом глубиной #}}',
+    depth: {
+      label: '{depth, plural, =0{не учитывая подзадач} one{учитывая подзадачи} few{учитывая # уровня подзадач} other{учитывая # уровней подзадач}}',
+      infinite: 'учитывая все уровни подзадач'
+    },
+    emptyStructure: 'создайте разделы кликом по кнопкам ниже или перетаскиванием их сюда',
+    togglePreviewLabel: 'вкл/выкл предпросмотр'
   },
   context: {
     clear: 'убрать  контекст',
@@ -228,11 +268,51 @@ const en = ({
   report: {
     total: 'total',
     reportOnFor: '"%0"',
+    commonReport: 'report on all tasks',
     headerDaysTasks: 'days and tasks summary',
     headerTasks: 'tasks summary',
     headerDays: 'days summary',
     headerDetailedDaysTasks: 'detailed days and tasks summary',
-    headerDetailedTasks: 'detailed tasks summary'
+    headerDetailedTasks: 'detailed tasks summary',
+    format: {
+      markdown: 'Markdown (.md)',
+      plaintext: 'Plain Text (.txt)',
+      spreadsheet: 'Spreadsheet (.ods)',
+      document: 'Document (.odt)',
+      html: 'HTML (.html)',
+      pdf: 'PDF (.pdf)',
+      csv: 'CSV (.csv)'
+    },
+    formatLabel: 'choose format',
+    structureLabel: 'structure of the report',
+    addSectionLabel: 'add section',
+    downloadLabel: 'download report as',
+    previewLabel: 'preview',
+    placeholderText: 'write your comments here',
+    section: {
+      header: 'header',
+      total: 'total',
+      text: 'comment',
+      period: 'period',
+      summary: 'summary',
+      summaryDays: 'days summary',
+      summaryTasks: 'tasks summary',
+      summaryDetailedTasks: 'detailed tasks summary',
+      summaryDaysTasks: 'days and tasks summary',
+      summaryDetailedDaysTasks: 'detailed days and tasks summary'
+    },
+    summary: {
+      days: 'by days',
+      tasks: 'by tasks',
+      daysTasks: 'by days and tasks'
+    },
+    nest: '{nest, plural, =0{flat} one{with tree depth #} other{with tree depth #}}',
+    depth: {
+      label: '{depth, plural, =0{without subtasks} one{collect # subtask level} other{collect # subtask levels}}',
+      infinite: 'collect all subtasks'
+    },
+    emptyStructure: 'create sections by clicking buttons below or dragging\'em here',
+    togglePreviewLabel: 'toggle report preview'
   },
   context: {
     clear: 'clear current task',

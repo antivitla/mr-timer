@@ -205,7 +205,6 @@ function responseWithFilteredEntries (allEntries, params) {
     throw error
   } else {
     response.pagination = JSON.parse(JSON.stringify(response.pagination))
-    console.log(response, response.entries.length)
     return response
   }
 }

@@ -198,6 +198,9 @@ button
     pointer-events none
     opacity 0.5
 
+  &.default
+    button-normal()
+
   &.block
     width 100%
     display block
@@ -257,13 +260,26 @@ select
   border-bottom solid titamota-color-border 3px
   &:focus
     border-bottom 0px
+    // border-bottom-left-radius 0px
+    // border-bottom-right-radius 0px
+    background-color lighten(titamota-color-back-dark, 15%)
+    color lighten(titamota-color-text-invert, 50%)
+    border-top solid darken(titamota-color-text, 20%) 3px
+  &:active
+    border-bottom 0px
     border-bottom-left-radius 0px
     border-bottom-right-radius 0px
     background-color lighten(titamota-color-back-dark, 15%)
     color lighten(titamota-color-text-invert, 50%)
     border-top solid darken(titamota-color-text, 20%) 3px
+  // &:focus
+    // background-color lighten(titamota-color-back-dark, 15%)
+    // color lighten(titamota-color-text-invert, 50%)
   option
     color lighten(titamota-color-text-invert, 50%)
+
+select.primary
+  button-primary()
 
 .invert
   select

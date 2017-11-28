@@ -122,17 +122,20 @@
         left 0px
         top 0px
         width 100vw
-        // z-index 10
+        z-index 10
 
       .modal-overlay
         display block
-        position absolute
+        position fixed
         left 0px
         top 0px
         width 100%
         bottom 0px
-        // z-index 11
+        z-index 11
         background-color alpha(titamota-color-back-light, 75%)
+
+      .page
+        pointer-events none
 
     // &.modal-active
     //   position fixed
