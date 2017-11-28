@@ -82,6 +82,15 @@ const ru = ({
   externalLink: 'перейти к',
   weekend: 'выходной',
   getReport: 'сформировать отчёт используя текущий вид',
+  report: {
+    total: 'всего',
+    reportOnFor: '«%0»',
+    headerDaysTasks: 'сводка по дням и задачам',
+    headerTasks: 'сводка по задачам',
+    headerDays: 'сводка по дням',
+    headerDetailedDaysTasks: 'подробная сводка по дням и задачам',
+    headerDetailedTasks: 'подробная сводка по задачам'
+  },
   context: {
     clear: 'убрать  контекст',
     task: 'текущая задача',
@@ -216,6 +225,15 @@ const en = ({
   externalLink: 'go to',
   weekend: 'weekend',
   getReport: 'create report from current view',
+  report: {
+    total: 'total',
+    reportOnFor: '"%0"',
+    headerDaysTasks: 'days and tasks summary',
+    headerTasks: 'tasks summary',
+    headerDays: 'days summary',
+    headerDetailedDaysTasks: 'detailed days and tasks summary',
+    headerDetailedTasks: 'detailed tasks summary'
+  },
   context: {
     clear: 'clear current task',
     task: 'current task',

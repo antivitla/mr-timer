@@ -35,8 +35,8 @@
     },
     methods: {
       getTimelineEvents () {
-        Mitaba.getTimelineEvents().then(result => {
-          console.log(result)
+        Mitaba.getTimelineEvents().then(response => {
+          Timeline.events = response.results
         })
       }
     }
@@ -46,6 +46,7 @@
   @import '~@/assets/stylesheets/core'
 
   .timeline
+    margin 60px
 
     // Body
     .body

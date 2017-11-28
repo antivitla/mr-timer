@@ -17,9 +17,10 @@
     //- Timer
     timer(slot="page")
     //- Timeline
-    timeline(slot="page")
+    //- timeline(slot="page")
+    //- view-report(slot="page" :source="Months.children")
     //- Debug Bdckend
-    mitaba(slot="page")
+    //- mitaba(slot="page")
     //- Navbar
     app-navbar.menu(slot="page")
       div(slot="left")
@@ -75,10 +76,15 @@
   import viewMonths from '@/components/views/view-months'
   import viewDays from '@/components/views/view-days'
   import viewStorage from '@/components/views/view-storage'
+  import viewReport from '@/components/views/view-report'
   // Mixins
   import appTips from '@/mixins/app-tips'
   import i18nLabel from '@/mixins/i18n-label'
   import storage from '@/mixins/storage'
+  // Items
+  import { Days } from '@/store/groups/days'
+  import { Months } from '@/store/groups/months'
+  import { Tasks } from '@/store/groups/tasks'
 
   export default {
     data () {
@@ -93,7 +99,10 @@
           storage: viewStorage
         },
         Selected,
-        isPending: false
+        isPending: false,
+        Days,
+        Months,
+        Tasks
       }
     },
     created () {
@@ -287,6 +296,7 @@
       viewMonths,
       viewDays,
       viewStorage,
+      viewReport,
       timer,
       timeline,
       mitaba,

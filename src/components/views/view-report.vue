@@ -34,7 +34,8 @@
     },
     data () {
       return {
-        handler: function () {
+        handler: () => {
+          console.log('handler')
           setTimeout(() => {
             autosize.update(this.$el.querySelector('textarea'))
           }, 100)
@@ -42,8 +43,10 @@
       }
     },
     created () {
-      this.handler = this.handler.bind(this)
       bus.$on('get-entries-complete', this.handler)
+    },
+    mounted () {
+      autosize(this.$el.querySelector('textarea'))
     },
     updated () {
       autosize(this.$el.querySelector('textarea'))
@@ -55,9 +58,8 @@
       textReport () {
         let title = this.context.join(' / ')
         title = `${title}\n${'='.repeat(title.length)}\n\n`
-        const report = this.generateReport({
-          children: this.source
-        }).join('\n') // .replace(/\n{4,}/g, '\n\n')
+        const report = JSON.stringify(this.generateReport(this.source), null, '  ')
+        // .join('\n') // .replace(/\n{4,}/g, '\n\n')
         return (this.context.length ? title : '') + report.trim()
       },
       ...mapGetters([
