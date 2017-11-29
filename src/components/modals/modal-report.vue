@@ -24,10 +24,12 @@
                   v-for="option in availableStructuresAsOptions"
                   :value="option.value") {{ label(option.label) }}
             .text(v-if="section.type === 'text'")
-              input(
-                type="text"
+              textarea(
+                spellcheck="false"
+                rows="1"
                 :value="section.text"
-                :placeholder="label('report.placeholderText')")
+                :placeholder="label('report.placeholderText')"
+                @input="changeText(section, $event.target.value, index)")
             .summary-type(v-if="section.type === 'summary'")
               select(
                 :value="section.summary.type"
@@ -79,7 +81,7 @@
     //- Preview
     .preview
       h3 {{ label('report.previewLabel') }}
-      .preview-content(v-if="previewVisible") {{ reportContentPreview }}
+      .preview-content(v-if="previewVisible") {{ reportContent }}
       .preview-toggle(
         @click="toggleReportPreview()"
         :title="label('report.togglePreviewLabel')")
@@ -87,7 +89,13 @@
         i.material-icons.on(v-if="previewVisible") visibility_off
 
     //- Download
-    .download(style="text-align: center;")
+    form.download(
+      :action="reportAction()"
+      method="post")
+      input(
+        type="hidden"
+        name="report"
+        :value="reportContent")
       button.primary
         i.material-icons file_download
         span {{ label('report.downloadLabel') }} {{ label('report.format.' + currentReportFormat) }}
@@ -97,6 +105,8 @@
   import reportMixin from '@/mixins/report'
   import draggable from 'vuedraggable'
   import capitalize from '@/utils/capitalize'
+  import bus from '@/event-bus'
+  import autosize from 'autosize'
 
   export default {
     data () {
@@ -153,13 +163,36 @@
           }
         ],
         currentReportStructure: [],
-        reportContentPreview: '',
-        previewVisible: false
+        reportContent: '',
+        reportFilename: '',
+        previewVisible: false,
+        refreshHandler: () => {
+          setTimeout(() => {
+            this._refreshReportPreview()
+            this.$el.querySelectorAll('textarea').forEach(el => {
+              autosize(el)
+            })
+          }, 500)
+        },
+        refreshComments: () => {
+          setTimeout(() => {
+            this.$el.querySelectorAll('textarea').forEach(el => {
+              autosize(el)
+            })
+          }, 100)
+        }
       }
+    },
+    created () {
+      bus.$on('get-entries-complete', this.refreshHandler)
+    },
+    beforeDestroy () {
+      bus.$off('get-entries-complete', this.refreshHandler)
     },
     mounted () {
       this.currentReportStructure = JSON.parse(JSON.stringify(this.reportStructure))
       this._updateReportData()
+      this.refreshComments()
     },
     computed: {
       currentReportFormat: {
@@ -191,6 +224,15 @@
         }
         return this.label(`report.section.${key}`)
       },
+      changeText (section, text, index) {
+        if (text) {
+          section.text = text
+        } else {
+          delete section.text
+        }
+        this._updateReportData()
+        this.refreshComments()
+      },
       changeSectionType (section, type, index) {
         let newSectionType = type === 'summary' ? 'summaryDaysTasks' : type
         const newSection = JSON.parse(JSON.stringify(this.defaultSection[newSectionType]))
@@ -200,6 +242,7 @@
         //   index
         // })
         this._updateReportData()
+        this.refreshComments()
       },
       changeSummaryType (section, type, index) {
         if (type === 'days') {
@@ -211,6 +254,7 @@
         }
         section.summary.type = type
         this._updateReportData()
+        this.refreshComments()
       },
       changeSummaryNest (section, nest, index) {
         section.summary.nest = nest
@@ -222,20 +266,26 @@
       },
       changeReportStructure (a) {
         this._updateReportData()
+        this.refreshComments()
       },
       removeSection (index) {
         this.currentReportStructure.splice(index, 1)
         this._updateReportData()
+        this.refreshComments()
       },
       pushSection (event, section, index) {
         if (event.target) {
           this.currentReportStructure.push(JSON.parse(JSON.stringify(section)))
           this._updateReportData()
+          this.refreshComments()
         }
       },
       toggleReportPreview () {
         this.previewVisible = !this.previewVisible
         this._refreshReportPreview()
+      },
+      reportAction () {
+        return 'https://local.mitaba.ru/api/download/report-as-text/?filename=' + this.reportFilename
       },
       _updateReportData () {
         this.setReportStructure({
@@ -244,18 +294,18 @@
         this._refreshReportPreview()
       },
       _refreshReportPreview () {
-        let previewObject
+        let report
         if (this.reportFormat === 'markdown') {
-          previewObject = this.generateMarkdownReport(this.currentReportStructure)
+          report = this.generateMarkdownReport(this.currentReportStructure)
         } else {
-          previewObject = this.generateTextReport(this.currentReportStructure)
+          report = this.generateTextReport(this.currentReportStructure)
         }
-        this.reportContentPreview = previewObject.content
+        this.reportContent = report.content
+        this.reportFilename = report.filename
       },
       ...mapMutations([
         'setReportFormat',
         'setReportStructure',
-        // 'setReportSection',
         'removeReportSection'
       ]),
       ...mapActions([
@@ -278,7 +328,6 @@
     box-shadow 1px 3px 10px 0px alpha(titamota-color-text, 10%)
 
     .structure
-      // margin-top 40px
       text-align center
 
       .structure-sections:empty
@@ -309,9 +358,6 @@
           display flex
           flex-wrap wrap
           .type
-            // width auto
-            // margin-right 4px
-            // margin-bottom 4px
             select
               font-weight 500
           .summary-type
@@ -339,9 +385,7 @@
           margin-left auto
           display flex
           & > *
-            // width 30px
             text-align center
-            // margin-left 5px
             cursor pointer
           .material-icons
             font-size 24px
@@ -353,9 +397,6 @@
       .sections
         display flex
         flex-wrap wrap
-        // flex-direction column
-        // justify-content justify
-        // align-items flex-start
         & > *
           flex-grow 1
           margin 2px
@@ -363,8 +404,6 @@
           padding-right 20px
           text-align left
           font-weight 500
-          // width 100%
-
 
     .format
       margin-top 40px
@@ -408,10 +447,15 @@
     button
       *
         vertical-align middle
-      i
+      i.material-icons
         margin-right 5px
         font-size 21px
-
-    // .sortable-ghost
-      // width 100%
+    textarea
+      border-radius 5px
+      border solid titamota-color-border 1px
+      padding: 10px
+      resize none
+      display block
+      width 100%
+      box-sizing border-box
 </style>

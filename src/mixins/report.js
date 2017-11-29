@@ -1,4 +1,5 @@
 import moment from 'moment'
+import slugify from 'slugify'
 import { mapGetters } from 'vuex'
 // import { currencies } from '@/store/i18n'
 import { taskDelimiter } from '@/store/ui'
@@ -49,9 +50,6 @@ export default {
       structure.forEach((section, index) => {
         if (section.type === 'text') {
           // Text
-          if (index) {
-            lines = lines.concat([''])
-          }
           lines = lines.concat([section.text])
         } else if (section.type === 'header') {
           // Header
@@ -99,7 +97,7 @@ export default {
       })
       const filename = `${this.userName}.${this.context.join(' - ')}.${this.generateTextPeriod()}.report.txt`
       return {
-        filename: filename.replace('.undefined', ''),
+        filename: slugify(filename.replace('.undefined', '')),
         content: lines.join('\n')
       }
     },
@@ -270,7 +268,7 @@ export default {
       })
       const filename = `${this.userName}.${this.context.join(' - ')}.${this.generateMarkdownPeriod()}.report.md`
       return {
-        filename: filename.replace('.undefined', ''),
+        filename: slugify(filename.replace('.undefined', '')),
         content: lines.join('\n')
       }
     },
@@ -395,125 +393,6 @@ export default {
     generateSpreadsheetSummary () {
       console.log('spread sheet')
     }
-
-    // generateReport (children, options) {
-      // console.log(report.summary.days())
-      // console.log(report.summary.tasks({ depth: 1, nest: 1 }))
-      // const report = Report.summary.days()
-      // const report = Report.summary.daysTasks({ depth: 2, nest: 1 })
-      // const report = Report.summary.tasks({ depth: 1, nest: 1 })
-      // return report
-      // let result = []
-      // // let l = this.reportLabels
-      // children.forEach(child => {
-      //   if (child.type === 'task') {
-      //     result = result.concat(this.reportTaskLines({
-      //       child,
-      //       depth
-      //     }))
-      //   } else if (child.type === 'day') {
-      //     result = result.concat(this.reportDayLine({
-      //       child,
-      //       depth
-      //     }))
-      //   } else if (child.type === 'month') {
-      //     result = result.concat(this.reportMonthLine({
-      //       child,
-      //       depth
-      //     }))
-      //   }
-      //   if (child.children && child.children.length > 0 && child.children[0].type) {
-      //     result = result.concat(this.generateReport({
-      //       children: child.children,
-      //       depth: child.type !== 'task' ? depth : depth + 1
-      //     }))
-      //     if (result.slice(-1)[0]) {
-      //       result.push('')
-      //     }
-      //   }
-      // })
-      // return result
-    // }
-    // reportMonthLine ({ child }) {
-    //   let line = capitalize(moment(child.lastUpdated()).format('MMMM'))
-    //   const ms = child.duration()
-    //   const l = this.reportLabels
-    //   if (ms > 1000) {
-    //     line = line + ': ' + durationHuman(ms, l.hr, l.min, l.sec)
-    //   }
-    //   if (this.price) {
-    //     line = line + ' = ' + this.reportCost(ms)
-    //   }
-    //   return ['', line, '-'.repeat(line.length), '']
-    // },
-    // reportDayLine ({ child }) {
-    //   const name = moment(child.name).format('LL').replace(' г.', '')
-    //   let line = name
-    //   const ms = child.duration()
-    //   const l = this.reportLabels
-    //   if (ms > 1000) {
-    //     line = line + '\n' + durationHuman(ms, l.hr, l.min, l.sec)
-    //   }
-    //   if (this.price) {
-    //     line = line + ' = ' + this.reportCost(ms)
-    //   }
-    //   return ['', line, '']
-    // },
-    // reportTaskLines ({ child, depth = 0 } = {}) {
-    //   const l = this.reportLabels
-    //   let name = child.name
-    //   if (name.match(urlRegexp)) {
-    //     name = decodeURIComponent(name.replace(/https?:\/\//, ''))
-    //   }
-    //   if (depth === 0) {
-    //     name = `${name}`
-    //   }
-    //   let line = name
-    //   const isLeaf = !(child.children[0].type)
-    //   const isLastDepth = this.reportMaxDepth && depth >= this.reportMaxDepth
-    //   if ((!isLeaf && !isLastDepth) || depth === 0) {
-    //     const ms = child.duration()
-    //     if (ms > 1000) {
-    //       const delim = depth ? ': ' : ' .'.repeat((60 - name.length - (depth + 1) * 2) * 0.5) + ' '
-    //       line = line + delim + durationHuman(ms, l.hr, l.min, l.sec)
-    //     }
-    //     if (this.price) {
-    //       line = line + ' = ' + this.reportCost(ms)
-    //     }
-    //   }
-    //   if (depth === 0) {
-    //     return [`${this.reportTab}${line}`]
-    //   } else {
-    //     return [`${this.reportTab.repeat(depth + 1)}- ${line}`]
-    //   }
-    // },
-    // reportCost (ms) {
-    //   const c = parseInt(ms * this.price / 3600000, 10)
-    //   let part = '' + c
-    //   let result = ''
-    //   while (part.length) {
-    //     result = ' ' + part.substr(-3) + result
-    //     part = part.slice(0, -3)
-    //   }
-    //   return this.addCurrency(result.trim())
-    // },
-    // addCurrency (price) {
-    //   const symbol = currencies[this.currency].symbol
-    //   if (this.isCurrencySymbolBefore) {
-    //     return symbol + ' ' + price
-    //   } else {
-    //     return price + ' ' + symbol
-    //   }
-    // },
-    // isLastDepth (depth) {
-    //   return this.reportMaxDepth && depth >= this.reportMaxDepth
-    // },
-    // taskDepth (depth, rootType) {
-    //   if (rootType !== 'task') {
-    //     return depth - 1
-    //   }
-    //   return depth
-    // }
   },
   mixins: [
     i18nLabel

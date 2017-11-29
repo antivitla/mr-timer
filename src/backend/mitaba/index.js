@@ -67,6 +67,9 @@ const apiConfig = {
   profile: 'profile/?avatar_size=120',
   entries: 'entries/',
   timeline: 'timeline/',
+  download: {
+    reportAsText: 'download/report-as-text/'
+  },
   petrov: 'petrov/',
   social: 'login/social/token_user/'
 }
