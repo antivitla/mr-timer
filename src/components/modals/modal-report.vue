@@ -81,6 +81,12 @@
     //- Preview
     .preview
       h3 {{ label('report.previewLabel') }}
+      .preview-toggle(
+        v-if="previewVisible"
+        @click="toggleReportPreview()"
+        :title="label('report.togglePreviewLabel')")
+        i.material-icons.off(v-if="!previewVisible") visibility_on
+        i.material-icons.on(v-if="previewVisible") visibility_off
       .preview-content(v-if="previewVisible") {{ reportContent }}
       .preview-toggle(
         @click="toggleReportPreview()"
@@ -107,6 +113,7 @@
   import capitalize from '@/utils/capitalize'
   import bus from '@/event-bus'
   import autosize from 'autosize'
+  import Mitaba from '@/backend/mitaba'
 
   export default {
     data () {
@@ -285,7 +292,7 @@
         this._refreshReportPreview()
       },
       reportAction () {
-        return 'https://local.mitaba.ru/api/download/report-as-text/?filename=' + this.reportFilename
+        return Mitaba.config.api.base + 'download/report-as-text/?filename=' + this.reportFilename
       },
       _updateReportData () {
         this.setReportStructure({
