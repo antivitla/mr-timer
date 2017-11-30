@@ -123,13 +123,14 @@ const ru = ({
       tasks: 'по задачам',
       daysTasks: 'по дням и задачам'
     },
-    nest: '{nest, plural, =0{плоская} one{с деревом} few{с деревом глубиной #} other{с деревом глубиной #}}',
+    nest: '{nest, plural, =0{плоская} one{с деревом} few{с глубоким деревом} other{с деревом глубиной #}}',
     depth: {
       label: '{depth, plural, =0{не учитывая подзадач} one{учитывая подзадачи} few{учитывая # уровня подзадач} other{учитывая # уровней подзадач}}',
       infinite: 'учитывая все уровни подзадач'
     },
     emptyStructure: 'создайте разделы кликом по кнопкам ниже или перетаскиванием их сюда',
-    togglePreviewLabel: 'вкл/выкл предпросмотр'
+    togglePreviewLabel: 'вкл/выкл предпросмотр',
+    nothingToPreview: 'нет предпросмотра'
   },
   context: {
     clear: 'убрать  контекст',
@@ -161,6 +162,8 @@ const ru = ({
     authorization: 'войти через',
     l10n: 'язык и валюта',
     exportImport: 'экспорт и импорт',
+    restoreAppState: 'восстановить приложение',
+    reports: 'отчёты',
     migration: 'перенести данные',
     settings: 'включить элементы интерфейса',
     displayOptions: 'внешний вид',
@@ -182,7 +185,19 @@ const ru = ({
     loadAllEntries: 'загрузить сюда все записи',
     importEntries: 'импортировать записи',
     currentView: 'текущий вид',
-    warningContext: 'ВНИМАНИЕ! Импортируемые записи попадут внутрь текущего контекста'
+    warningContext: 'ВНИМАНИЕ! Импортируемые записи попадут внутрь текущего контекста',
+    restoreApp: {
+      title: 'Восстановление приложения',
+      description: 'В любой непонятной ситуации — вырви шнур, выдави стекло и нажми эту кнопку. Потом не забудь перезагрузить страницу.',
+      action: 'Очистить приложение',
+      comment: 'Восстановить состояние приложения по умолчанию. Задачи останутся.'
+    },
+    report: {
+      title: 'отчёты',
+      showModal: 'показывать настройки перед загрузкой',
+      showModalLong: 'показывать окно в следующий раз (изменить в настройках меню)',
+      download: 'скачать отчёт'
+    }
   },
   sidebar: {
     icons: 'иконки',
@@ -306,13 +321,14 @@ const en = ({
       tasks: 'by tasks',
       daysTasks: 'by days and tasks'
     },
-    nest: '{nest, plural, =0{flat} one{with tree depth #} other{with tree depth #}}',
+    nest: '{nest, plural, =0{flat} one{with tree} other{with deep tree}}',
     depth: {
       label: '{depth, plural, =0{without subtasks} one{collect # subtask level} other{collect # subtask levels}}',
       infinite: 'collect all subtasks'
     },
     emptyStructure: 'create sections by clicking buttons below or dragging\'em here',
-    togglePreviewLabel: 'toggle report preview'
+    togglePreviewLabel: 'toggle report preview',
+    nothingToPreview: 'no preview'
   },
   context: {
     clear: 'clear current task',
@@ -348,6 +364,8 @@ const en = ({
     l10n: 'Language and Currency',
     migration: 'migrate data',
     exportImport: 'Export and Import',
+    restoreAppState: 'restore application',
+    reports: 'reports',
     settings: 'toggle UI elements',
     displayOptions: 'display options',
     positionOnScreen: 'align',
@@ -368,7 +386,19 @@ const en = ({
     loadAllEntries: 'load all entries here',
     importEntries: 'import entries',
     currentView: 'current view',
-    warningContext: 'WARNING! All imported items will gain current context'
+    warningContext: 'WARNING! All imported items will gain current context',
+    restoreApp: {
+      title: 'Restore application',
+      description: 'When in trouble — push the Red Button to restore default application state. Do not forget to reload page afterwards.',
+      action: 'Clean settings',
+      comment: 'Restore default application state. Tasks will remain intact.'
+    },
+    report: {
+      title: 'reports',
+      showModal: 'show report settings before download',
+      showModalLong: 'show modal next time (change in settings menu)',
+      download: 'download report'
+    }
   },
   sidebar: {
     icons: 'icons',

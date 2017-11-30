@@ -32,6 +32,7 @@
           :options="availableViewsAsOptions"
           v-model="viewModel")
         get-report
+          i.material-icons timeline
     //- Views
     component(:is="viewComponent[currentView]" slot="page")
     //- Sidebar
@@ -61,7 +62,7 @@
   import contextNav from '@/components/other/context-nav'
   import iconPreloader from '@/components/other/icon-preloader'
   import toaster from '@/components/other/toaster'
-  import getReport from '@/components/other/get-report'
+  import getReport from '@/components/reports/get-report'
   import timer from '@/components/timer'
   import timeline from '@/components/timeline'
   import mitaba from '@/components/mitaba'
@@ -359,6 +360,10 @@
   .app-navbar.menu
     line-height 24px
     border-bottom solid titamota-color-border 1px
+    .get-report
+      margin-left 10px
+      i.material-icons
+        vertical-align middle
     @media (max-width titamota-screen-w-7)
       display none
 </style>

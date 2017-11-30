@@ -1,5 +1,9 @@
 <template lang="pug">
   .settings-migration
+    p.note(v-if="isContext")
+      small
+        | {{ label('settings.warningContext') }} &ensp;
+        q {{ parseDetail(contextString) }}
     //- Timer 3.0 account
     p(v-if="countEntries.timer30")
       button.block.with-preloader(
@@ -46,10 +50,12 @@
 </template>
 <script>
   import { mapGetters, mapMutations } from 'vuex'
+  import { taskDelimiter } from '@/store/ui'
   import debounce from 'debounce'
   import migration from '@/mixins/migration'
   import i18nLabel from '@/mixins/i18n-label'
   import bus from '@/event-bus'
+  import parseDetail from '@/utils/parseDetail'
 
   export default {
     data () {
@@ -69,7 +75,8 @@
           timer30: [],
           timer31: [],
           petrov: []
-        }
+        },
+        parseDetail
       }
     },
     created () {
@@ -115,8 +122,13 @@
         })
     },
     computed: {
+      contextString () {
+        return this.context.join(taskDelimiter)
+      },
       ...mapGetters([
-        'isAuthorized'
+        'isAuthorized',
+        'isContext',
+        'context'
       ])
     },
     methods: {
@@ -154,6 +166,8 @@
 </script>
 <style lang="stylus">
   .settings-migration
+    .note
+      margin-bottom 20px
     button
     .button
       padding-left 15px

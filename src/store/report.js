@@ -1,3 +1,30 @@
+export const defaultSections = {
+  header: { type: 'header' },
+  total: { type: 'total' },
+  // period: { type: 'period' },
+  text: { type: 'text' },
+  summaryDays: {
+    type: 'summary',
+    summary: { type: 'days' }
+  },
+  summaryTasks: {
+    type: 'summary',
+    summary: { type: 'tasks', depth: 0, nest: 0 }
+  },
+  summaryDetailedTasks: {
+    type: 'summary',
+    summary: { type: 'tasks', depth: 0, nest: 1 }
+  },
+  summaryDaysTasks: {
+    type: 'summary',
+    summary: { type: 'daysTasks', depth: 1, nest: 0 }
+  },
+  summaryDetailedDaysTasks: {
+    type: 'summary',
+    summary: { type: 'daysTasks', depth: 1, nest: 1 }
+  }
+}
+
 const state = {
   format: 'markdown',
   formats: {
@@ -28,12 +55,13 @@ const state = {
     tasks: true,
     daysTasks: true
   },
-  data: []
+  showReportModal: true
 }
 
 const getters = {
   reportFormat: state => state.format,
   reportStructure: state => JSON.parse(JSON.stringify(state.structure)),
+  showReportModal: state => state.showReportModal,
   availableFormatsAsOptions: state => {
     return Object
       .keys(state.formats)
@@ -63,6 +91,9 @@ const mutations = {
   },
   setReportSection (state, payload) {
     state.structure.splice(payload.index, 1, JSON.parse(JSON.stringify(payload.section)))
+  },
+  setShowReportModal (state, payload) {
+    state.showReportModal = payload.showReportModal
   },
   addReportSection (state, payload) {
     state.structure.push(JSON.parse(JSON.stringify(payload.section)))

@@ -14,10 +14,12 @@ const state = {
   settings: {
     profile: true,
     authorization: true,
+    reports: true,
     displayOptions: true,
     l10n: true,
     migration: false,
-    exportImport: false
+    exportImport: false,
+    restoreAppState: false
   },
   sidebar: false,
   fullWidth: false,

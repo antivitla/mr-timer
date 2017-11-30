@@ -7,11 +7,51 @@ import { Storage } from '@/store/storage'
 import { duration, durationHuman } from '@/utils/duration'
 import i18nLabel from '@/mixins/i18n-label'
 import Report from '@/report'
+import FileSaver from 'file-saver'
+import MyExcel from '@/utils/myexcel'
+
+console.log('reloaded')
 
 function getTotalTime () {
   return Storage.entries.reduce((total, entry) => {
     return total + (new Date(entry.stop).getTime() - new Date(entry.start).getTime())
   }, 0)
+}
+
+function parseSummariesInfo (summaries) {
+  const info = {
+    maxNest: 0,
+    hasDayTasks: false
+  }
+  summaries.forEach(summary => {
+    info.maxNest = Math.max(info.maxNest, getMaxNest(summary))
+    if (isDaysTasks(summary[0])) {
+      info.hasDayTasks = true
+    }
+  })
+  return info
+}
+
+function isDaysTasks (item) {
+  return item.type.match(/day/) && item.type.match(/task/) && item.type.match(/nest/)
+}
+
+function getMaxNest (summaries, nest = 0) {
+  let maxNest = nest
+  summaries.forEach(summary => {
+    if (summary.children) {
+      maxNest = Math.max(maxNest, getMaxNest(summary.children, nest + 1))
+    }
+  })
+  return maxNest
+}
+
+function generateArray (length, value) {
+  if (value) {
+    return 'x'.repeat(length - 1).split('x').map(i => JSON.parse(JSON.stringify(value)))
+  } else {
+    return 'x'.repeat(length - 1).split('x')
+  }
 }
 
 const urlRegexp = /((https?):\/\/.*?(\s|$))/
@@ -26,11 +66,451 @@ export default {
       'isCurrencySymbolBefore',
       'price',
       'currency',
+      'locale',
       'userName',
-      'currentView'
+      'currentView',
+      'reportFormat',
+      'reportStructure',
+      'context'
     ])
   },
   methods: {
+    downloadReportWithCurrentParams () {
+      let report
+      let blob
+      if (this.reportFormat === 'markdown') {
+        report = this.generateMarkdownReport(this.reportStructure)
+      } else if (this.reportFormat === 'plaintext') {
+        report = this.generateTextReport(this.reportStructure)
+      } else if (this.reportFormat === 'spreadsheet') {
+        report = this.generateSpreadsheetReport(this.reportStructure)
+        const xlsx = this.convertToExcelReport(report.content)
+        xlsx.generate(report.filename)
+        return
+      }
+      if (this.reportFormat === 'markdown' || this.reportFormat === 'plaintext') {
+        blob = new Blob([report.content], { type: 'text/plain;charset=utf-8' })
+      } else {
+        blob = new Blob([report.content], { type: 'application/octet-stream' })
+      }
+      if (!blob) {
+        alert('No blob')
+        return
+      }
+      FileSaver.saveAs(blob, report.filename)
+    },
+
+    generateReportWithCurrentParams () {
+      if (this.reportFormat === 'markdown') {
+        return this.generateMarkdownReport(this.reportStructure)
+      } else if (this.reportFormat === 'plaintext') {
+        return this.generateTextReport(this.reportStructure)
+      } else if (this.reportFormat === 'spreadsheet') {
+        return this.generateSpreadsheetReportData(this.reportStructure)
+      }
+    },
+
+    //
+    // Spreadsheet
+    //
+
+    generateSpreadsheetReport (structure) {
+      // Collect info
+      // Has any summary price enabled?
+      // If yes, then 3 columns per level
+      // What is deepest tree?
+      // This will set global layout (total spreadsheet columns)
+      const info = {
+        priceEnabled: Boolean(this.price)
+      }
+      info.colsPerLevel = info.priceEnabled ? 3 : 2
+      // To get max depth, we need to create report data first
+      let summaries = []
+      structure.forEach(section => {
+        if (section.type === 'summary') {
+          summaries.push(Report.summary[section.summary.type]({
+            depth: parseInt(section.summary.depth, 10),
+            nest: parseInt(section.summary.nest, 10)
+          }))
+        }
+      })
+      Object.assign(info, parseSummariesInfo(summaries))
+      info.totalColumns = (info.maxNest + 1) * info.colsPerLevel
+      // Now start creating sheet
+      let sheet = []
+      structure.forEach((section, index) => {
+        if (section.type === 'header') {
+          sheet = sheet.concat(this.generateHeaderRows(info))
+        } else if (section.type === 'summary') {
+          const summary = summaries.shift()
+          // Create subheader
+          const subheader = this.generateSummarySubheaderRows({
+            info,
+            section,
+            summary
+          })
+          // Create table
+          const table = this.generateSpreadsheetSummaryRows({
+            info,
+            section,
+            summary
+          })
+          table[0].forEach(item => { item.border = 'thick' })
+          // Add rows to align main task names
+          if (section.summary.type === 'tasks') {
+            for (let r = 0; r < subheader.length; r++) {
+              if (subheader[r].length < info.totalColumns) {
+                const l = info.totalColumns - subheader[r].length
+                console.log(l)
+                for (let c = 0; c < l; c++) {
+                  subheader[r].unshift('')
+                }
+              }
+            }
+            for (let r = 0; r < table.length; r++) {
+              if (table[r].length < info.totalColumns) {
+                const l = info.totalColumns - table[r].length
+                for (let c = 0; c < l; c++) {
+                  table[r].unshift('')
+                }
+              }
+            }
+          } else if (section.summary.type === 'daysTasks') {
+            for (let r = 0; r < subheader.length; r++) {
+              if (subheader[r].length < info.totalColumns) {
+                const l = info.totalColumns - subheader[r].length
+                for (let c = 0; c < l; c++) {
+                  if (info.priceEnabled) {
+                    subheader[r].splice(3, 0, this.generateCell({
+                      value: '',
+                      type: 'string subheader',
+                      sectionType: 'daysTasks',
+                      border: subheader[r][0].border
+                    }))
+                  } else {
+                    subheader[r].splice(2, 0, this.generateCell({
+                      value: '',
+                      type: 'string subheader',
+                      sectionType: 'daysTasks',
+                      border: subheader[r][0].border
+                    }))
+                  }
+                }
+              }
+            }
+            for (let r = 0; r < table.length; r++) {
+              if (table[r].length < info.totalColumns) {
+                const l = info.totalColumns - table[r].length
+                for (let c = 0; c < l; c++) {
+                  console.log(table[r][0].border)
+                  if (info.priceEnabled) {
+                    table[r].splice(3, 0, this.generateCell({
+                      value: '',
+                      type: 'string',
+                      sectionType: 'daysTasks',
+                      border: table[r][0].border
+                    }))
+                  } else {
+                    table[r].splice(2, 0, this.generateCell({
+                      value: '',
+                      type: 'string',
+                      sectionType: 'daysTasks',
+                      border: table[r][0].border
+                    }))
+                  }
+                }
+              }
+            }
+          }
+
+          sheet = sheet.concat(subheader).concat(table)
+
+          // Create space if not last
+          if (index < structure.length - 1) {
+            sheet = sheet.concat([
+              generateArray(info.totalColumns),
+              generateArray(info.totalColumns)
+            ])
+          }
+        }
+      })
+      // add another space
+      sheet.unshift(generateArray(info.totalColumns))
+      sheet.unshift(generateArray(info.totalColumns))
+      sheet.forEach(row => row.unshift(''))
+      const filename = `${this.userName}.${this.context.join(' - ')}.${this.generateMarkdownPeriod()}.report.xlsx`
+      return {
+        filename: slugify(filename.replace('.undefined', '')),
+        content: sheet
+      }
+    },
+
+    generateCommonHeader () {
+      const context = this.context.join(taskDelimiter)
+      const period = this.generateTextPeriod()
+      let title = this.label('report.reportOnFor').replace('%0', context)
+      if (!context) {
+        title = this.label('report.commonReport')
+      }
+      return `${title}${period ? ', ' + period : ''}`
+    },
+
+    generateHeaderRows (info) {
+      let header = generateArray(info.totalColumns)
+      const dur = getTotalTime()
+      if (info.priceEnabled) {
+        header[header.length - 1] = this.generateCell({
+          value: Math.ceil(dur * this.price / 3600000),
+          type: 'price',
+          sectionType: 'header'
+        })
+        header[header.length - 2] = this.generateCell({
+          value: dur,
+          type: 'duration',
+          sectionType: 'header'
+        })
+      } else {
+        header[header.length - 1] = this.generateCell({
+          value: dur,
+          type: 'duration',
+          sectionType: 'header'
+        })
+      }
+      header[0] = this.generateCell({
+        value: this.generateCommonHeader(),
+        type: 'string',
+        sectionType: 'header'
+      })
+      return [
+        header,
+        generateArray(info.totalColumns),
+        generateArray(info.totalColumns)
+      ]
+    },
+
+    generateSummarySubheaderRows ({ info, section, summary }) {
+      const subheader = {
+        'daysTasks': this.label('report.headerDaysTasks'),
+        'tasks': this.label('report.headerTasks'),
+        'days': this.label('report.headerDays')
+      }
+      const detailedSubheader = {
+        'daysTasks': this.label('report.headerDetailedDaysTasks'),
+        'tasks': this.label('report.headerDetailedTasks')
+      }
+      let title
+      if (!parseInt(section.summary.nest, 10)) {
+        title = subheader[section.summary.type]
+      } else {
+        title = detailedSubheader[section.summary.type]
+      }
+      let length = (getMaxNest(summary) + 1) * info.colsPerLevel
+      const row = generateArray(length, this.generateCell({
+        value: '',
+        type: 'string subheader',
+        sectionType: section.summary.type
+      }))
+      const dur = getTotalTime()
+      row[0] = this.generateCell({
+        value: title,
+        type: 'string subheader',
+        sectionType: section.summary.type
+      })
+      if (info.priceEnabled) {
+        row[row.length - 1] = this.generateCell({
+          value: Math.ceil(dur * this.price / 3600000),
+          type: 'price subheader',
+          sectionType: section.summary.type
+        })
+        row[row.length - 2] = this.generateCell({
+          value: dur,
+          type: 'duration subheader',
+          sectionType: section.summary.type
+        })
+      } else {
+        row[row.length - 1] = this.generateCell({
+          value: dur,
+          type: 'duration subheader',
+          sectionType: section.summary.type
+        })
+      }
+      return [row]
+    },
+
+    generateSpreadsheetSummaryRows ({ info, section, summary, depth = 0, totalLength }) {
+      let table = []
+      const length = totalLength || ((getMaxNest(summary) + 1) * info.colsPerLevel)
+      summary.forEach((item, index) => {
+        const row = generateArray(length, {
+          value: '',
+          type: 'string',
+          sectionType: section.summary.type
+        })
+        const pos = depth * 3
+        row[pos] = this.generateCell({
+          value: item.value,
+          type: 'string',
+          sectionType: section.summary.type
+        })
+        row[pos + 1] = this.generateCell({
+          value: item.duration,
+          type: 'duration',
+          sectionType: section.summary.type
+        })
+        if (info.priceEnabled) {
+          row[pos + 2] = this.generateCell({
+            value: Math.ceil(item.duration * this.price / 3600000),
+            type: 'price',
+            sectionType: section.summary.type
+          })
+        }
+        table.push(row)
+        if (item.children) {
+          const rows = this.generateSpreadsheetSummaryRows({
+            info,
+            section,
+            summary: item.children,
+            depth: depth + 1,
+            totalLength: length
+          })
+          const firstRow = rows.shift()
+          for (let i = 0; i < row.length; i++) {
+            row[i] = row[i].value ? row[i] : firstRow[i]
+          }
+          row.forEach(item => {
+            item.border = depth ? 'thin' : 'medium'
+          })
+          table = table.concat(rows)
+        }
+      })
+      return table
+    },
+
+    generateCell ({ value, type, sectionType, border }) {
+      const cell = { value, type, sectionType }
+      if (value instanceof Date) {
+        cell.type = 'date'
+      } else if (!type) {
+        cell.type = 'string'
+      }
+      if (sectionType) {
+        cell.sectionType = sectionType
+      }
+      if (border) {
+        cell.border = border
+      }
+      return cell
+    },
+
+    convertToExcelReport (table, info) {
+      const xlsx = MyExcel.new('Arial 10')
+      // fix empty last cells in trees
+      for (let r = 0; r < table.length; r++) {
+        let rowSectionType
+        for (let c = 0; c < table[r].length; c++) {
+          if (table[r][c].value) {
+            rowSectionType = table[r][c].sectionType
+            break
+          }
+        }
+        if (rowSectionType && rowSectionType !== 'days' && table[r][table[r].length - 1] && !table[r][table[r].length - 1].value) {
+          let dur
+          let price
+          for (let i = table[r].length - 1; i > -1; i--) {
+            if (table[r][i].value) {
+              if (this.price) {
+                price = table[r][i]
+                dur = table[r][i - 1]
+              } else {
+                dur = table[r][i]
+              }
+              break
+            }
+          }
+          if (price && dur) {
+            table[r][table[r].length - 2] = JSON.parse(JSON.stringify(dur))
+            table[r][table[r].length - 1] = JSON.parse(JSON.stringify(price))
+          } else if (dur) {
+            table[r][table[r].length - 1] = JSON.parse(JSON.stringify(dur))
+          }
+        }
+      }
+
+      table.forEach((row, r) => {
+        row.forEach((cell, c) => {
+          xlsx.set(0, undefined, r, 21)
+          // Set cells
+          const style = {
+            align: 'L C',
+            font: 'Arial 10 #333333'
+          }
+          const props = {
+            sheet: 0,
+            row: r,
+            column: c,
+            value: (cell ? cell.value : '')
+          }
+          if (cell) {
+            if (cell.type.match(/date/)) {
+              props.value = moment(props.value).format('D MMMM').replace(' г.', '')
+            } else if (cell.type.match(/duration/)) {
+              props.value = duration(props.value).format('HH:mm')
+              style.align = 'C C'
+              style.font = style.font.replace('#333333', '#3C78D8')
+            } else if (cell.type.match(/price/)) {
+              style.format = '# ##0'
+              if (c < table[0].length - 3 && cell.sectionType !== 'days') {
+                style.align = 'C C'
+              } else {
+                style.align = 'R C'
+              }
+              style.font = style.font.replace('#333333', '#6AA84F')
+            }
+            if (cell.type.match(/subheader/)) {
+              style.font = style.font.replace('10', '12') + ' B'
+              if (cell.type.match(/string/) && cell.sectionType !== 'days') {
+                style.font = style.font.replace('12', '16')
+              }
+              // style.align = style.align.replace(/C$/, 'T')
+              if (cell.type.match(/price/)) {
+                // style.align = 'R T'
+                const curr = {
+                  rub: '# ##0 [$₽-419]',
+                  cny: '[$￥-804] # ##0',
+                  eur: '# ##0 [$€-40C]',
+                  usd: '[$$-409] # ##0'
+                }
+                style.format = curr[this.currency]
+              }
+              xlsx.set(0, undefined, r, 30)
+            }
+            if (cell.border === 'thick') {
+              style.border = 'none,none,thick #444444,none'
+            } else if (cell.border === 'medium') {
+              style.border = 'none,none,medium #444444,none'
+            } else if (cell.border === 'thin') {
+              // style.border = 'none,none,thin #333333,none'
+            }
+          }
+          if ((c - 1) % (this.price ? 3 : 2) === 0 && c < table[0].length - (this.price ? 3 : 2)) {
+            xlsx.set(0, c, undefined, 20)
+          }
+          if ((c - 1) % (this.price ? 3 : 2) === 1) {
+            xlsx.set(0, c, undefined, 9)
+          }
+          if ((c - 1) % (this.price ? 3 : 2) === 2) {
+            xlsx.set(0, c, undefined, 12)
+          }
+          if (!cell || !cell.value) {
+            // style.border = 'thin #ffffff,thin #ffffff,none,none'
+          }
+          props.style = xlsx.addStyle(style)
+          xlsx.set(props)
+        })
+      })
+      xlsx.set(0, table[0].length - (this.price ? 3 : 2), undefined, 60)
+      return xlsx
+    },
 
     //
     // Text Report
@@ -105,7 +585,9 @@ export default {
     generateTextTotal () {
       const l = this.label('duration', false)
       const total = durationHuman(getTotalTime(), l.hr, l.min, l.sec)
-      return `${this.label('report.total')}: ${total}`
+      const line = `${this.label('report.total')}: ${total}`
+      const space = ' '.repeat(33 - line.length * 0.5)
+      return space + line + space
     },
 
     generateTextHeader () {
@@ -117,15 +599,17 @@ export default {
       }
       if (context) {
         const header = `${title}${period ? ', ' + period : ''}`
+        const space = ' '.repeat(33 - header.length * 0.5)
         return [
-          header,
-          '='.repeat(header.length)
+          space + header + space,
+          space + '='.repeat(header.length) + space
         ]
       } else {
         const header = `${title}${period ? ', ' + period : ''}`
+        const space = ' '.repeat(33 - header.length * 0.5)
         return [
-          header,
-          '='.repeat(header.length)
+          space + header + space,
+          space + '='.repeat(header.length) + space
         ]
       }
     },
@@ -136,7 +620,9 @@ export default {
         const to = moment(Storage.entries[0].start)
         if (this.locale === 'ru') {
           if (from.year() === to.year()) {
-            if (from.month() === to.month()) {
+            if (from.month() === to.month() && from.date() === to.date()) {
+              return `${from.format('LL')}`
+            } else if (from.month() === to.month()) {
               return `${from.format('D')}-${to.format('D MMMM YYYY')}`
             } else {
               return `${from.format('D MMMM')} - ${to.format('D MMMM YYYY')}`
@@ -146,7 +632,9 @@ export default {
           }
         } else {
           if (from.year() === to.year()) {
-            if (from.month() === to.month()) {
+            if (from.month() === to.month() && from.date() === to.date()) {
+              return `${from.format('LL')}`
+            } else if (from.month() === to.month()) {
               return `${from.format('MMMM')} ${from.format('D')}-${to.format('D YYYY')}`
             } else {
               return `${from.format('MMMM D')} - ${to.format('MMMM D YYYY')}`
@@ -183,10 +671,12 @@ export default {
     generateTextDayLine (item, isShort = false) {
       const name = moment(item.value).format('DD MMMM YYYY')
       const d = duration(item.duration).format('HH:mm')
-      const maxSpace = isShort ? 30 : 60
+      const maxSpace = isShort ? 60 : 60
       const space = (name.length < maxSpace ? ' .'.repeat(parseInt((maxSpace - name.length) * 0.5, 10)) : ' .')
       const addon = (name.length % 2 === 1 ? ' ' : '')
-      return [`${name}${addon}${space} ${d}`]
+      const line = `${name}${addon}${space} ${d}`
+      // const s = ' '.repeat(33 - line.length * 0.5)
+      return [line]
     },
     generateTextTaskLines (item, depth = 0) {
       if (!isNest(item)) {
@@ -305,7 +795,9 @@ export default {
         const to = moment(Storage.entries[0].start)
         if (this.locale === 'ru') {
           if (from.year() === to.year()) {
-            if (from.month() === to.month()) {
+            if (from.month() === to.month() && from.date() === to.date()) {
+              return `${from.format('LL')}`
+            } else if (from.month() === to.month()) {
               return `${from.format('D')}-${to.format('D MMMM YYYY')}`
             } else {
               return `${from.format('D MMMM')} - ${to.format('D MMMM YYYY')}`
@@ -315,7 +807,9 @@ export default {
           }
         } else {
           if (from.year() === to.year()) {
-            if (from.month() === to.month()) {
+            if (from.month() === to.month() && from.date() === to.date()) {
+              return `${from.format('LL')}`
+            } else if (from.month() === to.month()) {
               return `${from.format('MMMM')} ${from.format('D')}-${to.format('D YYYY')}`
             } else {
               return `${from.format('MMMM D')} - ${to.format('MMMM D YYYY')}`
@@ -384,14 +878,6 @@ export default {
         const addon = (name.length % 2 === 1 ? ' ' : '')
         return `${name}${addon}${space} ${d}`
       }
-    },
-
-    //
-    // Spreadsheet Report
-    //
-
-    generateSpreadsheetSummary () {
-      console.log('spread sheet')
     }
   },
   mixins: [

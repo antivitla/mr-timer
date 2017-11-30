@@ -34,6 +34,8 @@
           l10n: false,
           migration: false,
           exportImport: false,
+          restoreAppState: false,
+          reports: false,
           tasks: false,
           years: false,
           months: false,
@@ -72,6 +74,16 @@
       'models.exportImport': function () {
         this.setAvailableSettings({
           exportImport: this.models.exportImport
+        })
+      },
+      'models.restoreAppState': function () {
+        this.setAvailableSettings({
+          restoreAppState: this.models.restoreAppState
+        })
+      },
+      'models.reports': function () {
+        this.setAvailableSettings({
+          reports: this.models.reports
         })
       },
       'models.displayOptions': function () {
