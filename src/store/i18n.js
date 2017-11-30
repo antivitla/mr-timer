@@ -94,7 +94,7 @@ const ru = ({
     format: {
       markdown: 'Markdown (.md)',
       plaintext: 'Plain Text (.txt)',
-      spreadsheet: 'Spreadsheet (.ods)',
+      spreadsheet: 'Spreadsheet (.xlsx)',
       document: 'Document (.odt)',
       html: 'HTML (.html)',
       pdf: 'PDF (.pdf)',
@@ -130,7 +130,10 @@ const ru = ({
     },
     emptyStructure: 'создайте разделы кликом по кнопкам ниже или перетаскиванием их сюда',
     togglePreviewLabel: 'вкл/выкл предпросмотр',
-    nothingToPreview: 'нет предпросмотра'
+    nothingToPreview: 'нет предпросмотра',
+    totalMoney: 'всего денег',
+    totalTime: 'времени',
+    moneyPerHour: 'денег в час'
   },
   context: {
     clear: 'убрать  контекст',
@@ -328,7 +331,10 @@ const en = ({
     },
     emptyStructure: 'create sections by clicking buttons below or dragging\'em here',
     togglePreviewLabel: 'toggle report preview',
-    nothingToPreview: 'no preview'
+    nothingToPreview: 'no preview',
+    totalMoney: 'total money',
+    totalTime: 'time',
+    moneyPerHour: 'money per hour'
   },
   context: {
     clear: 'clear current task',

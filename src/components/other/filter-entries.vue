@@ -34,7 +34,7 @@
     },
     mounted () {
       if (this.isFilter) {
-        this.filterModel = this.filter
+        this.filterModel = this.filter.join(taskDelimiter)
       }
     },
     computed: {
@@ -45,8 +45,8 @@
     },
     methods: {
       changeFilter (filter) {
-        this.filterModel = filter.slice(0)
-        this.setFilter({ filter: this.filterModel })
+        this.filterModel = filter.slice(0).join(taskDelimiter)
+        this.setFilter({ filter: this.filterModel.split(taskDelimiter) })
       },
       ...mapMutations([
         'setFilter'

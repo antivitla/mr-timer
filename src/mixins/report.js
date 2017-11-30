@@ -1,7 +1,6 @@
 import moment from 'moment'
 import slugify from 'slugify'
-import { mapGetters } from 'vuex'
-// import { currencies } from '@/store/i18n'
+import { mapGetters, mapMutations } from 'vuex'
 import { taskDelimiter } from '@/store/ui'
 import { Storage } from '@/store/storage'
 import { duration, durationHuman } from '@/utils/duration'
@@ -9,13 +8,16 @@ import i18nLabel from '@/mixins/i18n-label'
 import Report from '@/report'
 import FileSaver from 'file-saver'
 import MyExcel from '@/utils/myexcel'
-
-console.log('reloaded')
+import bus from '@/event-bus'
 
 function getTotalTime () {
   return Storage.entries.reduce((total, entry) => {
     return total + (new Date(entry.stop).getTime() - new Date(entry.start).getTime())
   }, 0)
+}
+
+function isDaysTasks (item) {
+  return item.type.match(/day/) && item.type.match(/task/) && item.type.match(/nest/)
 }
 
 function parseSummariesInfo (summaries) {
@@ -25,15 +27,11 @@ function parseSummariesInfo (summaries) {
   }
   summaries.forEach(summary => {
     info.maxNest = Math.max(info.maxNest, getMaxNest(summary))
-    if (isDaysTasks(summary[0])) {
+    if (summary[0] && isDaysTasks(summary[0])) {
       info.hasDayTasks = true
     }
   })
   return info
-}
-
-function isDaysTasks (item) {
-  return item.type.match(/day/) && item.type.match(/task/) && item.type.match(/nest/)
 }
 
 function getMaxNest (summaries, nest = 0) {
@@ -76,6 +74,11 @@ export default {
   },
   methods: {
     downloadReportWithCurrentParams () {
+      if (!Storage.entries.length) {
+        bus.$emit('toast', { content: 'Nothing to report - no entries' })
+        this.closeModal()
+        return
+      }
       let report
       let blob
       if (this.reportFormat === 'markdown') {
@@ -84,7 +87,7 @@ export default {
         report = this.generateTextReport(this.reportStructure)
       } else if (this.reportFormat === 'spreadsheet') {
         report = this.generateSpreadsheetReport(this.reportStructure)
-        const xlsx = this.convertToExcelReport(report.content)
+        const xlsx = this.convertToExcelReport(report.content, report.info)
         xlsx.generate(report.filename)
         return
       }
@@ -105,8 +108,6 @@ export default {
         return this.generateMarkdownReport(this.reportStructure)
       } else if (this.reportFormat === 'plaintext') {
         return this.generateTextReport(this.reportStructure)
-      } else if (this.reportFormat === 'spreadsheet') {
-        return this.generateSpreadsheetReportData(this.reportStructure)
       }
     },
 
@@ -161,7 +162,6 @@ export default {
             for (let r = 0; r < subheader.length; r++) {
               if (subheader[r].length < info.totalColumns) {
                 const l = info.totalColumns - subheader[r].length
-                console.log(l)
                 for (let c = 0; c < l; c++) {
                   subheader[r].unshift('')
                 }
@@ -202,7 +202,6 @@ export default {
               if (table[r].length < info.totalColumns) {
                 const l = info.totalColumns - table[r].length
                 for (let c = 0; c < l; c++) {
-                  console.log(table[r][0].border)
                   if (info.priceEnabled) {
                     table[r].splice(3, 0, this.generateCell({
                       value: '',
@@ -224,14 +223,10 @@ export default {
           }
 
           sheet = sheet.concat(subheader).concat(table)
-
-          // Create space if not last
-          if (index < structure.length - 1) {
-            sheet = sheet.concat([
-              generateArray(info.totalColumns),
-              generateArray(info.totalColumns)
-            ])
-          }
+          sheet = sheet.concat([
+            generateArray(info.totalColumns),
+            generateArray(info.totalColumns)
+          ])
         }
       })
       // add another space
@@ -241,7 +236,8 @@ export default {
       const filename = `${this.userName}.${this.context.join(' - ')}.${this.generateMarkdownPeriod()}.report.xlsx`
       return {
         filename: slugify(filename.replace('.undefined', '')),
-        content: sheet
+        content: sheet,
+        info
       }
     },
 
@@ -281,7 +277,30 @@ export default {
         type: 'string',
         sectionType: 'header'
       })
+
+      if (this.price) {
+        header[header.length - 3] = this.generateCell({
+          value: this.price,
+          type: 'value perhour',
+          sectionType: 'header'
+        })
+      }
+      const labels = generateArray(header.length, this.generateCell({
+        type: 'string small',
+        sectionType: 'header',
+        value: ''
+      }))
+      if (this.price) {
+        labels[header.length - 1].value = this.label('report.totalMoney', false)
+        labels[header.length - 2].value = this.label('report.totalTime', false)
+        labels[header.length - 2].type += ' center'
+        labels[header.length - 3].value = this.label('report.moneyPerHour', false)
+      } else {
+        labels[header.length - 1].value = this.label('report.totalTime', false)
+        labels[header.length - 1].type += ' center'
+      }
       return [
+        labels,
         header,
         generateArray(info.totalColumns),
         generateArray(info.totalColumns)
@@ -346,7 +365,7 @@ export default {
           type: 'string',
           sectionType: section.summary.type
         })
-        const pos = depth * 3
+        const pos = depth * (this.price ? 3 : 2)
         row[pos] = this.generateCell({
           value: item.value,
           type: 'string',
@@ -365,7 +384,7 @@ export default {
           })
         }
         table.push(row)
-        if (item.children) {
+        if (item.children && item.children.length) {
           const rows = this.generateSpreadsheetSummaryRows({
             info,
             section,
@@ -403,17 +422,23 @@ export default {
     },
 
     convertToExcelReport (table, info) {
+      const curr = {
+        rub: '# ##0 [$₽-419]',
+        cny: '[$￥-804] # ##0',
+        eur: '# ##0 [$€-40C]',
+        usd: '[$$-409] # ##0'
+      }
       const xlsx = MyExcel.new('Arial 10')
       // fix empty last cells in trees
       for (let r = 0; r < table.length; r++) {
         let rowSectionType
         for (let c = 0; c < table[r].length; c++) {
-          if (table[r][c].value) {
+          if (table[r][c] && table[r][c].value) {
             rowSectionType = table[r][c].sectionType
             break
           }
         }
-        if (rowSectionType && rowSectionType !== 'days' && table[r][table[r].length - 1] && !table[r][table[r].length - 1].value) {
+        if (rowSectionType && rowSectionType !== 'days' && rowSectionType !== 'header' && table[r][table[r].length - 1] && !table[r][table[r].length - 1].value) {
           let dur
           let price
           for (let i = table[r].length - 1; i > -1; i--) {
@@ -438,11 +463,12 @@ export default {
 
       table.forEach((row, r) => {
         row.forEach((cell, c) => {
-          xlsx.set(0, undefined, r, 21)
+          xlsx.set(0, undefined, r, 20)
           // Set cells
           const style = {
             align: 'L C',
-            font: 'Arial 10 #333333'
+            font: 'Arial 10 #333333',
+            fill: '#f8f8f8'
           }
           const props = {
             sheet: 0,
@@ -456,7 +482,7 @@ export default {
             } else if (cell.type.match(/duration/)) {
               props.value = duration(props.value).format('HH:mm')
               style.align = 'C C'
-              style.font = style.font.replace('#333333', '#3C78D8')
+              style.font = style.font.replace('#333333', '#888888')
             } else if (cell.type.match(/price/)) {
               style.format = '# ##0'
               if (c < table[0].length - 3 && cell.sectionType !== 'days') {
@@ -464,24 +490,47 @@ export default {
               } else {
                 style.align = 'R C'
               }
-              style.font = style.font.replace('#333333', '#6AA84F')
+              style.font = style.font.replace('#333333', '#333333') + ' B'
+            }
+            if (cell.sectionType === 'header') {
+              style.font = style.font.replace('10', '18') + ' B'
+              xlsx.set(0, undefined, r, 30)
+              if (cell.type.match(/price/) || cell.type.match(/duration/)) {
+                style.font = style.font.replace('18', '12')
+              }
+              if (cell.type.match(/price/)) {
+                // style.align = 'R T'
+                style.format = curr[this.currency]
+              }
+              if (cell.type.match(/perhour/)) {
+                style.font = style.font.replace('18', '10')
+                style.font = style.font.replace(' B', '')
+                if (cell.type.match(/value/)) {
+                  // style.font = style.font.replace('#333333', '#C23D0C')
+                  style.font = style.font.replace('10', '12') + ' B'
+                  style.format = curr[this.currency]
+                  style.align = 'R C'
+                }
+              } else if (cell.type.match(/small/)) {
+                style.font = style.font.replace('18', '10')
+                style.font = style.font.replace(' B', '')
+                style.align = 'R C'
+                if (cell.type.match(/center/)) {
+                  style.align = 'C C'
+                }
+              }
             }
             if (cell.type.match(/subheader/)) {
               style.font = style.font.replace('10', '12') + ' B'
               if (cell.type.match(/string/) && cell.sectionType !== 'days') {
-                style.font = style.font.replace('12', '16')
+                // style.font = style.font.replace('12', '14')
               }
               // style.align = style.align.replace(/C$/, 'T')
               if (cell.type.match(/price/)) {
                 // style.align = 'R T'
-                const curr = {
-                  rub: '# ##0 [$₽-419]',
-                  cny: '[$￥-804] # ##0',
-                  eur: '# ##0 [$€-40C]',
-                  usd: '[$$-409] # ##0'
-                }
                 style.format = curr[this.currency]
               }
+              // style.fill = '#dcdcdc'
               xlsx.set(0, undefined, r, 30)
             }
             if (cell.border === 'thick') {
@@ -492,7 +541,7 @@ export default {
               // style.border = 'none,none,thin #333333,none'
             }
           }
-          if ((c - 1) % (this.price ? 3 : 2) === 0 && c < table[0].length - (this.price ? 3 : 2)) {
+          if ((c - 1) % (this.price ? 3 : 2) === 0 && c < info.totalColumns - (this.price ? 3 : 2)) {
             xlsx.set(0, c, undefined, 20)
           }
           if ((c - 1) % (this.price ? 3 : 2) === 1) {
@@ -508,7 +557,24 @@ export default {
           xlsx.set(props)
         })
       })
-      xlsx.set(0, table[0].length - (this.price ? 3 : 2), undefined, 60)
+      xlsx.set(0, info.totalColumns + 1 - (this.price ? 3 : 2), undefined, 60)
+      if (this.price) {
+        xlsx.set(0, info.totalColumns, undefined, 13)
+      }
+      table.forEach((row, index) => {
+        while (row.length <= info.totalColumns + 1) {
+          row.push('')
+          xlsx.set({
+            sheet: 0,
+            row: index,
+            column: row.length - 1,
+            value: '',
+            style: xlsx.addStyle({
+              fill: '#f8f8f8'
+            })
+          })
+        }
+      })
       return xlsx
     },
 
@@ -878,7 +944,10 @@ export default {
         const addon = (name.length % 2 === 1 ? ' ' : '')
         return `${name}${addon}${space} ${d}`
       }
-    }
+    },
+    ...mapMutations([
+      'closeModal'
+    ])
   },
   mixins: [
     i18nLabel

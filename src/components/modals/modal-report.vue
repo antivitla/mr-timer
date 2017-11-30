@@ -10,7 +10,7 @@
           v-for="option in availableFormatsAsOptions"
           :value="option.value") {{ label(option.label) }}
     //- Preview
-    .preview
+    .preview(v-if="reportFormat === 'markdown' || reportFormat === 'plaintext'")
       h3 {{ label('report.previewLabel') }}
       .preview-toggle(
         v-if="previewVisible"
@@ -136,6 +136,9 @@
           text-align center
       .report-preview + .preview-toggle
         margin-top 20px
+
+    .format + .download
+      margin-top 40px
 
     .download
       button
