@@ -110,6 +110,14 @@
       & + *
         margin-left 0px
     .vdp-datepicker
+      .vdp-datepicker__calendar
+        border-top-left-radius 5px
+        border-top-right-radius 5px
+        .next:hover
+          border-top-right-radius 5px
+        .prev:hover
+          border-top-left-radius 5px
+
       input[type="text"]
         cursor pointer
         border none
