@@ -222,6 +222,7 @@ export default {
             }
           }
 
+          subheader[0][subheader[0].length - (this.price ? 2 : 1)].timeRowsDown = table.length
           sheet = sheet.concat(subheader).concat(table)
           sheet = sheet.concat([
             generateArray(info.totalColumns),
@@ -384,8 +385,9 @@ export default {
           })
         }
         table.push(row)
+        let rows = []
         if (item.children && item.children.length) {
-          const rows = this.generateSpreadsheetSummaryRows({
+          rows = this.generateSpreadsheetSummaryRows({
             info,
             section,
             summary: item.children,
@@ -400,6 +402,11 @@ export default {
             item.border = depth ? 'thin' : 'medium'
           })
           table = table.concat(rows)
+        }
+        if (item.children) {
+          // set formula
+          row[pos + 1].childrenTimeRows = rows.length
+          console.log(row[pos + 1], item.children, rows)
         }
       })
       return table
@@ -461,6 +468,8 @@ export default {
         }
       }
 
+      const abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+
       table.forEach((row, r) => {
         row.forEach((cell, c) => {
           xlsx.set(0, undefined, r, 20)
@@ -480,10 +489,17 @@ export default {
             if (cell.type.match(/date/)) {
               props.value = moment(props.value).format('D MMMM').replace(' г.', '')
             } else if (cell.type.match(/duration/)) {
-              props.value = duration(props.value).format('HH:mm')
+              props.value = props.value / (24 * 3600000) // duration(props.value).format('H:mm')
+              // if had children
+              if (cell.childrenTimeRows !== undefined) {
+                props.value = `=SUM(${abc[info.totalColumns - (this.price ? 1 : 0)]}${r + 1}:${abc[info.totalColumns - (this.price ? 1 : 0)]}${r + 1 + cell.childrenTimeRows})`
+                // console.log(cell.childrenTimeRows)
+              }
               style.align = 'C C'
               style.font = style.font.replace('#333333', '#888888')
+              style.format = '[h]:mm'
             } else if (cell.type.match(/price/)) {
+              props.value = `=${abc[c - 1]}${r + 1}*24*${this.price}`
               style.format = '# ##0'
               if (c < table[0].length - 3 && cell.sectionType !== 'days') {
                 style.align = 'C C'
@@ -529,6 +545,10 @@ export default {
               if (cell.type.match(/price/)) {
                 // style.align = 'R T'
                 style.format = curr[this.currency]
+              } else if (cell.type.match(/duration/)) {
+                if (cell.timeRowsDown !== undefined) {
+                  props.value = `=SUM(${abc[c]}${r + 2}:${abc[c]}${r + 2 + cell.timeRowsDown})`
+                }
               }
               // style.fill = '#dcdcdc'
               xlsx.set(0, undefined, r, 30)

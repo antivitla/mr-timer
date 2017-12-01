@@ -27,6 +27,18 @@ const durationFormat = {
     return hh + ':' + mm
   },
 
+  'H:mm': function (ms) {
+    let hh = 0
+    if (ms >= 3600000) {
+      hh = parseInt(ms / 3600000, 10)
+    }
+    let mm = parseInt((ms % 3600000) / 60000, 10)
+    if (mm < 10) {
+      mm = ('0' + mm).substr(-2)
+    }
+    return hh + ':' + mm
+  },
+
   'HH:mm:ss': function (ms) {
     let hh = 0
     if (ms >= 3600000) {
@@ -34,6 +46,22 @@ const durationFormat = {
     }
     if (hh < 10) {
       hh = ('0' + hh).substr(-2)
+    }
+    let mm = parseInt((ms % 3600000) / 60000, 10)
+    if (mm < 10) {
+      mm = ('0' + mm).substr(-2)
+    }
+    let ss = parseInt((ms % 60000) / 1000, 10)
+    if (ss < 10) {
+      ss = ('0' + ss).substr(-2)
+    }
+    return hh + ':' + mm + ':' + ss
+  },
+
+  'H:mm:ss': function (ms) {
+    let hh = 0
+    if (ms >= 3600000) {
+      hh = parseInt(ms / 3600000, 10)
     }
     let mm = parseInt((ms % 3600000) / 60000, 10)
     if (mm < 10) {
