@@ -18,8 +18,7 @@
     timer(slot="page")
     //- Timeline
     //- timeline(slot="page")
-    //- view-report(slot="page" :source="Months.children")
-    //- Debug Bdckend
+    //- Debug Backend
     //- mitaba(slot="page")
     //- Navbar
     app-navbar.menu(slot="page")
@@ -77,7 +76,6 @@
   import viewMonths from '@/components/views/view-months'
   import viewDays from '@/components/views/view-days'
   import viewStorage from '@/components/views/view-storage'
-  import viewReport from '@/components/views/view-report'
   // Mixins
   import appTips from '@/mixins/app-tips'
   import i18nLabel from '@/mixins/i18n-label'
@@ -180,6 +178,19 @@
         },
         updatePagination: mutation => {
           this.getEntriesWithCurrentParams()
+          // bus.$emit('scroll-top')
+        },
+        setIntervalStart: mutation => {
+          this.getEntriesWithCurrentParams()
+          // bus.$emit('scroll-top')
+        },
+        setIntervalStop: mutation => {
+          this.getEntriesWithCurrentParams()
+          // bus.$emit('scroll-top')
+        },
+        setPaginationOrInterval: mutation => {
+          this.getEntriesWithCurrentParams()
+          this.closeSidebar()
           bus.$emit('scroll-top')
         }
       }
@@ -297,7 +308,6 @@
       viewMonths,
       viewDays,
       viewStorage,
-      viewReport,
       timer,
       timeline,
       mitaba,

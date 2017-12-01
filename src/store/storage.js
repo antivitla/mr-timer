@@ -123,7 +123,11 @@ const actions = {
         context.commit('clearEntries')
         context.commit('clearPagination')
       } else if (error.message !== 'ignore') {
-        bus.$emit('toast', { content: error.message || error.response.statusText })
+        if (error.response && error.response.data && error.response.data.detail) {
+          bus.$emit('toast', { content: error.message + ': ' + error.response.data.detail })
+        } else {
+          bus.$emit('toast', { content: error.message || error.response.statusText })
+        }
       }
       bus.$emit('get-entries-complete')
     })

@@ -6,6 +6,9 @@ export default {
       'currentView',
       'pagination',
       'isPagination',
+      'isInterval',
+      'intervalStart',
+      'intervalStop',
       'filter'
     ])
   },
@@ -25,11 +28,21 @@ export default {
           params.last = this.currentView
         }
         return params
-      } else {
-        return {
-          start_from: new Date(),
-          start_to: new Date()
+      } else if (this.isInterval) {
+        /* eslint-disable camelcase */
+        let params = {}
+        const start_from = this.intervalStart && new Date(this.intervalStart).toISOString()
+        const start_to = this.intervalStop && new Date(this.intervalStop).toISOString()
+        if (start_from && start_to) {
+          params = { start_from, start_to }
+        } else if (start_from) {
+          params = { start_from }
+        } else if (start_to) {
+          params = { start_to }
+        } else {
+          params = { start_from: 'auto', start_to: 'auto' }
         }
+        return params
       }
     },
     getEntriesWithCurrentParams () {

@@ -2,28 +2,36 @@
   .view-interval
     .from
       datepicker(
-        v-model="from"
+        v-model="start"
         :language="locale"
-        :minimumView="minView"
-        :maximumView="maxView"
+        :initialView="initialView"
+        :monday-first="true"
+        :clear-button="true"
+        :clear-button-icon="'clear-date material-icons'"
+        @selected="selectIntervalStart"
         :format="customFormatter")
-      i.material-icons keyboard_arrow_down
+      i.material-icons.open keyboard_arrow_down
+      .auto(v-if="!start") начало времён
     .to
-      i.material-icons keyboard_arrow_down
+      i.material-icons.open keyboard_arrow_down
       datepicker(
-        v-model="to"
+        v-model="stop"
         :language="locale"
-        :minimumView="minView"
-        :maximumView="maxView"
+        :initialView="initialView"
+        :monday-first="true"
+        :clear-button="true"
+        :clear-button-icon="'clear-date material-icons'"
+        @selected="selectIntervalStop"
         :format="customFormatter")
+      .auto(v-if="!stop") сегодня
 </template>
 <script>
   import moment from 'moment'
-  import { mapGetters } from 'vuex'
+  import { mapGetters, mapMutations } from 'vuex'
   import Datepicker from 'vuejs-datepicker'
-  import bus from '@/event-bus'
-  import { Storage } from '@/store/storage'
   import capitalize from '@/utils/capitalize'
+
+  // function cleamDa
 
   export default {
     props: {
@@ -31,39 +39,39 @@
         type: String,
         default: 'DD MMMM YYYY'
       },
-      minView: String,
-      maxView: String
+      initialView: String
     },
     data () {
       return {
-        from: new Date(),
-        to: new Date(),
-        handleUpdateDates: () => {
-          setTimeout(() => {
-            if (Storage.entries.length) {
-              this.from = new Date((Storage.entries[Storage.entries.length - 1].start))
-              this.to = new Date((Storage.entries[0].start))
-            }
-          }, 100)
-        }
+        start: new Date(),
+        stop: 'auto'
       }
     },
     created () {
-      this.handleUpdateDates()
-      bus.$on('get-entries-complete', this.handleUpdateDates)
-    },
-    beforeDestroy () {
-      bus.$off('get-entries-complete', this.handleUpdateDates)
+      this.start = this.intervalStart
+      this.stop = this.intervalStop
     },
     computed: {
       ...mapGetters([
-        'locale'
+        'locale',
+        'intervalStart',
+        'intervalStop'
       ])
     },
     methods: {
       customFormatter (date) {
         return capitalize(moment(date).format(this.format))
-      }
+      },
+      selectIntervalStart (start) {
+        this.setIntervalStart({ start })
+      },
+      selectIntervalStop (stop) {
+        this.setIntervalStop({ stop })
+      },
+      ...mapMutations([
+        'setIntervalStart',
+        'setIntervalStop'
+      ])
     },
     components: {
       Datepicker
@@ -81,7 +89,16 @@
     line-height 24px
     border-top solid titamota-color-border 1px
     font-size 13px
-    .material-icons
+    .clear-date
+      position absolute
+      top 0px
+      font-size 14px
+      width 24px
+      text-align center
+      color titamota-color-text-muted
+      &:before
+        content: 'close'
+    .open
       margin 0px
       font-size 18px
       height 24px
@@ -100,32 +117,44 @@
         height 24px
         font-size 13px
         background-color transparent
-        max-width 150px
+        max-width 135px
         box-sizing border-box
         padding 0
+        font-weight 300
         @media (max-width titamota-screen-w-4)
-          max-width 140px
+          max-width 135px
+    .auto
+      position absolute
+      top 0px
+      pointer-events none
     .from
     .to
       display flex
       align-items center
       position relative
     .from
-      .material-icons
+      .open
         left 0px
+      .clear-date
+        right 0px
       input[type]
         padding-left 24px
       .vdp-datepicker__calendar
         left 0px
         bottom 24px
+      .auto
+        left 24px
     .to
-      .material-icons
+      .open
         right 0px
+      .clear-date
+        left 0px
       input[type]
         text-align right
         padding-right 24px
       .vdp-datepicker__calendar
         right 0px
         bottom 24px
-
+      .auto
+        right 24px
 </style>

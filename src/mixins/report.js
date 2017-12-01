@@ -53,6 +53,54 @@ function generateArray (length, value) {
   }
 }
 
+function fullDateRange (from, to, locale) {
+  if (locale === 'ru') {
+    if (from.year() === to.year()) {
+      if (from.month() === to.month() && from.date() === to.date()) {
+        return `${from.format('LL')}`
+      } else if (from.month() === to.month()) {
+        return `${from.format('D')}-${to.format('D MMMM YYYY')}`
+      } else {
+        return `${from.format('D MMMM')} - ${to.format('D MMMM YYYY')}`
+      }
+    } else {
+      return `${from.format('LL')} - ${to.format('LL')}`
+    }
+  } else {
+    if (from.year() === to.year()) {
+      if (from.month() === to.month() && from.date() === to.date()) {
+        return `${from.format('LL')}`
+      } else if (from.month() === to.month()) {
+        return `${from.format('MMMM')} ${from.format('D')}-${to.format('D YYYY')}`
+      } else {
+        return `${from.format('MMMM D')} - ${to.format('MMMM D YYYY')}`
+      }
+    } else {
+      return `${from.format('LL')} - ${to.format('LL')}`
+    }
+  }
+}
+
+function monthRange (from, to) {
+  if (from.year() === to.year()) {
+    if (from.month() === to.month()) {
+      return `${from.format('MMMM YYYY')}`
+    } else {
+      return `${from.format('MMMM')}-${to.format('MMMM YYYY')}`
+    }
+  } else {
+    return `${from.format('MMMM YYYY')} - ${to.format('MMMM YYYY')}`
+  }
+}
+
+function yearRange (from, to) {
+  if (from.year() === to.year()) {
+    return `${from.format('YYYY')}`
+  } else {
+    return `${from.format('YYYY')}-${to.format('YYYY')}`
+  }
+}
+
 const urlRegexp = /((https?):\/\/.*?(\s|$))/
 
 function isNest (item) {
@@ -71,7 +119,10 @@ export default {
       'currentView',
       'reportFormat',
       'reportStructure',
-      'context'
+      'context',
+      'isInterval',
+      'intervalStart',
+      'intervalStop'
     ])
   },
   methods: {
@@ -122,53 +173,23 @@ export default {
     },
 
     generatePeriodString () {
-      if (Storage.entries.length && this.currentView !== 'tasks') {
-        const from = moment(Storage.entries.slice(-1)[0].start)
-        const to = moment(Storage.entries[0].start)
+      let from
+      let to
+      if (this.isInterval) {
+        from = this.intervalStart ? moment(this.intervalStart) : moment()
+        to = this.intervalStop ? moment(this.intervalStop) : moment()
+        return fullDateRange(from, to, this.locale)
+      } else if (Storage.entries.length && this.currentView !== 'tasks') {
+        from = moment(Storage.entries.slice(-1)[0].start)
+        to = moment(Storage.entries[0].start)
         if (this.currentView === 'storage') {
           return `${from.format('LLL').replace(' г.', '')} - ${to.format('LLL').replace(' г.', '')}`
         } else if (this.currentView === 'years') {
-          if (from.year() === to.year()) {
-            return `${from.format('YYYY')}`
-          } else {
-            return `${from.format('YYYY')}-${to.format('YYYY')}`
-          }
+          return yearRange(from, to)
         } else if (this.currentView === 'months') {
-          if (from.year() === to.year()) {
-            if (from.month() === to.month()) {
-              return `${from.format('MMMM YYYY')}`
-            } else {
-              return `${from.format('MMMM')}-${to.format('MMMM YYYY')}`
-            }
-          } else {
-            return `${from.format('MMMM YYYY')} - ${to.format('MMMM YYYY')}`
-          }
+          return monthRange(from, to)
         } else {
-          if (this.locale === 'ru') {
-            if (from.year() === to.year()) {
-              if (from.month() === to.month() && from.date() === to.date()) {
-                return `${from.format('LL')}`
-              } else if (from.month() === to.month()) {
-                return `${from.format('D')}-${to.format('D MMMM YYYY')}`
-              } else {
-                return `${from.format('D MMMM')} - ${to.format('D MMMM YYYY')}`
-              }
-            } else {
-              return `${from.format('LL')} - ${to.format('LL')}`
-            }
-          } else {
-            if (from.year() === to.year()) {
-              if (from.month() === to.month() && from.date() === to.date()) {
-                return `${from.format('LL')}`
-              } else if (from.month() === to.month()) {
-                return `${from.format('MMMM')} ${from.format('D')}-${to.format('D YYYY')}`
-              } else {
-                return `${from.format('MMMM D')} - ${to.format('MMMM D YYYY')}`
-              }
-            } else {
-              return `${from.format('LL')} - ${to.format('LL')}`
-            }
-          }
+          return fullDateRange(from, to, this.locale)
         }
       }
     },

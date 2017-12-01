@@ -1,3 +1,19 @@
+function monthStartDate () {
+  const d = new Date()
+  return new Date(`${d.getFullYear()}-${d.getMonth() + 1}-01T00:00:00`)
+}
+
+function cleanDate (date) {
+  const d = new Date(date)
+  d.setHours(0)
+  d.setMinutes(0)
+  d.setSeconds(0)
+  d.setMilliseconds(0)
+  return d
+}
+
+console.log(monthStartDate().toISOString())
+
 const state = {
   pagination: {
     storage: {
@@ -40,12 +56,18 @@ const state = {
     months: { limit: [1, 3, 6] },
     years: { limit: [1, 2, 3] },
     tasks: { limit: [1, 3, 10] }
+  },
+  interval: {
+    start: monthStartDate(),
+    stop: null
   }
 }
 
 const getters = {
   pagination: state => state.pagination,
-  paginationOptions: state => state.options
+  paginationOptions: state => state.options,
+  intervalStart: state => state.interval.start,
+  intervalStop: state => state.interval.stop
 }
 
 const mutations = {
@@ -66,6 +88,12 @@ const mutations = {
         previous: null
       })
     })
+  },
+  setIntervalStart (state, payload) {
+    state.interval.start = payload.start ? cleanDate(payload.start) : null
+  },
+  setIntervalStop (state, payload) {
+    state.interval.stop = payload.stop ? cleanDate(payload.stop) : null
   }
 }
 

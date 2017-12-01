@@ -1,18 +1,14 @@
 <template lang="pug">
   .view.months
     span.text-muted(v-if="!isMonths") {{ label('noResultsLabel') }}
-    //- view-report(
-      v-if="isMonths || true"
-      :source="filterGroupChildren(Months.children)")
     group-item(
       v-for="month in filterGroupChildren(Months.children)"
       :key="month.name"
       :group="month")
     view-interval(
       v-if="isInterval"
-      format="MMMM YYYY"
-      :min-view="'month'"
-      :max-view="'month'")
+      format="D MMM YYYY"
+      initial-view="month")
     view-pagination(
       v-else
       type="months")
@@ -23,7 +19,6 @@
   import { filterGroupChildren } from '@/utils/group'
   import groupItem from '@/components/items/group-item'
   import viewPagination from '@/components/views/view-pagination'
-  import viewReport from '@/components/views/view-report'
   import viewInterval from '@/components/views/view-interval'
   import i18nLabel from '@/mixins/i18n-label'
 
@@ -48,7 +43,6 @@
     components: {
       groupItem,
       viewPagination,
-      viewReport,
       viewInterval
     }
   }

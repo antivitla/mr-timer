@@ -6,12 +6,15 @@
       slot content
     div(
       v-else
-      @click="downloadReportWithCurrentParams()")
+      @click="downloadReport")
       slot download
 </template>
 <script>
   import { mapGetters, mapActions } from 'vuex'
   import reportMixin from '@/mixins/report'
+  import i18nLabel from '@/mixins/i18n-label'
+  import { Storage } from '@/store/storage'
+  import bus from '@/event-bus'
 
   export default {
     props: {
@@ -34,14 +37,30 @@
     },
     methods: {
       openReportModal () {
-        this.openModal({ modal: 'report' })
+        if (Storage.entries.length) {
+          this.openModal({ modal: 'report' })
+        } else {
+          bus.$emit('toast', { content: this.label('report.nothingToReport') })
+        }
+      },
+      downloadReport () {
+        if (Storage.entries.length) {
+          this.downloadReportWithCurrentParams()
+          setTimeout(() => {
+            this.closeModal()
+          }, 100)
+        } else {
+          bus.$emit('toast', { content: this.label('report.nothingToReport') })
+        }
       },
       ...mapActions([
-        'openModal'
+        'openModal',
+        'closeModal'
       ])
     },
     mixins: [
-      reportMixin
+      reportMixin,
+      i18nLabel
     ]
   }
 </script>

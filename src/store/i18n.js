@@ -134,7 +134,8 @@ const ru = ({
     nothingToPreview: 'нет предпросмотра',
     totalMoney: 'всего денег',
     totalTime: 'времени',
-    moneyPerHour: 'денег в час'
+    moneyPerHour: 'денег в час',
+    nothingToReport: 'нет записей'
   },
   context: {
     clear: 'убрать  контекст',
@@ -172,8 +173,8 @@ const ru = ({
     settings: 'включить элементы интерфейса',
     displayOptions: 'внешний вид',
     positionOnScreen: 'расположение',
-    paginationType: 'просмотр',
-    setPaginationStandard: 'страницы',
+    paginationType: 'страницы',
+    setPaginationStandard: 'обычные',
     setPaginationInterval: 'интервал',
     setFullWidth: 'на всю ширину',
     setCenterView: 'в центре',
@@ -339,7 +340,8 @@ const en = ({
     nothingToPreview: 'no preview',
     totalMoney: 'total money',
     totalTime: 'time',
-    moneyPerHour: 'money per hour'
+    moneyPerHour: 'money per hour',
+    nothingToReport: 'no entries'
   },
   context: {
     clear: 'clear current task',
@@ -380,8 +382,8 @@ const en = ({
     settings: 'toggle UI elements',
     displayOptions: 'display options',
     positionOnScreen: 'align',
-    paginationType: 'browse',
-    setPaginationStandard: 'pages',
+    paginationType: 'pagination',
+    setPaginationStandard: 'standard',
     setPaginationInterval: 'date range',
     setFullWidth: 'full width',
     setCenterView: 'center',
