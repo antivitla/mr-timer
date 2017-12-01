@@ -23,6 +23,7 @@ const state = {
   },
   sidebar: false,
   fullWidth: false,
+  paginationOrInterval: true,
   taskDelimiter
 }
 
@@ -39,7 +40,9 @@ const getters = {
   settings: state => state.settings,
   sidebarActive: state => state.sidebar,
   taskDelimiter: state => state.taskDelimiter,
-  fullWidth: state => state.fullWidth
+  fullWidth: state => state.fullWidth,
+  isPagination: state => state.paginationOrInterval,
+  isInterval: state => !state.paginationOrInterval
 }
 
 const mutations = {
@@ -75,6 +78,9 @@ const mutations = {
   },
   setFullWidth (state, payload) {
     state.fullWidth = payload.fullWidth
+  },
+  setPaginationOrInterval (state, payload) {
+    state.paginationOrInterval = payload.paginationOrInterval
   }
 }
 

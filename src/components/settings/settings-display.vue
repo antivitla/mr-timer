@@ -18,7 +18,21 @@
             @input="setTimerWidth($event)")
           label(for="center-width") {{ label('settings.setCenterView') }}
       .fieldset
-        h5 Что-то ещё
+        h5 {{ label('settings.paginationType') }}
+        p
+          custom-radio(
+            id="paging-standard"
+            :value="'paging-standard'"
+            :model="pagingModel"
+            @input="setPaging($event)")
+          label(for="paging-standard") {{ label('settings.setPaginationStandard') }}
+        p
+          custom-radio(
+            id="paging-interval"
+            :value="'paging-interval'"
+            :model="pagingModel"
+            @input="setPaging($event)")
+          label(for="paging-interval") {{ label('settings.setPaginationInterval') }}
 </template>
 <script>
   import { mapGetters, mapMutations } from 'vuex'
@@ -28,15 +42,18 @@
   export default {
     data () {
       return {
-        timerWidthModel: ''
+        timerWidthModel: '',
+        pagingModel: ''
       }
     },
     created () {
       this.timerWidthModel = this.fullWidth ? 'timer-full-width' : 'timer-center'
+      this.pagingModel = this.isPagination ? 'paging-standard' : 'paging-interval'
     },
     computed: {
       ...mapGetters([
-        'fullWidth'
+        'fullWidth',
+        'isPagination'
       ])
     },
     methods: {
@@ -46,8 +63,15 @@
           fullWidth: value === 'timer-full-width'
         })
       },
+      setPaging (value) {
+        this.pagingModel = value
+        this.setPaginationOrInterval({
+          paginationOrInterval: value === 'paging-standard' || false
+        })
+      },
       ...mapMutations([
-        'setFullWidth'
+        'setFullWidth',
+        'setPaginationOrInterval'
       ])
     },
     mixins: [

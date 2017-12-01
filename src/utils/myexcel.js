@@ -114,7 +114,7 @@ const $JExcel = {};
         'xmlns:x14="http://schemas.microsoft.com/office/spreadsheetml/2009/9/main" xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" ' +
         'xmlns:xm="http://schemas.microsoft.com/office/excel/2006/main">' +
         '{columns}' +
-        '<sheetData>{rows}</sheetData></worksheet>';
+        '<sheetData>{rows}</sheetData><mergeCells>{merge}</mergeCells></worksheet>';
 
 
   // --------------------- BEGIN of generic UTILS
@@ -160,7 +160,10 @@ const $JExcel = {};
 
 
   function getAsXml(sheet) {
-    return templateSheet.replace('{columns}', generateColums(sheet.columns)).replace("{rows}", generateRows(sheet.rows));
+    return templateSheet
+      .replace('{columns}', generateColums(sheet.columns))
+      .replace("{rows}", generateRows(sheet.rows))
+      .replace("{merge}", generateMerge(sheet.merge));
   }
 
 
@@ -204,7 +207,7 @@ const $JExcel = {};
     var oSheets = {
       sheets: [],
       add: function (name) {
-        var sheet = { id: this.sheets.length + 1, rId: "rId" + (3 + this.sheets.length), name: name, rows: [], columns: [], getColumn: getColumn, set: setSheet, getRow: getRow, getCell: getCell };
+        var sheet = { id: this.sheets.length + 1, rId: "rId" + (3 + this.sheets.length), name: name, rows: [], columns: [], getColumn: getColumn, set: setSheet, getRow: getRow, getCell: getCell,  };
         return pushI(this.sheets, sheet);
       },
       get: function (index) {
@@ -213,7 +216,12 @@ const $JExcel = {};
         return sheet;
       },
 
-
+      addMerge: function (id, merge) {
+        var sheet = this.sheets[id];
+        if (!sheet) throw "Bad sheet " + index;
+        sheet.merge = sheet.merge || [];
+        sheet.merge.push(merge);
+      },
 
       rows: function (i) {
         if (i < 0 || i >= this.sheets.length) throw "Bad sheet number must be [0.." + (this.sheets.length - 1) + "] and is: " + i;
@@ -318,6 +326,7 @@ const $JExcel = {};
         alignXml = "<alignment ";
         if (h) alignXml = alignXml + ' horizontal="' + h + '" ';
         if (v) alignXml = alignXml + ' vertical="' + v + '" ';
+        if (style.wrap) alignXml = alignXml + ' wrapText="1" ';
         alignXml = alignXml + " />";
       }
     }
@@ -397,6 +406,7 @@ const $JExcel = {};
         if (a.font) style.font = findOrAdd(fonts, normalizeFont(a.font.toString().trim()));
         if (a.format) style.format = findOrAdd(formats, a.format);
         if (a.align) style.align = normalizeAlign(a.align);
+        if (a.wrap) style.wrap = true;
         if (a.border) style.border = 1 + findOrAdd(borders, normalizeBorders(a.border.toString().trim())); // There is a HARDCODED border
         return 1 + pushI(styles, style); // Add the style and return INDEX+1 because of the DEFAULT HARDCODED style
       }
@@ -519,6 +529,11 @@ const $JExcel = {};
     return s + ' >' + oCells.join('') + '</row>';
   }
 
+  function generateMerge (merge) {
+    return merge.map(m => {
+      return '<mergeCell ref="' + m + '"/>'
+    }).join('')
+  }
 
   function generateRows(rows) {
     var oRows = [];
@@ -615,6 +630,9 @@ const $JExcel = {};
       return sheets.add(name);
     }
 
+    excel.addMerge = function (id, merge) {
+      return sheets.addMerge(id, merge)
+    }
 
     excel.addStyle = function (a) {
       return styles.add(a);

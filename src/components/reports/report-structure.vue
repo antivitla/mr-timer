@@ -11,13 +11,17 @@
         .handler
           i.material-icons reorder
         .body(v-if="section")
-          .type
+          .type(:type="section.type")
             select(
               :value="section.type"
               @input="changeSectionType(section, $event.target.value, index)")
               option(
                 v-for="option in availableStructuresAsOptions"
                 :value="option.value") {{ label(option.label) }}
+          .header(v-if="section.type === 'header'")
+            div {{ headerLabel }}
+          .total(v-if="section.type === 'total'")
+            div {{ totalLabel }}
           .text(v-if="section.type === 'text'")
             textarea(
               spellcheck="false"
@@ -70,6 +74,7 @@
   import capitalize from '@/utils/capitalize'
   import draggable from 'vuedraggable'
   import { defaultSections } from '@/store/report'
+  import reportMixin from '@/mixins/report'
   // import bus from '@/event-bus'
 
   export default {
@@ -99,6 +104,12 @@
       this.refreshTextareas()
     },
     computed: {
+      headerLabel () {
+        return this.generateCommonHeaderString()
+      },
+      totalLabel () {
+        return this.generateTotalFormula()
+      },
       ...mapGetters([
         'reportStructure',
         'availableStructuresAsOptions',
@@ -172,7 +183,8 @@
       ])
     },
     mixins: [
-      i18nLabel
+      i18nLabel,
+      reportMixin
     ],
     components: {
       draggable
@@ -183,6 +195,8 @@
   @import '~@/assets/stylesheets/variables'
 
   .report-structure
+    h3
+      margin-top 20px !important
     .structure-sections
       &:empty
         height 43px
@@ -233,6 +247,18 @@
           & > *
             margin-right 4px
             margin-bottom 4px
+
+          .header
+            line-height 20px
+            padding 10px 0px
+            color titamota-color-text-muted
+          .total
+            line-height 20px
+            padding 10px 2px
+            color titamota-color-text-muted
+          .type[type="header"]
+          .type[type="total"]
+            margin-right 20px
         .actions
           margin-left auto
           display flex
@@ -242,6 +268,9 @@
           .material-icons
             font-size 24px
             line-height 40px
+
+    .structure-sections ~ h3
+      margin-top 40px !important
 
     .add-sections
       display flex

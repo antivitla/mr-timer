@@ -8,6 +8,7 @@ import i18nLabel from '@/mixins/i18n-label'
 import Report from '@/report'
 import FileSaver from 'file-saver'
 import MyExcel from '@/utils/myexcel'
+import numberFilter from '@/utils/number-filter'
 import bus from '@/event-bus'
 
 function getTotalTime () {
@@ -62,6 +63,7 @@ export default {
   computed: {
     ...mapGetters([
       'isCurrencySymbolBefore',
+      'currencySymbol',
       'price',
       'currency',
       'locale',
@@ -111,6 +113,99 @@ export default {
       }
     },
 
+    generateReportTitleString () {
+      if (this.context && this.context.length) {
+        return this.label('report.reportOnFor')
+          .replace('%0', this.context.join(taskDelimiter))
+      }
+      return this.label('report.commonReport')
+    },
+
+    generatePeriodString () {
+      if (Storage.entries.length && this.currentView !== 'tasks') {
+        const from = moment(Storage.entries.slice(-1)[0].start)
+        const to = moment(Storage.entries[0].start)
+        if (this.currentView === 'storage') {
+          return `${from.format('LLL').replace(' г.', '')} - ${to.format('LLL').replace(' г.', '')}`
+        } else if (this.currentView === 'years') {
+          if (from.year() === to.year()) {
+            return `${from.format('YYYY')}`
+          } else {
+            return `${from.format('YYYY')}-${to.format('YYYY')}`
+          }
+        } else if (this.currentView === 'months') {
+          if (from.year() === to.year()) {
+            if (from.month() === to.month()) {
+              return `${from.format('MMMM YYYY')}`
+            } else {
+              return `${from.format('MMMM')}-${to.format('MMMM YYYY')}`
+            }
+          } else {
+            return `${from.format('MMMM YYYY')} - ${to.format('MMMM YYYY')}`
+          }
+        } else {
+          if (this.locale === 'ru') {
+            if (from.year() === to.year()) {
+              if (from.month() === to.month() && from.date() === to.date()) {
+                return `${from.format('LL')}`
+              } else if (from.month() === to.month()) {
+                return `${from.format('D')}-${to.format('D MMMM YYYY')}`
+              } else {
+                return `${from.format('D MMMM')} - ${to.format('D MMMM YYYY')}`
+              }
+            } else {
+              return `${from.format('LL')} - ${to.format('LL')}`
+            }
+          } else {
+            if (from.year() === to.year()) {
+              if (from.month() === to.month() && from.date() === to.date()) {
+                return `${from.format('LL')}`
+              } else if (from.month() === to.month()) {
+                return `${from.format('MMMM')} ${from.format('D')}-${to.format('D YYYY')}`
+              } else {
+                return `${from.format('MMMM D')} - ${to.format('MMMM D YYYY')}`
+              }
+            } else {
+              return `${from.format('LL')} - ${to.format('LL')}`
+            }
+          }
+        }
+      }
+    },
+
+    generateCommonHeaderString () {
+      const header = this.generateReportTitleString()
+      const period = this.generatePeriodString()
+      if (period) {
+        return header + ', ' + period
+      }
+      return header
+    },
+
+    generateHumanTotalTime () {
+      const l = this.label('duration', false)
+      return durationHuman(getTotalTime(), l.hr, l.min, l.sec)
+    },
+
+    generateTotalFormula () {
+      const l = this.label('duration', false)
+      const time = getTotalTime()
+      const duration = durationHuman(time, l.hr, l.min, l.sec)
+      if (this.price) {
+        let price = this.price
+        let cost = price * (time / 3600000)
+        if (this.isCurrencySymbolBefore) {
+          price = this.currencySymbol + ' ' + numberFilter(price)
+          cost = this.currencySymbol + ' ' + numberFilter(cost)
+        } else {
+          price = numberFilter(price) + ' ' + this.currencySymbol
+          cost = numberFilter(cost) + ' ' + this.currencySymbol
+        }
+        return duration + ' x ' + price + ' ' + this.label('price.perHour', false) + ' = ' + cost
+      }
+      return duration
+    },
+
     //
     // Spreadsheet
     //
@@ -141,7 +236,18 @@ export default {
       let sheet = []
       structure.forEach((section, index) => {
         if (section.type === 'header') {
-          sheet = sheet.concat(this.generateHeaderRows(info))
+          sheet = sheet.concat(this.generateHeaderRows({ info }))
+          sheet = sheet.concat([
+            generateArray(info.totalColumns),
+            generateArray(info.totalColumns)
+          ])
+        } else if (section.type === 'total') {
+          sheet.pop()
+          sheet = sheet.concat(this.generateTotalRows({ info }))
+          sheet = sheet.concat([
+            generateArray(info.totalColumns),
+            generateArray(info.totalColumns)
+          ])
         } else if (section.type === 'summary') {
           const summary = summaries.shift()
           // Create subheader
@@ -231,10 +337,10 @@ export default {
         }
       })
       // add another space
-      sheet.unshift(generateArray(info.totalColumns))
+      // sheet.unshift(generateArray(info.totalColumns))
       sheet.unshift(generateArray(info.totalColumns))
       sheet.forEach(row => row.unshift(''))
-      const filename = `${this.userName}.${this.context.join(' - ')}.${this.generateMarkdownPeriod()}.report.xlsx`
+      const filename = `${this.userName}.${this.context.join(' - ')}.${this.generatePeriodString()}.report.xlsx`
       return {
         filename: slugify(filename.replace('.undefined', '')),
         content: sheet,
@@ -242,69 +348,74 @@ export default {
       }
     },
 
-    generateCommonHeader () {
-      const context = this.context.join(taskDelimiter)
-      const period = this.generateTextPeriod()
-      let title = this.label('report.reportOnFor').replace('%0', context)
-      if (!context) {
-        title = this.label('report.commonReport')
-      }
-      return `${title}${period ? ', ' + period : ''}`
-    },
-
-    generateHeaderRows (info) {
-      let header = generateArray(info.totalColumns)
-      const dur = getTotalTime()
-      if (info.priceEnabled) {
-        header[header.length - 1] = this.generateCell({
-          value: Math.ceil(dur * this.price / 3600000),
-          type: 'price',
-          sectionType: 'header'
-        })
-        header[header.length - 2] = this.generateCell({
-          value: dur,
-          type: 'duration',
-          sectionType: 'header'
-        })
-      } else {
-        header[header.length - 1] = this.generateCell({
-          value: dur,
-          type: 'duration',
-          sectionType: 'header'
-        })
-      }
+    generateHeaderRows ({ info }) {
+      let header = generateArray(info.totalColumns, this.generateCell({
+        value: '',
+        type: 'string',
+        sectionType: 'header'
+      }))
       header[0] = this.generateCell({
-        value: this.generateCommonHeader(),
+        value: this.generateReportTitleString(),
         type: 'string',
         sectionType: 'header'
       })
-
-      if (this.price) {
-        header[header.length - 3] = this.generateCell({
-          value: this.price,
-          type: 'value perhour',
-          sectionType: 'header'
+      const periodString = this.generatePeriodString()
+      if (periodString) {
+        const period = generateArray(info.totalColumns, this.generateCell({
+          value: '',
+          type: 'string',
+          sectionType: 'header period'
+        }))
+        period[0] = this.generateCell({
+          value: periodString,
+          type: 'string',
+          sectionType: 'header period'
         })
+        return [
+          header,
+          period
+        ]
       }
-      const labels = generateArray(header.length, this.generateCell({
+      return [header]
+    },
+
+    generateTotalRows ({ info }) {
+      const labels = generateArray(info.totalColumns, this.generateCell({
         type: 'string small',
-        sectionType: 'header',
+        sectionType: 'total',
+        value: ''
+      }))
+      const total = generateArray(info.totalColumns, this.generateCell({
+        type: 'string',
+        sectionType: 'total',
         value: ''
       }))
       if (this.price) {
-        labels[header.length - 1].value = this.label('report.totalMoney', false)
-        labels[header.length - 2].value = this.label('report.totalTime', false)
-        labels[header.length - 2].type += ' center'
-        labels[header.length - 3].value = this.label('report.moneyPerHour', false)
+        labels[info.totalColumns - 1].value = this.label('report.totalMoney', false)
+
+        labels[info.totalColumns - 2].value = this.label('report.totalTime', false)
+        labels[info.totalColumns - 2].type += ' center'
+
+        labels[info.totalColumns - 3].value = this.label('report.moneyPerHour', false)
+
+        total[info.totalColumns - 1].value = 0
+        total[info.totalColumns - 1].type = 'price'
+
+        total[info.totalColumns - 2].value = getTotalTime()
+        total[info.totalColumns - 2].type = 'duration'
+
+        total[info.totalColumns - 3].value = this.price
+        total[info.totalColumns - 3].type += ' perhour'
       } else {
-        labels[header.length - 1].value = this.label('report.totalTime', false)
-        labels[header.length - 1].type += ' center'
+        labels[info.totalColumns - 1].value = this.label('report.totalTime', false)
+        labels[info.totalColumns - 1].type += ' center'
+
+        total[info.totalColumns - 1].value = getTotalTime()
+        total[info.totalColumns - 1].type = 'duration'
       }
       return [
         labels,
-        header,
-        generateArray(info.totalColumns),
-        generateArray(info.totalColumns)
+        total
       ]
     },
 
@@ -406,7 +517,6 @@ export default {
         if (item.children) {
           // set formula
           row[pos + 1].childrenTimeRows = rows.length
-          console.log(row[pos + 1], item.children, rows)
         }
       })
       return table
@@ -445,7 +555,7 @@ export default {
             break
           }
         }
-        if (rowSectionType && rowSectionType !== 'days' && rowSectionType !== 'header' && table[r][table[r].length - 1] && !table[r][table[r].length - 1].value) {
+        if (rowSectionType && rowSectionType !== 'days' && rowSectionType !== 'header' && rowSectionType !== 'total' && table[r][table[r].length - 1] && !table[r][table[r].length - 1].value) {
           let dur
           let price
           for (let i = table[r].length - 1; i > -1; i--) {
@@ -486,14 +596,14 @@ export default {
             value: (cell ? cell.value : '')
           }
           if (cell) {
+            // common
             if (cell.type.match(/date/)) {
               props.value = moment(props.value).format('D MMMM').replace(' г.', '')
             } else if (cell.type.match(/duration/)) {
-              props.value = props.value / (24 * 3600000) // duration(props.value).format('H:mm')
+              props.value = props.value / (24 * 3600000)
               // if had children
               if (cell.childrenTimeRows !== undefined) {
                 props.value = `=SUM(${abc[info.totalColumns - (this.price ? 1 : 0)]}${r + 1}:${abc[info.totalColumns - (this.price ? 1 : 0)]}${r + 1 + cell.childrenTimeRows})`
-                // console.log(cell.childrenTimeRows)
               }
               style.align = 'C C'
               style.font = style.font.replace('#333333', '#888888')
@@ -508,57 +618,62 @@ export default {
               }
               style.font = style.font.replace('#333333', '#333333') + ' B'
             }
-            if (cell.sectionType === 'header') {
-              style.font = style.font.replace('10', '18') + ' B'
-              xlsx.set(0, undefined, r, 30)
-              if (cell.type.match(/price/) || cell.type.match(/duration/)) {
-                style.font = style.font.replace('18', '12')
-              }
-              if (cell.type.match(/price/)) {
-                // style.align = 'R T'
-                style.format = curr[this.currency]
-              }
-              if (cell.type.match(/perhour/)) {
-                style.font = style.font.replace('18', '10')
-                style.font = style.font.replace(' B', '')
-                if (cell.type.match(/value/)) {
-                  // style.font = style.font.replace('#333333', '#C23D0C')
-                  style.font = style.font.replace('10', '12') + ' B'
-                  style.format = curr[this.currency]
-                  style.align = 'R C'
-                }
-              } else if (cell.type.match(/small/)) {
-                style.font = style.font.replace('18', '10')
-                style.font = style.font.replace(' B', '')
-                style.align = 'R C'
-                if (cell.type.match(/center/)) {
-                  style.align = 'C C'
-                }
-              }
-            }
+            // can be subheader and price
             if (cell.type.match(/subheader/)) {
               style.font = style.font.replace('10', '12') + ' B'
-              if (cell.type.match(/string/) && cell.sectionType !== 'days') {
-                // style.font = style.font.replace('12', '14')
-              }
-              // style.align = style.align.replace(/C$/, 'T')
               if (cell.type.match(/price/)) {
-                // style.align = 'R T'
                 style.format = curr[this.currency]
               } else if (cell.type.match(/duration/)) {
                 if (cell.timeRowsDown !== undefined) {
                   props.value = `=SUM(${abc[c]}${r + 2}:${abc[c]}${r + 2 + cell.timeRowsDown})`
                 }
               }
-              // style.fill = '#dcdcdc'
               xlsx.set(0, undefined, r, 30)
+            }
+            if (cell.sectionType === 'total') {
+              if (cell.type.match(/price/) || cell.type.match(/duration/)) {
+                style.font = style.font.replace('10', '12') + ' B'
+              }
+              if (cell.type.match(/price/) || cell.type.match(/perhour/)) {
+                style.align = 'R C'
+                style.format = curr[this.currency]
+              }
+              if (cell.type.match(/perhour/)) {
+                style.font = 'Arial 12 #333333 B'
+              }
+              if (cell.type.match(/small/)) {
+                style.font = style.font.replace(' B', '')
+                style.align = 'R C'
+                if (cell.type.match(/center/)) {
+                  style.align = 'C C'
+                }
+              }
+            } else if (cell.sectionType.match(/header/)) {
+              if (info.totalColumns <= 2) {
+                style.font = style.font.replace('10', '12') + ' B'
+                style.wrap = true
+                xlsx.set({ row: r, value: 50 })
+              } else if (info.totalColumns <= 3) {
+                style.font = style.font.replace('10', '14') + ' B'
+                style.wrap = true
+                xlsx.set({ row: r, value: 50 })
+              } else {
+                style.font = style.font.replace('10', '18') + ' B'
+                xlsx.set(0, undefined, r, 30)
+              }
+              if (cell.sectionType.match(/period/)) {
+                style.font = style.font.replace('12', '10')
+                style.font = style.font.replace('14', '12')
+                style.font = style.font.replace('18', '14')
+                style.font = style.font.replace(' B', '')
+                xlsx.set(0, undefined, r, 20)
+              }
+              xlsx.addMerge(0, `${abc[c]}${r + 1}:${abc[c + info.totalColumns - 1]}${r + 1}`)
             }
             if (cell.border === 'thick') {
               style.border = 'none,none,thick #444444,none'
             } else if (cell.border === 'medium') {
               style.border = 'none,none,medium #444444,none'
-            } else if (cell.border === 'thin') {
-              // style.border = 'none,none,thin #333333,none'
             }
           }
           if ((c - 1) % (this.price ? 3 : 2) === 0 && c < info.totalColumns - (this.price ? 3 : 2)) {
@@ -570,14 +685,15 @@ export default {
           if ((c - 1) % (this.price ? 3 : 2) === 2) {
             xlsx.set(0, c, undefined, 12)
           }
-          if (!cell || !cell.value) {
-            // style.border = 'thin #ffffff,thin #ffffff,none,none'
-          }
           props.style = xlsx.addStyle(style)
           xlsx.set(props)
         })
       })
-      xlsx.set(0, info.totalColumns + 1 - (this.price ? 3 : 2), undefined, 60)
+      if (info.totalColumns < 4) {
+        xlsx.set(0, info.totalColumns + 1 - (this.price ? 3 : 2), undefined, 35)
+      } else {
+        xlsx.set(0, info.totalColumns + 1 - (this.price ? 3 : 2), undefined, 60)
+      }
       if (this.price) {
         xlsx.set(0, info.totalColumns, undefined, 13)
       }
@@ -616,30 +732,29 @@ export default {
       structure.forEach((section, index) => {
         if (section.type === 'text') {
           // Text
-          lines = lines.concat([section.text])
+          lines = lines.concat([section.text, ''])
         } else if (section.type === 'header') {
           // Header
           if (index) {
-            lines = lines.concat(['', ''])
+            lines = lines.concat([''])
           }
           if (!section.header) {
-            lines = lines.concat(this.generateTextHeader())
+            lines = lines.concat(this.generateTextHeader()).concat([''])
           } else {
             const header = `${section.header}`
             lines = lines.concat([
               header,
-              '='.repeat(header.length)
+              '='.repeat(header.length),
+              ''
             ])
           }
         } else if (section.type === 'total') {
           // Total
-          lines = lines.concat([
-            this.generateTextTotal()
-          ])
+          lines = lines.concat([this.generateTextTotal(), ''])
         } else if (section.type === 'summary') {
           // Summary
           if (index) {
-            lines = lines.concat(['', ''])
+            lines = lines.concat([''])
           }
           if (parseInt(section.summary.nest, 10)) {
             const header = `${detailedSubheader[section.summary.type]}`
@@ -658,10 +773,10 @@ export default {
             depth: parseInt(section.summary.depth, 10),
             nest: parseInt(section.summary.nest, 10)
           })
-          lines = lines.concat(this.generateTextSummary(data))
+          lines = lines.concat(this.generateTextSummary(data)).concat([''])
         }
       })
-      const filename = `${this.userName}.${this.context.join(' - ')}.${this.generateTextPeriod()}.report.txt`
+      const filename = `${this.userName}.${this.context.join(' - ')}.${this.generatePeriodString()}.report.txt`
       return {
         filename: slugify(filename.replace('.undefined', '')),
         content: lines.join('\n')
@@ -678,7 +793,7 @@ export default {
 
     generateTextHeader () {
       const context = this.context.join(taskDelimiter)
-      const period = this.generateTextPeriod()
+      const period = this.generatePeriodString()
       let title = this.label('report.reportOnFor').replace('%0', context)
       if (!context) {
         title = this.label('report.commonReport')
@@ -697,38 +812,6 @@ export default {
           space + header + space,
           space + '='.repeat(header.length) + space
         ]
-      }
-    },
-
-    generateTextPeriod () {
-      if (Storage.entries.length) {
-        const from = moment(Storage.entries.slice(-1)[0].start)
-        const to = moment(Storage.entries[0].start)
-        if (this.locale === 'ru') {
-          if (from.year() === to.year()) {
-            if (from.month() === to.month() && from.date() === to.date()) {
-              return `${from.format('LL')}`
-            } else if (from.month() === to.month()) {
-              return `${from.format('D')}-${to.format('D MMMM YYYY')}`
-            } else {
-              return `${from.format('D MMMM')} - ${to.format('D MMMM YYYY')}`
-            }
-          } else {
-            return `${from.format('LL')} - ${to.format('LL')}`
-          }
-        } else {
-          if (from.year() === to.year()) {
-            if (from.month() === to.month() && from.date() === to.date()) {
-              return `${from.format('LL')}`
-            } else if (from.month() === to.month()) {
-              return `${from.format('MMMM')} ${from.format('D')}-${to.format('D YYYY')}`
-            } else {
-              return `${from.format('MMMM D')} - ${to.format('MMMM D YYYY')}`
-            }
-          } else {
-            return `${from.format('LL')} - ${to.format('LL')}`
-          }
-        }
       }
     },
 
@@ -808,30 +891,23 @@ export default {
       let lines = []
       structure.forEach((section, index) => {
         if (section.type === 'text') {
-          lines = lines.concat(section.text)
+          lines = lines.concat([section.text, ''])
         } else if (section.type === 'total') {
-          lines = lines.concat(this.generateMarkdownTotal())
+          lines = lines.concat([this.generateMarkdownTotal(), ''])
         } else if (section.type === 'header') {
-          // Header
-          if (index) {
-            lines = lines.concat([''])
-          }
           if (!section.header) {
-            lines = lines.concat(this.generateMarkdownHeader())
+            lines = lines.concat([this.generateMarkdownHeader(), ''])
           } else {
             const header = `${section.header}`
-            lines = lines.concat([
-              `# ${header}`,
-              ''
-            ])
+            lines = lines.concat([`# ${header}`, ''])
           }
         }
         if (section.type === 'summary') {
           // Subheader
           if (parseInt(section.summary.nest, 10)) {
-            lines = lines.concat(['', `## ${detailedSubheader[section.summary.type]}`, ''])
+            lines = lines.concat([`## ${detailedSubheader[section.summary.type]}`, ''])
           } else {
-            lines = lines.concat(['', `## ${subheader[section.summary.type]}`, ''])
+            lines = lines.concat([`## ${subheader[section.summary.type]}`, ''])
           }
 
           // Table
@@ -839,10 +915,10 @@ export default {
             depth: parseInt(section.summary.depth, 10),
             nest: parseInt(section.summary.nest, 10)
           })
-          lines = lines.concat(this.generateMarkdownSummary(data))
+          lines = lines.concat(this.generateMarkdownSummary(data)).concat([''])
         }
       })
-      const filename = `${this.userName}.${this.context.join(' - ')}.${this.generateMarkdownPeriod()}.report.md`
+      const filename = `${this.userName}.${this.context.join(' - ')}.${this.generatePeriodString()}.report.md`
       return {
         filename: slugify(filename.replace('.undefined', '')),
         content: lines.join('\n')
@@ -856,55 +932,7 @@ export default {
     },
 
     generateMarkdownHeader () {
-      const context = this.context.join(taskDelimiter)
-      const period = this.generateMarkdownPeriod()
-      let title = this.label('report.reportOnFor').replace('%0', context)
-      if (!context) {
-        title = this.label('report.commonReport')
-      }
-      if (context) {
-        return [
-          `# ${title}${period ? ', ' + period : ''}`,
-          ''
-        ]
-      } else {
-        return [
-          `# ${title}${period ? ', ' + period : ''}`,
-          ''
-        ]
-      }
-    },
-
-    generateMarkdownPeriod () {
-      if (Storage.entries.length) {
-        const from = moment(Storage.entries.slice(-1)[0].start)
-        const to = moment(Storage.entries[0].start)
-        if (this.locale === 'ru') {
-          if (from.year() === to.year()) {
-            if (from.month() === to.month() && from.date() === to.date()) {
-              return `${from.format('LL')}`
-            } else if (from.month() === to.month()) {
-              return `${from.format('D')}-${to.format('D MMMM YYYY')}`
-            } else {
-              return `${from.format('D MMMM')} - ${to.format('D MMMM YYYY')}`
-            }
-          } else {
-            return `${from.format('LLL')} - ${to.format('LLL')}`
-          }
-        } else {
-          if (from.year() === to.year()) {
-            if (from.month() === to.month() && from.date() === to.date()) {
-              return `${from.format('LL')}`
-            } else if (from.month() === to.month()) {
-              return `${from.format('MMMM')} ${from.format('D')}-${to.format('D YYYY')}`
-            } else {
-              return `${from.format('MMMM D')} - ${to.format('MMMM D YYYY')}`
-            }
-          } else {
-            return `${from.format('LLL')} - ${to.format('LLL')}`
-          }
-        }
-      }
+      return ['# ' + this.generateCommonHeaderString()]
     },
 
     generateMarkdownSummary (data) {

@@ -171,6 +171,9 @@ const ru = ({
     settings: 'включить элементы интерфейса',
     displayOptions: 'внешний вид',
     positionOnScreen: 'расположение',
+    paginationType: 'просмотр',
+    setPaginationStandard: 'страницы',
+    setPaginationInterval: 'интервал',
     setFullWidth: 'на всю ширину',
     setCenterView: 'в центре',
     export: 'экспорт',
@@ -208,7 +211,7 @@ const ru = ({
     girls: 'девчушки',
     turnOn: 'включить',
     numberOfEntries: '{entries, plural, =0{0 записей} one{1 запись} few{# записи} other{# записей}}',
-    toggleViews: 'страницы',
+    toggleViews: 'виды',
     toggleUiSettings: 'настройки'
   },
   profile: {
@@ -375,6 +378,9 @@ const en = ({
     settings: 'toggle UI elements',
     displayOptions: 'display options',
     positionOnScreen: 'align',
+    paginationType: 'browse',
+    setPaginationStandard: 'pages',
+    setPaginationInterval: 'date range',
     setFullWidth: 'full width',
     setCenterView: 'center',
     export: 'export',
@@ -454,7 +460,8 @@ const getters = {
   currency: state => state.currency,
   isCurrencySymbolBefore: state => {
     return currencies[state.currency].isBefore
-  }
+  },
+  currencySymbol: state => currencies[state.currency].symbol
 }
 
 const mutations = {

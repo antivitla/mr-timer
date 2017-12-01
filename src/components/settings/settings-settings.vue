@@ -22,6 +22,7 @@
 <script>
   import { mapGetters, mapMutations } from 'vuex'
   import customCheckbox from '@/components/other/custom-checkbox'
+  import customRadio from '@/components/other/custom-radio'
   import customFor from '@/directives/custom-for'
   import i18nLabel from '@/mixins/i18n-label'
 
@@ -147,7 +148,8 @@
       customFor
     },
     components: {
-      customCheckbox
+      customCheckbox,
+      customRadio
     }
   }
 </script>

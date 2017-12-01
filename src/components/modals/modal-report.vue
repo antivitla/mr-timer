@@ -1,5 +1,6 @@
 <template lang="pug">
   .modal.report
+    h2 Отчёт-Дискотека
     //- Structure
     report-structure
     //- Format
