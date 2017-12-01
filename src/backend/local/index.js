@@ -5,7 +5,7 @@ import { insertSorted } from '@/utils/sorted'
 import { loadEntriesFromLocalStorage, saveEntriesToLocalStorage } from './get-entries'
 import { time } from '@/utils/time'
 
-function filterByContext (entries, context) {
+function filterByContext (entries, context = []) {
   return entries.filter(entry => {
     const target = context.join(' / ')
     const source = entry.details.join(' / ')
@@ -16,7 +16,7 @@ function filterByContext (entries, context) {
 
 const dateRegExp = /(\s|^)((\d{4})|(\d{1,2}\.\d{4})|(\d{1,2}\.\d{1,2}\.\d{4}))(\s|$)/
 
-function filterByFilter (entries, filter, context) {
+function filterByFilter (entries, filter, context = []) {
   return entries.filter(entry => {
     return filter.every(f => {
       if (f.match(dateRegExp)) {

@@ -1,6 +1,6 @@
 <template lang="pug">
   .modal.report
-    h2 Отчёт-Дискотека
+    h2 {{ label('report.discoTitle') }}
     //- Structure
     report-structure
     //- Format

@@ -47,9 +47,9 @@ function getMaxNest (summaries, nest = 0) {
 
 function generateArray (length, value) {
   if (value) {
-    return 'x'.repeat(length - 1).split('x').map(i => JSON.parse(JSON.stringify(value)))
+    return 'x'.repeat((length > 0 ? length : 1) - 1).split('x').map(i => JSON.parse(JSON.stringify(value)))
   } else {
-    return 'x'.repeat(length - 1).split('x')
+    return 'x'.repeat((length > 0 ? length : 1) - 1).split('x')
   }
 }
 
@@ -327,7 +327,6 @@ export default {
               }
             }
           }
-
           subheader[0][subheader[0].length - (this.price ? 2 : 1)].timeRowsDown = table.length
           sheet = sheet.concat(subheader).concat(table)
           sheet = sheet.concat([
@@ -484,13 +483,13 @@ export default {
           sectionType: section.summary.type
         })
         row[pos + 1] = this.generateCell({
-          value: item.duration,
+          value: item.duration ? item.duration : 0,
           type: 'duration',
           sectionType: section.summary.type
         })
         if (info.priceEnabled) {
           row[pos + 2] = this.generateCell({
-            value: Math.ceil(item.duration * this.price / 3600000),
+            value: item.duration ? Math.ceil(item.duration * this.price / 3600000) : 0,
             type: 'price',
             sectionType: section.summary.type
           })
@@ -507,7 +506,7 @@ export default {
           })
           const firstRow = rows.shift()
           for (let i = 0; i < row.length; i++) {
-            row[i] = row[i].value ? row[i] : firstRow[i]
+            row[i] = (row[i].value !== '' ? row[i] : firstRow[i])
           }
           row.forEach(item => {
             item.border = depth ? 'thin' : 'medium'
@@ -559,7 +558,7 @@ export default {
           let dur
           let price
           for (let i = table[r].length - 1; i > -1; i--) {
-            if (table[r][i].value) {
+            if (table[r][i].value || table[r][i].value === 0) {
               if (this.price) {
                 price = table[r][i]
                 dur = table[r][i - 1]
@@ -600,7 +599,7 @@ export default {
             if (cell.type.match(/date/)) {
               props.value = moment(props.value).format('D MMMM').replace(' г.', '')
             } else if (cell.type.match(/duration/)) {
-              props.value = props.value / (24 * 3600000)
+              props.value = props.value ? props.value / (24 * 3600000) : 0
               // if had children
               if (cell.childrenTimeRows !== undefined) {
                 props.value = `=SUM(${abc[info.totalColumns - (this.price ? 1 : 0)]}${r + 1}:${abc[info.totalColumns - (this.price ? 1 : 0)]}${r + 1 + cell.childrenTimeRows})`
@@ -758,14 +757,16 @@ export default {
           }
           if (parseInt(section.summary.nest, 10)) {
             const header = `${detailedSubheader[section.summary.type]}`
+            const repeat = 61 - header.length
             lines = lines.concat([
-              header.concat(' '.repeat(61 - header.length)).concat(duration(getTotalTime()).format('HH:mm')),
+              header.concat(' '.repeat(repeat < 0 ? 0 : repeat)).concat(duration(getTotalTime()).format('HH:mm')),
               '-'.repeat(66)
             ])
           } else {
             const header = `${subheader[section.summary.type]}`
+            const repeat = 61 - header.length
             lines = lines.concat([
-              header.concat(' '.repeat(61 - header.length)).concat(duration(getTotalTime()).format('HH:mm')),
+              header.concat(' '.repeat(repeat < 0 ? 0 : repeat)).concat(duration(getTotalTime()).format('HH:mm')),
               '-'.repeat(66)
             ])
           }
@@ -787,7 +788,8 @@ export default {
       const l = this.label('duration', false)
       const total = durationHuman(getTotalTime(), l.hr, l.min, l.sec)
       const line = `${this.label('report.total')}: ${total}`
-      const space = ' '.repeat(33 - line.length * 0.5)
+      const repeat = parseInt(33 - line.length * 0.5, 10)
+      const space = ' '.repeat(repeat < 0 ? 0 : repeat)
       return space + line + space
     },
 
@@ -800,14 +802,16 @@ export default {
       }
       if (context) {
         const header = `${title}${period ? ', ' + period : ''}`
-        const space = ' '.repeat(33 - header.length * 0.5)
+        const repeat = 33 - parseInt(header.length * 0.5, 10)
+        const space = ' '.repeat(repeat < 0 ? 0 : repeat)
         return [
           space + header + space,
           space + '='.repeat(header.length) + space
         ]
       } else {
         const header = `${title}${period ? ', ' + period : ''}`
-        const space = ' '.repeat(33 - header.length * 0.5)
+        const repeat = 33 - parseInt(header.length * 0.5, 10)
+        const space = ' '.repeat(repeat < 0 ? 0 : repeat)
         return [
           space + header + space,
           space + '='.repeat(header.length) + space
@@ -841,7 +845,8 @@ export default {
       const name = moment(item.value).format('DD MMMM YYYY')
       const d = duration(item.duration).format('HH:mm')
       const maxSpace = isShort ? 60 : 60
-      const space = (name.length < maxSpace ? ' .'.repeat(parseInt((maxSpace - name.length) * 0.5, 10)) : ' .')
+      const repeat = parseInt((maxSpace - name.length) * 0.5, 10)
+      const space = (name.length < maxSpace ? ' .'.repeat(repeat < 0 ? 0 : repeat) : ' .')
       const addon = (name.length % 2 === 1 ? ' ' : '')
       const line = `${name}${addon}${space} ${d}`
       // const s = ' '.repeat(33 - line.length * 0.5)
@@ -868,7 +873,8 @@ export default {
         const padding = '  '.repeat(depth)
         return `${padding}${name} (${d})`
       } else {
-        const space = (name.length < 60 ? ' .'.repeat(parseInt(30 - name.length * 0.5, 10)) : ' .')
+        const repeat = parseInt(30 - name.length * 0.5, 10)
+        const space = (name.length < 60 ? ' .'.repeat(repeat < 0 ? 0 : repeat) : ' .')
         const addon = (name.length % 2 === 1 ? ' ' : '')
         return `${name}${addon}${space} ${d}`
       }
@@ -961,7 +967,8 @@ export default {
       const name = `**${moment(item.value).format('DD MMMM YYYY')}**`
       const d = `**${duration(item.duration).format('HH:mm')}**`
       const maxSpace = isShort ? 26 : 60
-      const space = (name.length < maxSpace ? ' .'.repeat(parseInt((maxSpace - name.length) * 0.5, 10)) : ' .')
+      const repeat = parseInt((maxSpace - name.length) * 0.5, 10)
+      const space = (name.length < maxSpace ? ' .'.repeat(repeat < 0 ? 0 : repeat) : ' .')
       const addon = (name.length % 2 === 1 ? ' ' : '')
       return [`${name}${addon}${space} ${d}`]
     },
@@ -988,7 +995,8 @@ export default {
       } else {
         d = `**${d}**`
         name = `**${name}**`
-        const space = (name.length < 60 ? ' .'.repeat(parseInt(30 - name.length * 0.5, 10)) : ' .')
+        const repeat = parseInt(30 - name.length * 0.5, 10)
+        const space = (name.length < 60 ? ' .'.repeat(repeat < 0 ? 0 : repeat) : ' .')
         const addon = (name.length % 2 === 1 ? ' ' : '')
         return `${name}${addon}${space} ${d}`
       }

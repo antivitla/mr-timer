@@ -35,7 +35,6 @@
     data () {
       return {
         handler: () => {
-          console.log('handler')
           setTimeout(() => {
             autosize.update(this.$el.querySelector('textarea'))
           }, 100)

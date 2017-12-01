@@ -91,6 +91,7 @@ const ru = ({
     headerDays: 'сводка по дням',
     headerDetailedDaysTasks: 'подробная сводка по дням и задачам',
     headerDetailedTasks: 'подробная сводка по задачам',
+    discoTitle: 'отчёт-Дискотека',
     format: {
       markdown: 'Markdown (.md)',
       plaintext: 'Plain Text (.txt)',
@@ -101,7 +102,7 @@ const ru = ({
       csv: 'CSV (.csv)'
     },
     formatLabel: 'выбрать формат',
-    structureLabel: 'структура отчёта',
+    structureLabel: 'структура',
     addSectionLabel: 'добавить раздел',
     previewLabel: 'предпросмотр',
     downloadLabel: 'скачать отчёт в формате',
@@ -295,6 +296,7 @@ const en = ({
     headerDays: 'days summary',
     headerDetailedDaysTasks: 'detailed days and tasks summary',
     headerDetailedTasks: 'detailed tasks summary',
+    discoTitle: 'report-Porn',
     format: {
       markdown: 'Markdown (.md)',
       plaintext: 'Plain Text (.txt)',
@@ -305,7 +307,7 @@ const en = ({
       csv: 'CSV (.csv)'
     },
     formatLabel: 'choose format',
-    structureLabel: 'structure of the report',
+    structureLabel: 'structure',
     addSectionLabel: 'add section',
     downloadLabel: 'download report as',
     previewLabel: 'preview',
