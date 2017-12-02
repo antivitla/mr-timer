@@ -18,10 +18,10 @@
           @click="changeLimit(currentOptions.limit[2])")
           span.full {{ labelNumber(currentOptions.limit[2]) }}
           span.shorter {{ currentOptions.limit[2] }}
-        span.text-muted(v-if="currentExist && currentCount > currentLimit")
+        span.text-muted(v-if="currentExist && currentCount >= currentLimit")
           | &nbsp;{{ label('pagination.or', false) }}&nbsp;
         span.selectable(
-          v-if="currentExist && currentCount > currentLimit"
+          v-if="currentExist && currentCount >= currentLimit"
           :class="{ 'active': currentLimit === currentCount || !currentLimit }"
           @click="changeLimit(currentCount)")
           span.full {{ labelAll }}

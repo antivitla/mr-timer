@@ -12,39 +12,45 @@ function cleanDate (date) {
   return d
 }
 
-console.log(monthStartDate().toISOString())
+export const defaultLimit = {
+  storage: 20,
+  days: 7,
+  months: 1,
+  years: 1,
+  tasks: 3
+}
 
 const state = {
   pagination: {
     storage: {
       count: 0,
-      limit: 20,
+      limit: defaultLimit.storage,
       offset: 0
     },
     days: {
       count: 0,
-      limit: 3,
+      limit: defaultLimit.days,
       offset: 0,
       next: null,
       previous: null
     },
     months: {
       count: 0,
-      limit: 3,
+      limit: defaultLimit.months,
       offset: 0,
       next: null,
       previous: null
     },
     years: {
       count: 0,
-      limit: 1,
+      limit: defaultLimit.years,
       offset: 0,
       next: null,
       previous: null
     },
     tasks: {
       count: 0,
-      limit: 3,
+      limit: defaultLimit.tasks,
       offset: 0,
       next: null,
       previous: null

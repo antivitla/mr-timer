@@ -4,6 +4,7 @@ import uuid from 'uuid/v1'
 import { insertSorted } from '@/utils/sorted'
 import { loadEntriesFromLocalStorage, saveEntriesToLocalStorage } from './get-entries'
 import { time } from '@/utils/time'
+import { defaultLimit } from '@/store/pagination'
 
 function filterByContext (entries, context = []) {
   return entries.filter(entry => {
@@ -11,6 +12,25 @@ function filterByContext (entries, context = []) {
     const source = entry.details.join(' / ')
     const r = new RegExp(`^${target}`)
     return source.match(r)
+  })
+}
+
+function filterByInterval (entries, startFrom, startTo) {
+  if (startFrom === 'auto' && startTo === 'auto') {
+    return entries
+  }
+  const past = Date.parse(startFrom)
+  const future = Date.parse(startTo)
+  return entries.filter(entry => {
+    const t = new Date(entry.start).getTime()
+    if (!isNaN(past) && !isNaN(future)) {
+      return t >= past && t <= future
+    } else if (past) {
+      return t >= past
+    } else if (future) {
+      return t <= future
+    }
+    return false
   })
 }
 
@@ -148,13 +168,18 @@ function responseWithFilteredEntries (allEntries, params) {
     }
   }
   if (params.context) {
-    response.entries = filterByContext(response.entries, params.context)
     response.context = params.context.slice(0)
+    response.entries = filterByContext(response.entries, response.context)
     response.pagination.count = response.entries.length
   }
   if (params.filter) {
-    response.entries = filterByFilter(response.entries, params.filter, params.context)
+    response.entries = filterByFilter(response.entries, params.filter, response.context)
     response.pagination.count = response.entries.length
+  }
+  if (params.start_from || params.start_to) {
+    response.pagination.limit = null
+    response.pagination.offset = 0
+    response.entries = filterByInterval(response.entries, params.start_from, params.start_to)
   }
   if (params.last) {
     response.pagination.group = params.last
@@ -186,10 +211,12 @@ function responseWithFilteredEntries (allEntries, params) {
         context: response.context
       })
     }
-    // paginate
     Object.assign(response.pagination, createGroupPagination({ params, group }))
   } else {
-    if (!params.limit) {
+    if (params.limit === null) {
+      response.entries = response.entries.slice(params.offset, params.offset + defaultLimit.storage)
+      response.pagination.limit = defaultLimit.storage
+    } else if (!params.limit) {
       response.entries = response.entries.slice(params.offset)
     } else {
       response.entries = response.entries.slice(params.offset, params.offset + params.limit)

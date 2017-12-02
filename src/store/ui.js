@@ -23,7 +23,7 @@ const state = {
   },
   sidebar: false,
   fullWidth: false,
-  paginationOrInterval: false,
+  paginationOrInterval: true,
   taskDelimiter
 }
 
