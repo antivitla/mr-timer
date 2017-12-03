@@ -163,7 +163,7 @@ const $JExcel = {};
     return templateSheet
       .replace('{columns}', generateColums(sheet.columns))
       .replace("{rows}", generateRows(sheet.rows))
-      .replace("{merge}", generateMerge(sheet.merge));
+      .replace("{merge}", sheet.merge ? generateMerge(sheet.merge) : '');
   }
 
 

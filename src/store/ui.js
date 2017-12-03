@@ -1,4 +1,6 @@
 import { freezeElement, meltElement } from '@/utils/freeze-element'
+import scrollTopElement from '@/utils/scroll-top-element'
+
 export const taskDelimiter = ' / '
 
 const state = {
@@ -87,6 +89,9 @@ const mutations = {
 const actions = {
   openModal (context, payload) {
     context.commit('openModal', payload)
+    setTimeout(() => {
+      scrollTopElement(document.querySelector('.modals'), document.querySelector('.modals .modal'))
+    }, 1)
     freezeElement(document.body)
   },
   closeModal (context) {

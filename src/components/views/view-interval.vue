@@ -11,7 +11,7 @@
         @selected="selectIntervalStart"
         :format="customFormatter")
       i.material-icons.open keyboard_arrow_down
-      .auto(v-if="!start") начало времён
+      .auto(v-if="!start") {{ label('pagination.beginningOfTime', false) }}
     .to
       i.material-icons.open keyboard_arrow_down
       datepicker(
@@ -23,13 +23,14 @@
         :clear-button-icon="'clear-date material-icons'"
         @selected="selectIntervalStop"
         :format="customFormatter")
-      .auto(v-if="!stop") сегодня
+      .auto(v-if="!stop") {{ label('pagination.now', false) }}
 </template>
 <script>
   import moment from 'moment'
   import { mapGetters, mapMutations } from 'vuex'
   import Datepicker from 'vuejs-datepicker'
   import capitalize from '@/utils/capitalize'
+  import i18nLabel from '@/mixins/i18n-label'
 
   // function cleamDa
 
@@ -73,6 +74,9 @@
         'setIntervalStop'
       ])
     },
+    mixins: [
+      i18nLabel
+    ],
     components: {
       Datepicker
     }

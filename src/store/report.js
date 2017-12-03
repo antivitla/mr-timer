@@ -2,7 +2,7 @@ export const defaultSections = {
   header: { type: 'header' },
   total: { type: 'total' },
   // period: { type: 'period' },
-  text: { type: 'text' },
+  // text: { type: 'text' },
   summaryDays: {
     type: 'summary',
     summary: { type: 'days' }
@@ -60,7 +60,8 @@ const state = {
   previewTextColumnWidths: [50, 60, 70, 80, 100],
   reportPerHour: true,
   reportCost: true,
-  reportDuration: true
+  reportDuration: true,
+  reportPeriod: true
 }
 
 const getters = {
@@ -74,6 +75,7 @@ const getters = {
   reportPerHour: state => state.reportPerHour,
   reportCost: state => state.reportCost,
   reportDuration: state => state.reportDuration,
+  reportPeriod: state => state.reportPeriod,
   reportResult: state => {
     if (state.reportDuration && state.reportCost) {
       return 'report-duration-and-cost'
@@ -129,6 +131,9 @@ const mutations = {
   },
   setReportPerHour (state, payload) {
     state.reportPerHour = payload.reportPerHour
+  },
+  setReportPeriod (state, payload) {
+    state.reportPeriod = payload.reportPeriod
   },
   // setReportCost (state, payload) {
   //   state.reportCost = payload.reportCost

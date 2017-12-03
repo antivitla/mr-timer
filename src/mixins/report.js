@@ -127,6 +127,7 @@ export default {
       'previewTextShortColumnWidth',
       'reportPerHour',
       'reportCost',
+      'reportPeriod',
       'reportDuration'
     ])
   },
@@ -181,9 +182,17 @@ export default {
       let from
       let to
       if (this.isInterval) {
-        from = this.intervalStart ? moment(this.intervalStart) : moment()
-        to = this.intervalStop ? moment(this.intervalStop) : moment()
-        return fullDateRange(from, to, this.locale)
+        from = this.intervalStart ? moment(this.intervalStart) : null
+        to = this.intervalStop ? moment(this.intervalStop) : null
+        if (from && to) {
+          return fullDateRange(from, to, this.locale)
+        } else if (from) {
+          return `${this.label('report.from', false)} ${from.format('LL')}`
+        } else if (to) {
+          return `${this.label('report.until', false)} ${to.format('LL')}`
+        } else {
+          return `${this.label('report.allTime', false)}`
+        }
       } else if (Storage.entries.length && this.currentView !== 'tasks') {
         from = moment(Storage.entries.slice(-1)[0].start)
         to = moment(Storage.entries[0].start)
@@ -201,8 +210,8 @@ export default {
 
     generateCommonHeaderString () {
       const header = this.generateReportTitleString()
-      const period = this.generatePeriodString()
-      if (period) {
+      if (this.reportPeriod) {
+        const period = this.generatePeriodString()
         return header + ', ' + period
       }
       return header
@@ -287,6 +296,23 @@ export default {
       info.totalColumns = (info.maxNest + 1) * info.colsPerLevel
       // Now start creating sheet
       let sheet = []
+      // First, if we need to show pricePerHour and we do not have
+      // it in structure, add it
+      if (this.reportPerHour) {
+        let headerFirst = false
+        let totalFound = false
+        structure.forEach((section, index) => {
+          if (index === 0 && section.type === 'header') {
+            headerFirst = true
+          }
+          if (section.type === 'total') {
+            totalFound = true
+          }
+        })
+        if (!totalFound) {
+          structure.splice(!headerFirst ? 0 : 1, 0, { type: 'total' })
+        }
+      }
       structure.forEach((section, index) => {
         if (section.type === 'header') {
           sheet = sheet.concat(this.generateHeaderRows({ info }))
@@ -362,7 +388,10 @@ export default {
               }
             }
           }
-          subheader[0][subheader[0].length - (info.colsPerLevel - 1)].timeRowsDown = table.length
+          subheader[0][subheader[0].length - (info.colsPerLevel - 1)].rowsDown = table.length
+          if (info.colsPerLevel === 3) {
+            subheader[0][subheader[0].length - 1].rowsDown = table.length
+          }
           sheet = sheet.concat(subheader).concat(table)
           sheet = sheet.concat([
             generateArray(info.totalColumns),
@@ -393,8 +422,8 @@ export default {
         type: 'string',
         sectionType: 'header'
       })
-      const periodString = this.generatePeriodString()
-      if (periodString) {
+      if (this.reportPeriod) {
+        const periodString = this.generatePeriodString()
         const period = generateArray(info.totalColumns, this.generateCell({
           value: '',
           type: 'string',
@@ -424,26 +453,27 @@ export default {
         sectionType: 'total',
         value: ''
       }))
-      if (this.price) {
+      if (this.reportDuration && this.reportCost) {
         labels[info.totalColumns - 1].value = this.label('report.totalMoney', false)
+        total[info.totalColumns - 1].value = parseInt((getTotalTime() / 3600000) * this.price)
+        total[info.totalColumns - 1].type = 'price'
 
         labels[info.totalColumns - 2].value = this.label('report.totalTime', false)
         labels[info.totalColumns - 2].type += ' center'
-
-        labels[info.totalColumns - 3].value = this.label('report.moneyPerHour', false)
-
-        total[info.totalColumns - 1].value = 0
-        total[info.totalColumns - 1].type = 'price'
-
         total[info.totalColumns - 2].value = getTotalTime()
         total[info.totalColumns - 2].type = 'duration'
-
-        total[info.totalColumns - 3].value = this.price
-        total[info.totalColumns - 3].type += ' perhour'
+        if (this.reportPerHour) {
+          labels[info.totalColumns - 3].value = this.label('report.moneyPerHour', false)
+          total[info.totalColumns - 3].value = this.price
+          total[info.totalColumns - 3].type += ' perhour'
+        }
+      } else if (this.reportCost) {
+        labels[info.totalColumns - 1].value = this.label('report.totalMoney', false)
+        total[info.totalColumns - 1].value = parseInt((getTotalTime() / 3600000) * this.price)
+        total[info.totalColumns - 1].type = 'price'
       } else {
         labels[info.totalColumns - 1].value = this.label('report.totalTime', false)
         labels[info.totalColumns - 1].type += ' center'
-
         total[info.totalColumns - 1].value = getTotalTime()
         total[info.totalColumns - 1].type = 'duration'
       }
@@ -481,7 +511,7 @@ export default {
         type: 'string subheader',
         sectionType: section.summary.type
       })
-      if (info.priceEnabled) {
+      if (this.reportDuration && this.reportCost) {
         row[row.length - 1] = this.generateCell({
           value: Math.ceil(dur * this.price / 3600000),
           type: 'price subheader',
@@ -490,6 +520,12 @@ export default {
         row[row.length - 2] = this.generateCell({
           value: dur,
           type: 'duration subheader',
+          sectionType: section.summary.type
+        })
+      } else if (this.reportCost) {
+        row[row.length - 1] = this.generateCell({
+          value: Math.ceil(dur * this.price / 3600000),
+          type: 'price subheader',
           sectionType: section.summary.type
         })
       } else {
@@ -511,21 +547,33 @@ export default {
           type: 'string',
           sectionType: section.summary.type
         })
-        const pos = depth * (this.price ? 3 : 2)
+        const pos = depth * info.colsPerLevel
         row[pos] = this.generateCell({
           value: item.value,
           type: 'string',
           sectionType: section.summary.type
         })
-        row[pos + 1] = this.generateCell({
-          value: item.duration ? item.duration : 0,
-          type: 'duration',
-          sectionType: section.summary.type
-        })
-        if (info.priceEnabled) {
+        if (this.reportDuration && this.reportCost) {
+          row[pos + 1] = this.generateCell({
+            value: item.duration ? item.duration : 0,
+            type: 'duration',
+            sectionType: section.summary.type
+          })
           row[pos + 2] = this.generateCell({
             value: item.duration ? Math.ceil(item.duration * this.price / 3600000) : 0,
             type: 'price',
+            sectionType: section.summary.type
+          })
+        } else if (this.reportCost) {
+          row[pos + 1] = this.generateCell({
+            value: item.duration ? Math.ceil(item.duration * this.price / 3600000) : 0,
+            type: 'price',
+            sectionType: section.summary.type
+          })
+        } else {
+          row[pos + 1] = this.generateCell({
+            value: item.duration ? item.duration : 0,
+            type: 'duration',
             sectionType: section.summary.type
           })
         }
@@ -549,8 +597,7 @@ export default {
           table = table.concat(rows)
         }
         if (item.children) {
-          // set formula
-          row[pos + 1].childrenTimeRows = rows.length
+          row[pos + 1].childrenRows = rows.length
         }
       })
       return table
@@ -574,13 +621,17 @@ export default {
 
     convertToExcelReport (table, info) {
       const curr = {
-        rub: '# ##0 [$₽-419]',
-        cny: '[$￥-804] # ##0',
-        eur: '# ##0 [$€-40C]',
-        usd: '[$$-409] # ##0'
+        rub: '#,##0 [$₽-419]',
+        cny: '[$￥-804] #,##0',
+        eur: '#,##0 [$€-40C]',
+        usd: '[$$-409] #,##0'
       }
       const xlsx = MyExcel.new('Arial 10')
-      // fix empty last cells in trees
+      // fix empty last cells in tree-view,
+      // when root task has no children,
+      // so we need to duplicate it's value to
+      // end of row (where all durations
+      // and costs aligned in non-days summaries)
       for (let r = 0; r < table.length; r++) {
         let rowSectionType
         for (let c = 0; c < table[r].length; c++) {
@@ -589,14 +640,16 @@ export default {
             break
           }
         }
-        if (rowSectionType && rowSectionType !== 'days' && rowSectionType !== 'header' && rowSectionType !== 'total' && table[r][table[r].length - 1] && !table[r][table[r].length - 1].value) {
+        if (rowSectionType && !rowSectionType.match(/days/) && !rowSectionType.match(/header/) && !rowSectionType.match(/total/) && table[r][table[r].length - 1] && !table[r][table[r].length - 1].value) {
           let dur
           let price
           for (let i = table[r].length - 1; i > -1; i--) {
             if (table[r][i].value || table[r][i].value === 0) {
-              if (this.price) {
+              if (this.reportDuration && this.reportCost) {
                 price = table[r][i]
                 dur = table[r][i - 1]
+              } else if (this.reportCost) {
+                price = table[r][i]
               } else {
                 dur = table[r][i]
               }
@@ -606,13 +659,29 @@ export default {
           if (price && dur) {
             table[r][table[r].length - 2] = JSON.parse(JSON.stringify(dur))
             table[r][table[r].length - 1] = JSON.parse(JSON.stringify(price))
-          } else if (dur) {
+          } else if (price) {
+            table[r][table[r].length - 1] = JSON.parse(JSON.stringify(price))
+          } else {
             table[r][table[r].length - 1] = JSON.parse(JSON.stringify(dur))
           }
         }
       }
 
       const abc = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+
+      // Find cell address with price per hour
+      let perHourAddress
+      for (let r = 0; r < table.length; r++) {
+        for (let c = 0; c < table[r].length; c++) {
+          if (table[r][c] && table[r][c].type.match(/perhour/)) {
+            perHourAddress = `${abc[c]}${r + 1}`
+            break
+          }
+        }
+        if (perHourAddress) {
+          break
+        }
+      }
 
       table.forEach((row, r) => {
         row.forEach((cell, c) => {
@@ -632,19 +701,37 @@ export default {
           if (cell) {
             // common
             if (cell.type.match(/date/)) {
+              // DAY
               props.value = moment(props.value).format('D MMMM').replace(' г.', '')
             } else if (cell.type.match(/duration/)) {
+              // DURATION
               props.value = props.value ? props.value / (24 * 3600000) : 0
-              // if had children
-              if (cell.childrenTimeRows !== undefined) {
-                props.value = `=SUM(${abc[info.totalColumns - (this.price ? 1 : 0)]}${r + 1}:${abc[info.totalColumns - (this.price ? 1 : 0)]}${r + 1 + cell.childrenTimeRows})`
+              // if had children, sum time from last column
+              let formula
+              if (cell.childrenRows !== undefined) {
+                const lastDurationColumn = info.totalColumns - (this.reportDuration && this.reportCost ? 1 : 0)
+                const from = `${abc[lastDurationColumn]}${r + 1}`
+                const to = `${abc[lastDurationColumn]}${r + 1 + cell.childrenRows}`
+                formula = `=SUM(${from}:${to})`
+                props.value = formula
               }
               style.align = 'C C'
               style.font = style.font.replace('#333333', '#888888')
               style.format = '[h]:mm'
             } else if (cell.type.match(/price/)) {
-              props.value = `=${abc[c - 1]}${r + 1}*24*${this.price}`
-              style.format = '# ##0'
+              // COST
+              let formula
+              if (this.reportDuration && this.reportCost) {
+                const durationCellAddress = `${abc[c - 1]}${r + 1}`
+                formula = `=${durationCellAddress}*24*${this.reportPerHour ? perHourAddress : this.price}`
+              } else if (cell.childrenRows !== undefined) {
+                const lastColumn = info.totalColumns
+                const from = `${abc[lastColumn]}${r + 1}`
+                const to = `${abc[lastColumn]}${r + 1 + cell.childrenRows}`
+                formula = `=SUM(${from}:${to})`
+              }
+              props.value = formula || cell.value
+              style.format = '#,##0'
               if (c < table[0].length - 3 && cell.sectionType !== 'days') {
                 style.align = 'C C'
               } else {
@@ -654,17 +741,27 @@ export default {
             }
             // can be subheader and price
             if (cell.type.match(/subheader/)) {
+              // SUBHEADER
+              // if it is price, is has already formula to
+              // get from time near
               style.font = style.font.replace('10', '12') + ' B'
+              let formula = cell.value
+              if (cell.rowsDown !== undefined) {
+                const from = `${abc[c]}${r + 2}`
+                const to = `${abc[c]}${r + 2 + cell.rowsDown}`
+                formula = `=SUM(${from}:${to})`
+              }
+              const costOnly = !this.reportDuration && this.reportCost
+              if (cell.type.match(/duration/) || (cell.type.match(/price/) && costOnly)) {
+                props.value = formula
+              }
               if (cell.type.match(/price/)) {
                 style.format = curr[this.currency]
-              } else if (cell.type.match(/duration/)) {
-                if (cell.timeRowsDown !== undefined) {
-                  props.value = `=SUM(${abc[c]}${r + 2}:${abc[c]}${r + 2 + cell.timeRowsDown})`
-                }
               }
               xlsx.set(0, undefined, r, 30)
             }
             if (cell.sectionType === 'total') {
+              // TOTAL
               if (cell.type.match(/price/) || cell.type.match(/duration/)) {
                 style.font = style.font.replace('10', '12') + ' B'
               }
@@ -683,6 +780,7 @@ export default {
                 }
               }
             } else if (cell.sectionType.match(/header/)) {
+              // HEADER
               if (info.totalColumns <= 2) {
                 style.font = style.font.replace('10', '12') + ' B'
                 style.wrap = true
@@ -702,7 +800,7 @@ export default {
                 style.font = style.font.replace(' B', '')
                 xlsx.set(0, undefined, r, 20)
               }
-              xlsx.addMerge(0, `${abc[c]}${r + 1}:${abc[c + info.totalColumns - 1]}${r + 1}`)
+              // xlsx.addMerge(0, `${abc[c]}${r + 1}:${abc[c + info.totalColumns - 1]}${r + 1}`)
             }
             if (cell.border === 'thick') {
               style.border = 'none,none,thick #444444,none'
@@ -710,13 +808,13 @@ export default {
               style.border = 'none,none,medium #444444,none'
             }
           }
-          if ((c - 1) % (this.price ? 3 : 2) === 0 && c < info.totalColumns - (this.price ? 3 : 2)) {
+          if ((c - 1) % (info.colsPerLevel) === 0 && c < info.totalColumns - (info.colsPerLevel)) {
             xlsx.set(0, c, undefined, 20)
           }
-          if ((c - 1) % (this.price ? 3 : 2) === 1) {
+          if ((c - 1) % (info.colsPerLevel) === 1) {
             xlsx.set(0, c, undefined, 9)
           }
-          if ((c - 1) % (this.price ? 3 : 2) === 2) {
+          if ((c - 1) % (info.colsPerLevel) === 2) {
             xlsx.set(0, c, undefined, 12)
           }
           props.style = xlsx.addStyle(style)
@@ -724,9 +822,9 @@ export default {
         })
       })
       if (info.totalColumns < 4) {
-        xlsx.set(0, info.totalColumns + 1 - (this.price ? 3 : 2), undefined, 35)
+        xlsx.set(0, info.totalColumns + 1 - (info.colsPerLevel), undefined, 35)
       } else {
-        xlsx.set(0, info.totalColumns + 1 - (this.price ? 3 : 2), undefined, 60)
+        xlsx.set(0, info.totalColumns + 1 - (info.colsPerLevel), undefined, 60)
       }
       if (this.price) {
         xlsx.set(0, info.totalColumns, undefined, 13)
@@ -840,14 +938,8 @@ export default {
     },
 
     generateTextHeader () {
-      const context = this.context.join(taskDelimiter)
-      const period = this.generatePeriodString()
-      let title = this.label('report.reportOnFor').replace('%0', context)
+      const header = this.generateCommonHeaderString()
       const columnWidth = this.previewTextColumnWidth - 1
-      if (!context) {
-        title = this.label('report.commonReport')
-      }
-      const header = `${title}${period ? ', ' + period : ''}`
       const repeat = Math.floor((columnWidth - header.length) * 0.5)
       const space = ' '.repeat(repeat < 0 ? 0 : repeat)
       return [

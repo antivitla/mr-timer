@@ -93,6 +93,9 @@ const ru = ({
     headerDetailedTasks: 'подробная сводка по задачам',
     discoTitle: 'отчёт-Дискотека',
     withColumnWidth: 'с шириной колонки',
+    allTime: 'за всё время',
+    from: 'с',
+    until: 'до',
     format: {
       markdown: 'Markdown (.md)',
       plaintext: 'Plain Text (.txt)',
@@ -162,7 +165,9 @@ const ru = ({
     numberYears: '{years, plural, =0{# лет} one{# год} few{# года} other{# лет}}',
     numberTasks: '{tasks, plural, =0{# задач} one{# задачу} few{# задачи} other{# задач}}',
     latest: '{gender, select, male{последний} female{последняя} other{последние}}',
-    earliest: '{gender, select, male{первый} female{первая} other{первые}}'
+    earliest: '{gender, select, male{первый} female{первая} other{первые}}',
+    beginningOfTime: 'начало времён',
+    now: 'сейчас'
   },
   settings: {
     profile: 'профиль',
@@ -210,7 +215,8 @@ const ru = ({
       durationOnly: 'только время',
       costOnly: 'только стоимость',
       durationAndCost: 'время и стоимость',
-      perHour: 'цену в час'
+      perHour: 'цену в час',
+      period: 'период'
     }
   },
   sidebar: {
@@ -305,6 +311,9 @@ const en = ({
     headerDetailedTasks: 'detailed tasks summary',
     discoTitle: 'report-Porn',
     withColumnWidth: 'with column width',
+    from: 'from',
+    until: 'until',
+    allTime: 'all time',
     format: {
       markdown: 'Markdown (.md)',
       plaintext: 'Plain Text (.txt)',
@@ -377,7 +386,9 @@ const en = ({
     numberYears: '{years, plural, =0{# years} one{# year} other{# years}}',
     numberTasks: '{tasks, plural, =0{# tasks} one{# task} other{# tasks}}',
     latest: '{gender, select, male{latest} female{latest} other{latest}}',
-    earliest: '{gender, select, male{earliest} female{earliest} other{earliest}}'
+    earliest: '{gender, select, male{earliest} female{earliest} other{earliest}}',
+    beginningOfTime: 'the begin',
+    now: 'now'
   },
   settings: {
     profile: 'profile',
@@ -425,7 +436,8 @@ const en = ({
       durationOnly: 'time only',
       costOnly: 'cost only',
       durationAndCost: 'time and cost',
-      perHour: 'price per hour'
+      perHour: 'price per hour',
+      period: 'period'
     }
   },
   sidebar: {

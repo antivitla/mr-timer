@@ -30,6 +30,13 @@
           id="report-per-hour"
           v-model="reportPerHourModel")
         label(for="report-per-hour") {{ label('settings.report.perHour') }}
+      div
+        custom-checkbox(
+          mark
+          off-box
+          id="report-period"
+          v-model="reportPeriodModel")
+        label(for="report-period") {{ label('settings.report.period') }}
 </template>
 <script>
   import { mapGetters, mapMutations } from 'vuex'
@@ -37,19 +44,8 @@
   import i18nLabel from '@/mixins/i18n-label'
   import customRadio from '@/components/other/custom-radio'
   import customCheckbox from '@/components/other/custom-checkbox'
-  import bus from '@/event-bus'
 
   export default {
-    created () {
-      this.unsubscribe = this.$store.subscribe(mutation => {
-        if (mutation.type === 'setReportPerHour' || mutation.type === 'setReportResult') {
-          bus.$emit('refresh-report-preview')
-        }
-      })
-    },
-    beforeDestroy () {
-      this.unsubscribe()
-    },
     computed: {
       reportResultModel () {
         return this.reportResult
@@ -64,9 +60,20 @@
           })
         }
       },
+      reportPeriodModel: {
+        get () {
+          return this.reportPeriod
+        },
+        set (value) {
+          this.setReportPeriod({
+            reportPeriod: value
+          })
+        }
+      },
       ...mapGetters([
         'reportResult',
-        'reportPerHour'
+        'reportPerHour',
+        'reportPeriod'
       ])
     },
     methods: {
@@ -77,7 +84,8 @@
       },
       ...mapMutations([
         'setReportResult',
-        'setReportPerHour'
+        'setReportPerHour',
+        'setReportPeriod'
       ])
     },
     mixins: [

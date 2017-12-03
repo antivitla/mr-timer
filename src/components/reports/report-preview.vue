@@ -23,10 +23,17 @@
     created () {
       this.refreshPreview()
       this.unsubscribe = this.$store.subscribe(mutation => {
-        if (mutation.type === 'setReportStructure' || mutation.type === 'setReportFormat') {
+        const types = [
+          'setReportStructure',
+          'setReportFormat',
+          'setReportPeriod',
+          'setReportResult',
+          'setReportPerHour'
+        ]
+        if (types.indexOf(mutation.type) > -1) {
           setTimeout(() => {
             this.refreshPreview()
-          }, 100)
+          }, 1)
         }
       })
       bus.$on('get-entries-complete', this.handleRefreshPreview)
