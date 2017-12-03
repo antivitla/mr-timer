@@ -92,6 +92,7 @@ const ru = ({
     headerDetailedDaysTasks: 'подробная сводка по дням и задачам',
     headerDetailedTasks: 'подробная сводка по задачам',
     discoTitle: 'отчёт-Дискотека',
+    withColumnWidth: 'с шириной колонки',
     format: {
       markdown: 'Markdown (.md)',
       plaintext: 'Plain Text (.txt)',
@@ -106,6 +107,7 @@ const ru = ({
     addSectionLabel: 'добавить раздел',
     previewLabel: 'предпросмотр',
     downloadLabel: 'скачать отчёт в формате',
+    resultLabel: 'Показывать',
     placeholderText: 'введите текст заметки',
     section: {
       header: 'заголовок',
@@ -204,7 +206,11 @@ const ru = ({
       title: 'отчёты',
       showModal: 'показывать настройки перед загрузкой',
       showModalLong: 'показывать окно в следующий раз (изменить в настройках меню)',
-      download: 'скачать отчёт'
+      download: 'скачать отчёт',
+      durationOnly: 'только время',
+      costOnly: 'только стоимость',
+      durationAndCost: 'время и стоимость',
+      perHour: 'цену в час'
     }
   },
   sidebar: {
@@ -298,6 +304,7 @@ const en = ({
     headerDetailedDaysTasks: 'detailed days and tasks summary',
     headerDetailedTasks: 'detailed tasks summary',
     discoTitle: 'report-Porn',
+    withColumnWidth: 'with column width',
     format: {
       markdown: 'Markdown (.md)',
       plaintext: 'Plain Text (.txt)',
@@ -312,6 +319,7 @@ const en = ({
     addSectionLabel: 'add section',
     downloadLabel: 'download report as',
     previewLabel: 'preview',
+    resultLabel: 'show',
     placeholderText: 'write your comments here',
     section: {
       header: 'header',
@@ -413,7 +421,11 @@ const en = ({
       title: 'reports',
       showModal: 'show report settings before download',
       showModalLong: 'show modal next time (change in settings menu)',
-      download: 'download report'
+      download: 'download report',
+      durationOnly: 'time only',
+      costOnly: 'cost only',
+      durationAndCost: 'time and cost',
+      perHour: 'price per hour'
     }
   },
   sidebar: {

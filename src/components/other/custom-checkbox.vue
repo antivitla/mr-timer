@@ -10,7 +10,7 @@
       span(v-if="!mark") check_box
       span(v-else) check
     i.material-icons.off
-      span(v-if="!mark") check_box_outline_blank
+      span(v-if="!mark || offBox") check_box_outline_blank
       span.empty(v-else) check
 </template>
 <script>
@@ -18,7 +18,8 @@
     props: {
       value: Boolean,
       id: String,
-      mark: Boolean
+      mark: Boolean,
+      offBox: Boolean
     },
     methods: {
       updateValue (value) {

@@ -35,9 +35,7 @@
   .custom-radio
     display inline-block
     vertical-align middle
-    color titamota-color-text-invert
-    // position relative
-    // top -1px
+    color titamota-color-text
     cursor pointer
     &:first-child + label
       margin-left 10px
@@ -50,10 +48,20 @@
       display none
     input:not(:checked) ~ .off
       display block
-      color titamota-color-text-invert
+      color titamota-color-text
     input:checked ~ .on
       display block
-      color titamota-color-text-invert
+      color titamota-color-text
     input:checked ~ .off
       display none
+
+  .invert
+    .custom-radio
+      color titamota-color-text-invert
+      input:not(:checked) ~ .off
+        display block
+        color titamota-color-text-invert
+      input:checked ~ .on
+        display block
+        color titamota-color-text-invert
 </style>

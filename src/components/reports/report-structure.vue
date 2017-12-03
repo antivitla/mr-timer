@@ -108,7 +108,7 @@
         return this.generateCommonHeaderString()
       },
       totalLabel () {
-        return this.generateTotalFormula()
+        return this.generateFormula()
       },
       ...mapGetters([
         'reportStructure',
@@ -195,8 +195,6 @@
   @import '~@/assets/stylesheets/variables'
 
   .report-structure
-    h3
-      margin-top 20px !important
     .structure-sections
       &:empty
         height 43px

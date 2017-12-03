@@ -2,11 +2,11 @@ export default function numberFilter (n) {
   if (n === undefined) {
     return ''
   }
-  let s = String(parseInt(n, 10)).split('').reverse()
-  let level = 1
-  while (level * 3 < s.length) {
-    s.splice(level * 3, 0, ' ')
-    level = level + 1
+  let part = '' + n
+  let result = ''
+  while (part.length) {
+    result = ' ' + part.substr(-3) + result
+    part = part.slice(0, -3)
   }
-  return s.reverse().join('').trim()
+  return result.trim().replace('- ', '-')
 }

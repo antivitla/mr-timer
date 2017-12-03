@@ -1,15 +1,24 @@
 <template lang="pug">
   .modal.report
     h2 {{ label('report.discoTitle') }}
+    //- Result
+    report-result
     //- Structure
     report-structure
     //- Format
     .format
       h3 {{ label('report.formatLabel') }}
-      select(v-model="currentReportFormat")
-        option(
-          v-for="option in availableFormatsAsOptions"
-          :value="option.value") {{ label(option.label) }}
+      .row
+        select(v-model="currentReportFormat")
+          option(
+            v-for="option in availableFormatsAsOptions"
+            :value="option.value") {{ label(option.label) }}
+        .options(v-if="currentReportFormat === 'plaintext'")
+          span.label {{ label('report.withColumnWidth', false) }}
+          select(v-model="columnWidthModel")
+            option(
+              v-for="option in availablePreviewTextColumnWidthsAsOptions"
+              :value="option.value") {{ option.value }}
     //- Preview
     .preview(v-if="reportFormat === 'markdown' || reportFormat === 'plaintext'")
       h3 {{ label('report.previewLabel') }}
@@ -48,8 +57,10 @@
   import getReport from '@/components/reports/get-report'
   import reportStructure from '@/components/reports/report-structure'
   import reportPreview from '@/components/reports/report-preview'
+  import reportResult from '@/components/reports/report-result'
   import customCheckbox from '@/components/other/custom-checkbox'
   import customFor from '@/directives/custom-for'
+  import bus from '@/event-bus'
 
   export default {
     data () {
@@ -57,7 +68,27 @@
         previewVisible: false
       }
     },
+    created () {
+      this.unsubscribe = this.$store.subscribe(mutation => {
+        if (mutation.type === 'setPreviewTextColumnWidth') {
+          bus.$emit('refresh-report-preview')
+        }
+      })
+    },
+    beforeDestroy () {
+      this.unsubscribe()
+    },
     computed: {
+      columnWidthModel: {
+        get () {
+          return this.previewTextColumnWidth
+        },
+        set (value) {
+          this.setPreviewTextColumnWidth({
+            previewTextColumnWidth: parseInt(value, 10)
+          })
+        }
+      },
       currentReportFormat: {
         get () {
           return this.reportFormat
@@ -79,7 +110,9 @@
       ...mapGetters([
         'reportFormat',
         'showReportModal',
-        'availableFormatsAsOptions'
+        'availableFormatsAsOptions',
+        'previewTextColumnWidth',
+        'availablePreviewTextColumnWidthsAsOptions'
       ])
     },
     methods: {
@@ -88,7 +121,8 @@
       },
       ...mapMutations([
         'setReportFormat',
-        'setShowReportModal'
+        'setShowReportModal',
+        'setPreviewTextColumnWidth'
       ]),
       ...mapActions([
         'closeModal'
@@ -104,6 +138,7 @@
       getReport,
       reportStructure,
       reportPreview,
+      reportResult,
       customCheckbox
     }
   }
@@ -119,6 +154,18 @@
       margin-top 40px
 
     .format
+      .options
+        & > *
+          vertical-align top
+      .row
+        display flex
+        flex-wrap wrap
+        align-items center
+        justify-content center
+      .label
+        margin 0 1em
+        line-height 40px
+        display inline-block
       select
         width auto
 

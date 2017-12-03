@@ -55,13 +55,33 @@ const state = {
     tasks: true,
     daysTasks: true
   },
-  showReportModal: true
+  showReportModal: true,
+  previewTextColumnWidth: 70,
+  previewTextColumnWidths: [50, 60, 70, 80, 100],
+  reportPerHour: true,
+  reportCost: true,
+  reportDuration: true
 }
 
 const getters = {
   reportFormat: state => state.format,
   reportStructure: state => JSON.parse(JSON.stringify(state.structure)),
   showReportModal: state => state.showReportModal,
+  previewTextColumnWidth: state => state.previewTextColumnWidth,
+  previewTextShortColumnWidth: (state, getters) => {
+    return getters.reportCost && getters.reportDuration ? 40 : 35
+  },
+  reportPerHour: state => state.reportPerHour,
+  reportCost: state => state.reportCost,
+  reportDuration: state => state.reportDuration,
+  reportResult: state => {
+    if (state.reportDuration && state.reportCost) {
+      return 'report-duration-and-cost'
+    } else if (state.reportCost) {
+      return 'report-cost-only'
+    }
+    return 'report-duration-only'
+  },
   availableFormatsAsOptions: state => {
     return Object
       .keys(state.formats)
@@ -79,6 +99,9 @@ const getters = {
       .keys(state.summaries)
       .filter(key => state.summaries[key])
       .map(key => ({ value: key, label: `report.summary.${key}` }))
+  },
+  availablePreviewTextColumnWidthsAsOptions: state => {
+    return state.previewTextColumnWidths.map(i => ({ value: i }))
   }
 }
 
@@ -103,6 +126,33 @@ const mutations = {
   },
   clearReportSections (state) {
     state.structure = []
+  },
+  setReportPerHour (state, payload) {
+    state.reportPerHour = payload.reportPerHour
+  },
+  // setReportCost (state, payload) {
+  //   state.reportCost = payload.reportCost
+  // },
+  // setReportDuration (state, payload) {
+  //   state.reportDuration = payload.reportDuration
+  // },
+  setPreviewTextColumnWidth (state, payload) {
+    state.previewTextColumnWidth = payload.previewTextColumnWidth
+  },
+  setReportResult (state, payload) {
+    if (payload.reportResult === 'report-duration-only') {
+      state.reportDuration = true
+      state.reportCost = false
+    } else if (payload.reportResult === 'report-cost-only') {
+      state.reportDuration = false
+      state.reportCost = true
+    } else if (payload.reportResult === 'report-duration-and-cost') {
+      state.reportDuration = true
+      state.reportCost = true
+    } else {
+      state.reportDuration = true
+      state.reportCost = false
+    }
   }
 }
 

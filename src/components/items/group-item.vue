@@ -126,6 +126,7 @@
 
   // Utils
   import { durationHuman, durationEditable } from '@/utils/duration'
+  import numberFilter from '@/utils/number-filter'
   import {
     extractEntries,
     parentOfDifferentType,
@@ -177,15 +178,7 @@
         }
       },
       cost () {
-        const c = parseInt(
-          this.group.duration() * this.price / 3600000, 10)
-        let part = '' + c
-        let result = ''
-        while (part.length) {
-          result = ' ' + part.substr(-3) + result
-          part = part.slice(0, -3)
-        }
-        return result.trim()
+        return numberFilter(parseInt(this.group.duration() * this.price / 3600000, 10))
       },
       depth () {
         return this.group.path().length - 1

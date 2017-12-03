@@ -122,7 +122,12 @@ export default {
       'context',
       'isInterval',
       'intervalStart',
-      'intervalStop'
+      'intervalStop',
+      'previewTextColumnWidth',
+      'previewTextShortColumnWidth',
+      'reportPerHour',
+      'reportCost',
+      'reportDuration'
     ])
   },
   methods: {
@@ -203,28 +208,55 @@ export default {
       return header
     },
 
-    generateHumanTotalTime () {
-      const l = this.label('duration', false)
-      return durationHuman(getTotalTime(), l.hr, l.min, l.sec)
+    generateShortTime (time) {
+      return duration(time).format('HH:mm')
     },
 
-    generateTotalFormula () {
+    generateHumanTime (time) {
       const l = this.label('duration', false)
-      const time = getTotalTime()
-      const duration = durationHuman(time, l.hr, l.min, l.sec)
-      if (this.price) {
-        let price = this.price
-        let cost = price * (time / 3600000)
-        if (this.isCurrencySymbolBefore) {
-          price = this.currencySymbol + ' ' + numberFilter(price)
-          cost = this.currencySymbol + ' ' + numberFilter(cost)
-        } else {
-          price = numberFilter(price) + ' ' + this.currencySymbol
-          cost = numberFilter(cost) + ' ' + this.currencySymbol
-        }
-        return duration + ' x ' + price + ' ' + this.label('price.perHour', false) + ' = ' + cost
+      return durationHuman(time, l.hr, l.min, l.sec)
+    },
+
+    generatePricePerHour () {
+      let price = (this.price ? this.price : 0)
+      if (this.isCurrencySymbolBefore) {
+        price = this.currencySymbol + ' ' + numberFilter(price)
+      } else {
+        price = numberFilter(price) + ' ' + this.currencySymbol
       }
-      return duration
+      return `${price} ${this.label('price.perHour', false)}`
+    },
+
+    generateCost (time) {
+      let cost = parseInt((this.price ? this.price : 0) * (time / 3600000))
+      if (this.isCurrencySymbolBefore) {
+        cost = this.currencySymbol + ' ' + numberFilter(cost)
+      } else {
+        cost = numberFilter(cost) + ' ' + this.currencySymbol
+      }
+      return cost
+    },
+
+    generateTotal (time, { identCost = false } = {}) {
+      let dur = this.reportDuration ? this.generateShortTime(time) : ''
+      let cost = this.reportCost ? this.generateCost(time) : ''
+      if (identCost && cost.length < 9) {
+        cost = (' '.repeat(9) + cost).slice(-9)
+      }
+      if (this.reportDuration && this.reportCost) {
+        return `${dur} = ${cost}`
+      }
+      return `${dur}${cost.trim()}`
+    },
+
+    generateFormula (time = getTotalTime()) {
+      const price = this.reportPerHour ? this.generatePricePerHour(time) : ''
+      const cost = this.reportCost ? this.generateCost(time) : ''
+      const dur = this.reportDuration ? this.generateHumanTime(time) : ''
+      if (this.reportDuration && this.reportCost) {
+        return `${dur}${price ? ' x ' : ''}${price} = ${cost}`
+      }
+      return `${dur}${cost}`
     },
 
     //
@@ -240,7 +272,7 @@ export default {
       const info = {
         priceEnabled: Boolean(this.price)
       }
-      info.colsPerLevel = info.priceEnabled ? 3 : 2
+      info.colsPerLevel = this.reportDuration && this.reportCost ? 3 : 2
       // To get max depth, we need to create report data first
       let summaries = []
       structure.forEach(section => {
@@ -307,21 +339,12 @@ export default {
               if (subheader[r].length < info.totalColumns) {
                 const l = info.totalColumns - subheader[r].length
                 for (let c = 0; c < l; c++) {
-                  if (info.priceEnabled) {
-                    subheader[r].splice(3, 0, this.generateCell({
-                      value: '',
-                      type: 'string subheader',
-                      sectionType: 'daysTasks',
-                      border: subheader[r][0].border
-                    }))
-                  } else {
-                    subheader[r].splice(2, 0, this.generateCell({
-                      value: '',
-                      type: 'string subheader',
-                      sectionType: 'daysTasks',
-                      border: subheader[r][0].border
-                    }))
-                  }
+                  subheader[r].splice(info.colsPerLevel, 0, this.generateCell({
+                    value: '',
+                    type: 'string subheader',
+                    sectionType: 'daysTasks',
+                    border: subheader[r][0].border
+                  }))
                 }
               }
             }
@@ -329,26 +352,17 @@ export default {
               if (table[r].length < info.totalColumns) {
                 const l = info.totalColumns - table[r].length
                 for (let c = 0; c < l; c++) {
-                  if (info.priceEnabled) {
-                    table[r].splice(3, 0, this.generateCell({
-                      value: '',
-                      type: 'string',
-                      sectionType: 'daysTasks',
-                      border: table[r][0].border
-                    }))
-                  } else {
-                    table[r].splice(2, 0, this.generateCell({
-                      value: '',
-                      type: 'string',
-                      sectionType: 'daysTasks',
-                      border: table[r][0].border
-                    }))
-                  }
+                  table[r].splice(info.colsPerLevel, 0, this.generateCell({
+                    value: '',
+                    type: 'string',
+                    sectionType: 'daysTasks',
+                    border: table[r][0].border
+                  }))
                 }
               }
             }
           }
-          subheader[0][subheader[0].length - (this.price ? 2 : 1)].timeRowsDown = table.length
+          subheader[0][subheader[0].length - (info.colsPerLevel - 1)].timeRowsDown = table.length
           sheet = sheet.concat(subheader).concat(table)
           sheet = sheet.concat([
             generateArray(info.totalColumns),
@@ -739,6 +753,7 @@ export default {
     //
 
     generateTextReport (structure) {
+      // const columnWidth = this.previewTextColumnWidth - 1
       const subheader = {
         'daysTasks': this.label('report.headerDaysTasks'),
         'tasks': this.label('report.headerTasks'),
@@ -759,7 +774,9 @@ export default {
             lines = lines.concat([''])
           }
           if (!section.header) {
-            lines = lines.concat(this.generateTextHeader()).concat([''])
+            lines = lines
+              .concat(this.generateTextHeader())
+              .concat([''])
           } else {
             const header = `${section.header}`
             lines = lines.concat([
@@ -770,26 +787,35 @@ export default {
           }
         } else if (section.type === 'total') {
           // Total
-          lines = lines.concat([this.generateTextTotal(), ''])
+          lines = lines
+            .concat(this.generateTextTotal())
+            .concat([''])
         } else if (section.type === 'summary') {
           // Summary
           if (index) {
             lines = lines.concat([''])
           }
+          const total = this.generateTotal(getTotalTime(), { identCost: true })
           if (parseInt(section.summary.nest, 10)) {
             const header = `${detailedSubheader[section.summary.type]}`
-            const repeat = 61 - header.length
-            lines = lines.concat([
-              header.concat(' '.repeat(repeat < 0 ? 0 : repeat)).concat(duration(getTotalTime()).format('HH:mm')),
-              '-'.repeat(66)
-            ])
+            let repeat = this.previewTextColumnWidth - 1 - header.length - total.length
+            if (section.summary.type === 'days') {
+              repeat = this.previewTextShortColumnWidth - header.length - total.length
+            }
+            const line = header
+              .concat(' '.repeat(repeat < 0 ? 0 : repeat))
+              .concat(total)
+            lines = lines.concat([line, '-'.repeat(line.length)])
           } else {
             const header = `${subheader[section.summary.type]}`
-            const repeat = 61 - header.length
-            lines = lines.concat([
-              header.concat(' '.repeat(repeat < 0 ? 0 : repeat)).concat(duration(getTotalTime()).format('HH:mm')),
-              '-'.repeat(66)
-            ])
+            let repeat = this.previewTextColumnWidth - 1 - header.length - total.length
+            if (section.summary.type === 'days') {
+              repeat = this.previewTextShortColumnWidth - header.length - total.length
+            }
+            const line = header
+              .concat(' '.repeat(repeat < 0 ? 0 : repeat))
+              .concat(total)
+            lines = lines.concat([line, '-'.repeat(line.length)])
           }
           const data = Report.summary[section.summary.type]({
             depth: parseInt(section.summary.depth, 10),
@@ -806,10 +832,9 @@ export default {
     },
 
     generateTextTotal () {
-      const l = this.label('duration', false)
-      const total = durationHuman(getTotalTime(), l.hr, l.min, l.sec)
+      const total = this.generateFormula(getTotalTime())
       const line = `${this.label('report.total')}: ${total}`
-      const repeat = parseInt(33 - line.length * 0.5, 10)
+      const repeat = Math.floor((this.previewTextColumnWidth - 1 - line.length) * 0.5)
       const space = ' '.repeat(repeat < 0 ? 0 : repeat)
       return space + line + space
     },
@@ -818,26 +843,17 @@ export default {
       const context = this.context.join(taskDelimiter)
       const period = this.generatePeriodString()
       let title = this.label('report.reportOnFor').replace('%0', context)
+      const columnWidth = this.previewTextColumnWidth - 1
       if (!context) {
         title = this.label('report.commonReport')
       }
-      if (context) {
-        const header = `${title}${period ? ', ' + period : ''}`
-        const repeat = 33 - parseInt(header.length * 0.5, 10)
-        const space = ' '.repeat(repeat < 0 ? 0 : repeat)
-        return [
-          space + header + space,
-          space + '='.repeat(header.length) + space
-        ]
-      } else {
-        const header = `${title}${period ? ', ' + period : ''}`
-        const repeat = 33 - parseInt(header.length * 0.5, 10)
-        const space = ' '.repeat(repeat < 0 ? 0 : repeat)
-        return [
-          space + header + space,
-          space + '='.repeat(header.length) + space
-        ]
-      }
+      const header = `${title}${period ? ', ' + period : ''}`
+      const repeat = Math.floor((columnWidth - header.length) * 0.5)
+      const space = ' '.repeat(repeat < 0 ? 0 : repeat)
+      return [
+        space + header + space,
+        space + '='.repeat(header.length) + space
+      ]
     },
 
     generateTextSummary (data) {
@@ -851,6 +867,7 @@ export default {
       })
       return lines.join('\n').trim()
     },
+
     generateTextDayLines (item) {
       if (!isNest(item)) {
         return [this.generateTextDayLine(item, true)]
@@ -862,17 +879,19 @@ export default {
         return ['', this.generateTextDayLine(item)].concat(nested)
       }
     },
+
     generateTextDayLine (item, isShort = false) {
-      const name = moment(item.value).format('DD MMMM YYYY')
-      const d = duration(item.duration).format('HH:mm')
-      const maxSpace = isShort ? 60 : 60
-      const repeat = parseInt((maxSpace - name.length) * 0.5, 10)
-      const space = (name.length < maxSpace ? ' .'.repeat(repeat < 0 ? 0 : repeat) : ' .')
-      const addon = (name.length % 2 === 1 ? ' ' : '')
-      const line = `${name}${addon}${space} ${d}`
-      // const s = ' '.repeat(33 - line.length * 0.5)
-      return [line]
+      const name = moment(item.value).format('D MMM YYYY')
+      const total = this.generateTotal(item.duration, { identCost: true })
+      let columnWidth = this.previewTextColumnWidth - 1
+      if (isShort) {
+        columnWidth = this.previewTextShortColumnWidth
+      }
+      const repeat = columnWidth - name.length - total.length - 2
+      const space = (name.length < columnWidth ? '.'.repeat(repeat < 0 ? 0 : repeat) : '.')
+      return `${name} ${space} ${total}`.replace(/\.\./g, '. ')
     },
+
     generateTextTaskLines (item, depth = 0) {
       if (!isNest(item)) {
         return [this.generateTextTaskLine(item, depth)]
@@ -884,20 +903,22 @@ export default {
         return [this.generateTextTaskLine(item, depth)].concat(nested)
       }
     },
+
     generateTextTaskLine (item, depth = 0) {
       let name = item.value
       if (name.match(urlRegexp)) {
         name = decodeURIComponent(name.replace(/https?:\/\//, ''))
       }
-      const d = duration(item.duration).format('HH:mm')
+      let total = this.generateTotal(item.duration, { identCost: true })
       if (depth) {
+        total = this.generateTotal(item.duration)
         const padding = '  '.repeat(depth)
-        return `${padding}${name} (${d})`
+        return `${padding}${name} (${total})`
       } else {
-        const repeat = parseInt(30 - name.length * 0.5, 10)
-        const space = (name.length < 60 ? ' .'.repeat(repeat < 0 ? 0 : repeat) : ' .')
-        const addon = (name.length % 2 === 1 ? ' ' : '')
-        return `${name}${addon}${space} ${d}`
+        const columnWidth = this.previewTextColumnWidth - 1
+        const repeat = columnWidth - name.length - total.length - 2
+        const space = (name.length < columnWidth ? '.'.repeat(repeat < 0 ? 0 : repeat) : '.')
+        return `${name} ${space} ${total}`.replace(/\.\./g, '. ')
       }
     },
 
@@ -953,8 +974,7 @@ export default {
     },
 
     generateMarkdownTotal () {
-      const l = this.label('duration', false)
-      const total = durationHuman(getTotalTime(), l.hr, l.min, l.sec)
+      let total = this.generateFormula(getTotalTime())
       return `${this.label('report.total')}: ${total}`
     },
 
@@ -966,13 +986,15 @@ export default {
       let lines = []
       data.forEach(item => {
         if (item.type.match(/day/)) {
-          lines = lines.concat(this.generateMarkdownDayLines(item))
+          lines = lines
+            .concat(this.generateMarkdownDayLines(item))
         } else if (item.type.match(/task/)) {
           lines = lines.concat(this.generateMarkdownTaskLines(item))
         }
       })
       return lines.join('\n').trim()
     },
+
     generateMarkdownDayLines (item) {
       if (!isNest(item)) {
         return [this.generateMarkdownDayLine(item, true)]
@@ -984,15 +1006,13 @@ export default {
         return ['', this.generateMarkdownDayLine(item)].concat(nested)
       }
     },
+
     generateMarkdownDayLine (item, isShort = false) {
-      const name = `**${moment(item.value).format('DD MMMM YYYY')}**`
-      const d = `**${duration(item.duration).format('HH:mm')}**`
-      const maxSpace = isShort ? 26 : 60
-      const repeat = parseInt((maxSpace - name.length) * 0.5, 10)
-      const space = (name.length < maxSpace ? ' .'.repeat(repeat < 0 ? 0 : repeat) : ' .')
-      const addon = (name.length % 2 === 1 ? ' ' : '')
-      return [`${name}${addon}${space} ${d}`]
+      const name = moment(item.value).format('DD MMMM YYYY')
+      const total = this.generateTotal(item.duration)
+      return `**${name}** \`${total}\``.replace(/\.\./g, '. ')
     },
+
     generateMarkdownTaskLines (item, depth = 0) {
       if (!isNest(item)) {
         return [this.generateMarkdownTaskLine(item, depth)]
@@ -1001,25 +1021,30 @@ export default {
         item.children.map(child => {
           nested = nested.concat(this.generateMarkdownTaskLines(child, depth + 1))
         })
+        if (!depth) {
+          return ['', this.generateMarkdownTaskLine(item, depth)].concat(nested)
+        }
         return [this.generateMarkdownTaskLine(item, depth)].concat(nested)
       }
     },
+
     generateMarkdownTaskLine (item, depth = 0) {
       let name = item.value
       if (name.match(urlRegexp)) {
         name = decodeURIComponent(name.replace(/https?:\/\//, ''))
       }
-      let d = duration(item.duration).format('HH:mm')
-      if (depth) {
+      let total = this.generateTotal(item.duration)
+      if (depth > 1) {
+        // If deep nested
         const padding = '  '.repeat(depth)
-        return `${padding}${name} (${d})`
+        return `${padding}- ${name} (${total})`
+      } else if (depth === 1) {
+        // If 1-level nest
+        return `  - ${name} (${total})`
       } else {
-        d = `**${d}**`
-        name = `**${name}**`
-        const repeat = parseInt(30 - name.length * 0.5, 10)
-        const space = (name.length < 60 ? ' .'.repeat(repeat < 0 ? 0 : repeat) : ' .')
-        const addon = (name.length % 2 === 1 ? ' ' : '')
-        return `${name}${addon}${space} ${d}`
+        // If root
+        total = this.generateTotal(item.duration, { identCost: true })
+        return `**${name}** \`${total}\``.replace(/\.\./g, '. ')
       }
     },
     ...mapMutations([

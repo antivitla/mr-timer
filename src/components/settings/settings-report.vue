@@ -3,6 +3,7 @@
     p
       custom-checkbox(
         mark
+        off-box
         class="show-report-modal"
         v-model="showReportSettings")
       label(v-custom-for="'.show-report-modal'")

@@ -15,12 +15,14 @@ function filterByContext (entries, context = []) {
   })
 }
 
+const dayMilliseconds = 1000 * 60 * 60 * 24
+
 function filterByInterval (entries, startFrom, startTo) {
   if (startFrom === 'auto' && startTo === 'auto') {
     return entries
   }
   const past = Date.parse(startFrom)
-  const future = Date.parse(startTo)
+  const future = Date.parse(startTo) + dayMilliseconds - 1
   return entries.filter(entry => {
     const t = new Date(entry.start).getTime()
     if (!isNaN(past) && !isNaN(future)) {

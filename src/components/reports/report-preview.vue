@@ -1,5 +1,7 @@
 <template lang="pug">
-  .report-preview(:format="reportFormat") {{ reportTextContent }}
+  .report-preview(
+    :format="reportFormat"
+    :column-width="previewTextColumnWidth") {{ reportTextContent }}
 </template>
 <script>
   import { mapGetters } from 'vuex'
@@ -11,7 +13,7 @@
     data () {
       return {
         reportTextContent: '',
-        onEntriesComplete: () => {
+        handleRefreshPreview: () => {
           setTimeout(() => {
             this.refreshPreview()
           }, 100)
@@ -27,11 +29,13 @@
           }, 100)
         }
       })
-      bus.$on('get-entries-complete', this.onEntriesComplete)
+      bus.$on('get-entries-complete', this.handleRefreshPreview)
+      bus.$on('refresh-report-preview', this.handleRefreshPreview)
     },
     beforeDestroy () {
       this.unsubscribe()
-      bus.$off('get-entries-complete', this.onEntriesComplete)
+      bus.$off('get-entries-complete', this.handleRefreshPreview)
+      bus.$on('refresh-report-preview', this.handleRefreshPreview)
     },
     computed: {
       ...mapGetters([
@@ -62,6 +66,18 @@
     text-align left
     font-size 14px
     margin 40px auto
-    &[format="plaintext"]:not([money])
-      max-width 510px
+    &[format="plaintext"][column-width="40"]
+      max-width calc(0.55em * 39)
+    &[format="plaintext"][column-width="50"]
+      max-width calc(0.55em * 49)
+    &[format="plaintext"][column-width="60"]
+      max-width calc(0.55em * 59)
+    &[format="plaintext"][column-width="70"]
+      max-width calc(0.55em * 69)
+    &[format="plaintext"][column-width="80"]
+      max-width calc(0.55em * 79)
+    &[format="plaintext"][column-width="100"]
+      max-width calc(0.55em * 99)
+    &[format="plaintext"][column-width="120"]
+      max-width calc(0.55em * 119)
 </style>
