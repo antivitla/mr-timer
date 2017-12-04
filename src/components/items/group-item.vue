@@ -55,7 +55,6 @@
       .title(
         :title="startTaskLabel"
         @click="startTask()")
-        i.material-icons.timer-clock(v-if="trackingEntry") timer
         .name(
           v-if="group.type === 'task'"
           :color="colorCode"
@@ -68,6 +67,7 @@
           v-long-click="375"
           @long-click.prevent.stop="startEdit('details')")
           group-name(:group="group")
+        //- i.material-icons.timer-clock(v-if="trackingEntry") timer
         .duration(
           v-if="duration"
           v-long-click="375"
@@ -125,7 +125,7 @@
   import Group from '@/models/group'
 
   // Utils
-  import { durationHuman, durationEditable } from '@/utils/duration'
+  import { durationHuman, durationEditable, duration } from '@/utils/duration'
   import numberFilter from '@/utils/number-filter'
   import {
     extractEntries,
@@ -165,9 +165,12 @@
       duration () {
         const d = this.label('duration', false)
         const trackingEntry = this.trackingEntry
+        let dur = this.group.duration()
         if (trackingEntry && trackingEntry.duration() < this.timerEntry.duration()) {
-          const duration = this.group.duration() - trackingEntry.duration() + this.timerEntry.duration()
-          return durationHuman(duration, d.hr, d.min, d.sec)
+          dur = dur - trackingEntry.duration() + this.timerEntry.duration()
+        }
+        if (trackingEntry) {
+          return duration(dur).format('HH:mm:ss')
         } else {
           return durationHuman(this.group.duration(), d.hr, d.min, d.sec)
         }
@@ -570,58 +573,11 @@
       color titamota-color-text
       font-weight 500
       .duration
+        color titamota-color-red
+        font-weight 500
       .cost
         color titamota-color-text
         font-weight 500
-      .title
-        position relative
-        .timer-clock
-          position absolute
-          left -28px
-          font-size 24px
-          top -2px
-          width 24px
-          height 24px
-          & + .name
-            margin-left 0px
-          &:before
-            content ' '
-            position absolute
-            left 12px
-            top 11px
-            transform translateX(-50%) translateY(-50%)
-            border-radius 50%
-            width 10px
-            height 10px
-            background-color titamota-color-back-light
-            z-index 1
-          &:after
-            content ' '
-            width 2px
-            height 6px
-            background-color titamota-color-text
-            position absolute
-            transform-origin 50% 80%
-            left 11px
-            top 6px
-            z-index 2
-            animation tick 12s steps(12, end) infinite
-  .group-item[depth="2"] > .item.read
-  .group-item[depth="1"]:not(.has-children) > .item.read
-    .timer-clock
-      &:before
-        top 13px
-      &:after
-        top 8px
-  .group-item[depth="1"].has-children > .item.read
-    .timer-clock
-      top 0px
-      left -30px
-      &:before
-        top 22px
-      &:after
-        top 17px
-
 
   // Depth === 1 with children
   .group-item[depth="1"].has-children

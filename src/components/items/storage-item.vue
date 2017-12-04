@@ -30,7 +30,9 @@
           @input="updateDuration($event)"
           @keyup.enter="submitEdit()")
       span.actions
-        a.icon-button.delete(@click="deleteAndGetEntries({ entries: [entry] })")
+        a.icon-button.delete(
+          v-if="!isTrackingEntry"
+          @click="deleteAndGetEntries({ entries: [entry] })")
           i.material-icons delete
         a.icon-button.cancel(@click="cancelEdit()")
           i.material-icons block
@@ -45,8 +47,6 @@
       span.details(
         v-long-click="375"
         @long-click="startEdit('details')")
-        span.timer-clock
-          i.material-icons(v-if="isTrackingEntry") timer
         span {{ details }}
       span.duration(
         v-long-click="375"
@@ -445,8 +445,6 @@
         bottom 0px
         padding-top 4px
         padding-bottom 4px
-        // .icon-button
-        //    margin-left 0.2em
         .icon-button + .icon-button
           margin-left 0.45em
         .icon-button + .icon-button.select
@@ -470,17 +468,18 @@
     &.active
       color titamota-color-text
       .start
-      .duration
         font-weight 700
         color titamota-color-text
+      .duration
+        font-weight 700
+        color titamota-color-red
+
       .details
         font-weight 500
       .start input
       .details textarea
       .duration input
         color titamota-color-text
-        &:focus
-          color lighten(titamota-color-red, 10%)
       .start input
       .duration input
         font-weight bold
