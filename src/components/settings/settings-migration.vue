@@ -110,14 +110,13 @@
           let type
           if (error.message === '404') {
             content = 'Timer 3.1 local entries not found'
-            console.warn(content)
           }
           if (error.message === '500') {
             content = 'Timer 3.1 entries are broken'
             type = 'error'
-            console.warn(content)
           }
-          bus.$emit('toast', { content, type })
+          console.warn(content)
+          // bus.$emit('toast', { content, type })
         })
     },
     computed: {
