@@ -14,6 +14,10 @@
         textarea(
           v-model="importData"
           :placeholder="label('settings.importPlaceholder')")
+      p.note(v-if="isContext")
+        small
+          | {{ label('settings.warningContext') }} &ensp;
+          q {{ parseDetail(contextString) }}
       p
         button.block(
           :class="{ 'pending': isPending }"
@@ -39,9 +43,12 @@
   import customSwitch from '@/components/other/custom-switch'
   import appNavbar from '@/components/layout/app-navbar'
   import i18nLabel from '@/mixins/i18n-label'
+  import migration from '@/mixins/migration'
   import storage from '@/mixins/storage'
   import { driver } from '@/store/storage'
   import bus from '@/event-bus'
+  import parseDetail from '@/utils/parseDetail'
+  import { taskDelimiter } from '@/store/ui'
 
   export default {
     data () {
@@ -57,7 +64,8 @@
           { value: 'json', label: 'settings.json' }
         ],
         formatsModel: '',
-        isPending: false
+        isPending: false,
+        parseDetail
       }
     },
     created () {
@@ -71,8 +79,13 @@
       isImport () {
         return this.importExportToggleModel === 'import'
       },
+      contextString () {
+        return this.context.join(taskDelimiter)
+      },
       ...mapGetters([
-        'backend'
+        'backend',
+        'isContext',
+        'context'
       ])
     },
     methods: {
@@ -90,14 +103,11 @@
         this.isPending = true
         try {
           const entries = JSON.parse(this.importData).entries
-          driver[this.backend]
-            .postEntries(entries)
-            .then(() => {
-              this.getEntriesWithCurrentParams()
-              this.isPending = false
-              this.importData = ''
-              this.closeSidebar()
-            })
+          this.migrateEntries(entries).then(() => {
+            this.isPending = false
+            this.importData = ''
+            this.closeSidebar()
+          })
         } catch (error) {
           this.isPending = false
           const content = `Import entries: ${error.message}`
@@ -111,7 +121,8 @@
     },
     mixins: [
       i18nLabel,
-      storage
+      storage,
+      migration
     ],
     components: {
       customSwitch,
@@ -139,6 +150,10 @@
       padding 0
       margin 10px auto
 
+    .note
+      margin-top 20px
+      margin-bottom 20px
+
     .refresh
       animation spin 0.75s infinite linear
       transform rotate(0deg)
@@ -150,4 +165,5 @@
     .pending
       .refresh
         display inline-block
+
 </style>

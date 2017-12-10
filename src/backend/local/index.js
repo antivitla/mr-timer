@@ -279,6 +279,12 @@ class LocalBackendDriver {
     return saveEntriesToLocalStorage(this.entries, this.key)
   }
 
+  deleteAccount () {
+    return new Promise((resolve, reject) => {
+      resolve()
+    })
+  }
+
   _addEntries (entries) {
     entries.forEach(entry => {
       if (this._findEntryIndex(entry) < 0) {

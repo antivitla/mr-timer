@@ -10,15 +10,31 @@
       )
         i.material-icons lock
         span {{ label('logout') }}
+      i.toggle-delete-account.material-icons(@click="showProfileDanger = !showProfileDanger")
+        span(v-if="!showProfileDanger") settings
+        span(v-else) settings
+      .delete-account(v-if="showProfileDanger")
+        p
+          small {{ label('settings.confirmDeleteLabel') }}
+        input(
+          type="text"
+          v-model="tryDelete"
+          @keyup.enter="confirmDelete")
     div(v-else)
       .local-account {{ label('profile.localAccount') }}
 </template>
 <script>
-  import { mapGetters, mapMutations } from 'vuex'
+  import { mapGetters, mapMutations, mapActions } from 'vuex'
   import appTips from '@/mixins/app-tips'
   import i18nLabel from '@/mixins/i18n-label'
 
   export default {
+    data () {
+      return {
+        tryDelete: '',
+        showProfileDanger: false
+      }
+    },
     computed: {
       ...mapGetters([
         'userName',
@@ -27,8 +43,20 @@
       ])
     },
     methods: {
+      confirmDelete () {
+        if (this.tryDelete === this.label('settings.confirmDeletePhrase')) {
+          this.tryDelete = ''
+          this.deleteAccount()
+          this.setNotAuthorized()
+          this.closeSidebar()
+        }
+      },
       ...mapMutations([
-        'setNotAuthorized'
+        'setNotAuthorized',
+        'closeSidebar'
+      ]),
+      ...mapActions([
+        'deleteAccount'
       ])
     },
     mixins: [
@@ -65,6 +93,27 @@
       span
         vertical-align top
         display inline-block
+
+    .delete-account
+      p
+        margin-top 20px
+        margin-bottom 10px
+        color titamota-color-text-invert
+      input
+        width 100%
+        display block
+        box-sizing border-box
+
+    .toggle-delete-account
+      font-size 24px
+      width 40px
+      height 40px
+      text-align center
+      line-height 38px
+      vertical-align top
+      margin-top 20px
+      cursor pointer
+      color titamota-color-text-invert
 
   // Inverted
   .invert .user-profile

@@ -2,7 +2,7 @@
   .toaster
     .toast(
       @click.prevent.stop="removeToast(toast)"
-      :class="{ 'error': toast.type === 'error', 'default': !toast.type }"
+      :class="toast.type ? toast.type : 'default'"
       v-for="toast in toasts")
       span {{ toast.content }}
 </template>
@@ -64,4 +64,9 @@
         background-color titamota-color-red
       &.default
         background-color titamota-color-back-dark
+      &.info
+        background-color white
+        color titamota-color-text
+        box-shadow 1px 1px 10px 0px alpha(titamota-color-text, 10%)
+
 </style>

@@ -119,6 +119,8 @@ class Mitaba {
       })
   }
 
+  // Account
+
   getProfile () {
     return this.resource
       .get(this.config.api.profile, this._protectedConfig())
@@ -133,6 +135,17 @@ class Mitaba {
       })
   }
 
+  deleteAccount () {
+    return this.resource
+      .delete(this.config.api.profile, this._protectedConfig())
+      .then(this._parseSuccessResponse)
+      .catch(error => {
+        throw new Error(error.response.statusText)
+      })
+  }
+
+  // Entries
+
   getEntries ({ params } = {}) {
     return this.resource
       .get(this.config.api.entries, this._protectedConfig({ params }))
@@ -144,8 +157,6 @@ class Mitaba {
       .get(this.config.api.petrov, { params: { account } })
       .then(this._parseSuccessResponse)
   }
-
-  // Entries
 
   postEntries (entries) {
     return this.resource

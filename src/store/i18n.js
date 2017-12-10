@@ -217,7 +217,9 @@ const ru = ({
       durationAndCost: 'время и стоимость',
       perHour: 'цену в час',
       period: 'период'
-    }
+    },
+    confirmDeletePhrase: 'УДАЛИТЬ АККАУНТ И ДАННЫЕ',
+    confirmDeleteLabel: 'Чтоб удалить свой аккаунт и все свои данные введите «УДАЛИТЬ АККАУНТ И ДАННЫЕ»'
   },
   sidebar: {
     icons: 'иконки',
@@ -438,7 +440,9 @@ const en = ({
       durationAndCost: 'time and cost',
       perHour: 'price per hour',
       period: 'period'
-    }
+    },
+    confirmDeletePhrase: 'DELETE ACCOUNT AND DATA',
+    confirmDeleteLabel: 'To delete your account and all your data enter "DELETE ACCOUNT AND DATA"'
   },
   sidebar: {
     icons: 'icons',

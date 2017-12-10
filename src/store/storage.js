@@ -175,6 +175,17 @@ const actions = {
     context.commit('removeEntries', payload)
     return driver[context.getters.backend]
       .deleteEntries(payload.entries.map(entry => ({ id: entry.id })))
+  },
+  deleteAccount (context) {
+    return driver[context.getters.backend]
+      .deleteAccount().then(() => {
+        bus.$emit('toast', { content: 'Delete account: success' })
+      }).catch(error => {
+        bus.$emit('toast', {
+          type: 'error',
+          content: 'Delete account: ' + error.message
+        })
+      })
   }
 }
 
