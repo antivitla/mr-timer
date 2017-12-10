@@ -54,7 +54,7 @@
   import debounce from 'debounce'
   import migration from '@/mixins/migration'
   import i18nLabel from '@/mixins/i18n-label'
-  import bus from '@/event-bus'
+  // import bus from '@/event-bus'
   import parseDetail from '@/utils/parseDetail'
 
   export default {
@@ -88,13 +88,13 @@
         })
         .catch(error => {
           let content = error.message
-          let type
+          // let type
           if (error.message === '404') {
             content = 'Timer 3.0 local entries not found'
           }
           if (error.message === '500') {
             content = 'Timer 3.0 local entries are broken'
-            type = 'error'
+            // type = 'error'
           }
           console.warn(content)
           // bus.$emit('toast', { content, type })
@@ -107,13 +107,13 @@
         })
         .catch(error => {
           let content = error.message
-          let type
+          // let type
           if (error.message === '404') {
             content = 'Timer 3.1 local entries not found'
           }
           if (error.message === '500') {
             content = 'Timer 3.1 entries are broken'
-            type = 'error'
+            // type = 'error'
           }
           console.warn(content)
           // bus.$emit('toast', { content, type })
