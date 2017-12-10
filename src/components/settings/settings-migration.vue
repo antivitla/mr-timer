@@ -91,14 +91,13 @@
           let type
           if (error.message === '404') {
             content = 'Timer 3.0 local entries not found'
-            console.warn(content)
           }
           if (error.message === '500') {
             content = 'Timer 3.0 local entries are broken'
             type = 'error'
-            console.warn(content)
           }
-          bus.$emit('toast', { content, type })
+          console.warn(content)
+          // bus.$emit('toast', { content, type })
         })
       // Titomata Local Entries
       this.getEntriesFromLocalStorage('titamota-entries-local')
