@@ -366,6 +366,9 @@
         .user-name
           display none
 
+    @media (max-height 768px)
+      margin-bottom 20px
+
   // Menu Navbar
   .app-navbar.menu
     line-height 24px

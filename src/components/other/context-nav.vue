@@ -111,4 +111,26 @@
         top 1px
         .material-icons
           font-size 18px
+
+  @media (max-height 768px)
+    .context-nav
+      position relative
+      .path
+        position absolute
+        top -3px
+        left 0px
+        font-size 14px
+        z-index 1
+        margin-top 0px
+      .task
+        line-height 40px
+        .item
+          font-size 24px
+          position relative
+          top 10px
+          letter-spacing 0
+      .clear
+        top 12px
+        .material-icons
+          font-size 24px
 </style>

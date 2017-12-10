@@ -409,4 +409,8 @@
         display inline
       .current .full
         display none
+
+  @media (max-height 768px)
+    .view-pagination
+      margin-top 40px
 </style>

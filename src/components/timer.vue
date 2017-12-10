@@ -225,6 +225,8 @@
     width calc(100% + 20px)
     @media (max-width titamota-screen-w-7)
       margin-bottom 40px
+    @media (max-height 768px)
+      margin-bottom 40px
 
     button
       height 60px

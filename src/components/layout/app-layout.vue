@@ -64,9 +64,10 @@
         padding-left 60px
         padding-right 60px
       @media (min-width 1366px)
-        padding-top 60px
         padding-left 90px
         padding-right 90px
+      @media (max-height 768px)
+        padding-top 20px
 
     .sidebar
       position fixed
