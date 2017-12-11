@@ -530,9 +530,13 @@ const $JExcel = {};
   }
 
   function generateMerge (merge) {
-    return merge.map(m => {
-      return '<mergeCell ref="' + m + '"/>'
-    }).join('')
+    if (merge && merge.length) {
+      return merge.map(m => {
+        if (m) {
+          return '<mergeCell ref="' + m + '"/>'
+        }
+      }).join('')
+    }
   }
 
   function generateRows(rows) {

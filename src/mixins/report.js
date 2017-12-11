@@ -818,6 +818,7 @@ export default {
             xlsx.set(0, c, undefined, 12)
           }
           props.style = xlsx.addStyle(style)
+          props.value = props.value || ''
           xlsx.set(props)
         })
       })
