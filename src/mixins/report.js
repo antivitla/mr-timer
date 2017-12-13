@@ -206,6 +206,7 @@ export default {
           return fullDateRange(from, to, this.locale)
         }
       }
+      return this.label('report.allTime', false)
     },
 
     generateCommonHeaderString () {

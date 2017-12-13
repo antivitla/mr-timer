@@ -182,7 +182,11 @@
         return this.generalRange(this.pagination[this.currentView].next)
       },
       labelAll () {
-        return `${this.label('pagination.all', false)} ${this.labelNumber(this.currentCount)}`
+        if (this.currentCount > 1) {
+          return `${this.label('pagination.all', false)} ${this.labelNumber(this.currentCount)}`
+        } else {
+          return `${this.labelNumber(this.currentCount)}`
+        }
       },
       latestLabel () {
         if (this.currentLimit === 1) {

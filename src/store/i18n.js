@@ -319,7 +319,7 @@ const en = ({
     format: {
       markdown: 'Markdown (.md)',
       plaintext: 'Plain Text (.txt)',
-      spreadsheet: 'Spreadsheet (.ods)',
+      spreadsheet: 'Spreadsheet (.xlsx)',
       document: 'Document (.odt)',
       html: 'HTML (.html)',
       pdf: 'PDF (.pdf)',
