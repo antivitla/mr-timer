@@ -10,8 +10,8 @@ const state = {
   },
   rates: {
     rub: 1,
-    usd: 0.017,
-    eur: 0.015,
+    usd: 0.015,
+    eur: 0.013,
     cny: 0.119
   }
 }
@@ -58,6 +58,7 @@ const mutations = {
 }
 
 const actions = {
+  // DEPRECATED
   loadRates (context) {
     // ajax fixer.io and set rates
     const symbols = Object

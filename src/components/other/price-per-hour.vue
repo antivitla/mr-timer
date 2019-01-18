@@ -22,9 +22,6 @@
         debounceSetPrice: debounce()
       }
     },
-    created () {
-      this.loadRates()
-    },
     computed: {
       labelPrice () {
         return capitalize(
@@ -54,8 +51,7 @@
       },
       ...mapActions([
         'setPrice',
-        'clearPrice',
-        'loadRates'
+        'clearPrice'
       ])
     }
   }
