@@ -128,19 +128,21 @@
           this.doNotUpdate = false
           return
         }
-        // Return list if changed
-        const list = parseList($event.target.value)
-        const prev = parseList(this.value)
-        if (list.join(taskDelimiter) !== prev.join(taskDelimiter)) {
+        // Return list if changed.
+        const unfinishedList = $event.target.value.match(/\s\/\s*$/)
+        const nextList = parseList($event.target.value).join(taskDelimiter)
+        const prevList = parseList(this.value).join(taskDelimiter)
+        if (nextList !== prevList && !unfinishedList) {
+          const updatedList = $event.target.value.split(taskDelimiter)
           // Use delayed update..
           if (this.debounce) {
             this.debounceUpdate(() => {
-              this.$emit('input', list)
+              this.$emit('input', updatedList)
               this.$emit('input-original-event', $event)
             }, this.debounce)
           } else {
             // ...or not
-            this.$emit('input', list)
+            this.$emit('input', updatedList)
             this.$emit('input-original-event', $event)
           }
         }
