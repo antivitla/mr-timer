@@ -43,3 +43,10 @@ For a detailed explanation on how things work, check out the [guide](http://vuej
 Static images in `/static/img/` are added as usual (link to file). Compiler will add random stuff to filename to battle cache. Path to such images should be relative.
 
 Another images are compiled as `data:image` (good for small images). Their path should be some kind of root path with webpack-specific stuf, for example `~@/assets/images/example.png`. You should put such images to `/src/assets/images/`.
+
+**Деплой изменений**
+
+``` bash
+npm run build
+scp -r dist u49801@u49801.netangels.ru:~/mr-woodman.ru/www/titamota
+```
