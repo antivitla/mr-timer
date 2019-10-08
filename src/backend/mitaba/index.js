@@ -27,7 +27,7 @@ const socialConfigDev = {
 
 const socialConfig = {
   facebook: {
-    DIALOG_URL: 'https://www.facebook.com/v2.10/dialog/oauth',
+    DIALOG_URL: 'https://www.facebook.com/v4.0/dialog/oauth',
     CLIENT_ID: '498893767146355',
     SCOPE: 'email',
     MITABA_BACKEND: 'facebook'
