@@ -1,7 +1,7 @@
 <template lang="pug">
   .collection-footer
     a.copyright-link(href="//github.com/antivitla/titamota" target="_blank")
-      .copyright-title Titamo&#x301;ta 1.0
+      .copyright-title Titamo&#x301;ta 1.1
       .copyright-motto сделано на&nbsp;левом берегу &trade;
       img.copyright-cat(src="~@/assets/images/cat-preloader-muted.gif")
 </template>
