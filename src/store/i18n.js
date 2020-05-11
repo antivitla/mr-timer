@@ -111,6 +111,7 @@ const ru = ({
     previewLabel: 'предпросмотр',
     downloadLabel: 'скачать отчёт в формате',
     resultLabel: 'Показывать',
+    sortBy: 'Сортировать',
     placeholderText: 'введите текст заметки',
     section: {
       header: 'заголовок',
@@ -215,6 +216,8 @@ const ru = ({
       durationOnly: 'только время',
       costOnly: 'только стоимость',
       durationAndCost: 'время и стоимость',
+      sortByDuration: 'сначала длительные',
+      sortByDate: 'сначала недавние',
       perHour: 'цену в час',
       period: 'период'
     },
@@ -331,6 +334,7 @@ const en = ({
     downloadLabel: 'download report as',
     previewLabel: 'preview',
     resultLabel: 'show',
+    sortBy: 'sort',
     placeholderText: 'write your comments here',
     section: {
       header: 'header',
@@ -438,6 +442,8 @@ const en = ({
       durationOnly: 'time only',
       costOnly: 'cost only',
       durationAndCost: 'time and cost',
+      sortByDuration: 'long duration first',
+      sortByDate: 'recent first',
       perHour: 'price per hour',
       period: 'period'
     },

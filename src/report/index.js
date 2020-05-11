@@ -16,13 +16,19 @@ function taskName (task, startFrom = 0) {
   return details.join(taskDelimiter)
 }
 
-function generateTasksSummary ({ children = Tasks.children, depth, nest = 0, currentNest = 0 } = {}) {
+function generateTasksSummary ({ children = Tasks.children, depth, nest = 0, currentNest = 0, sortBy = 'date' } = {}) {
   if (!nest || currentNest >= nest) {
     return extractTasks(children.filter(child => !(child instanceof Entry)), { depth }).map(task => {
       return {
         type: 'task',
         value: taskName(task, currentNest),
         duration: task.duration()
+      }
+    }).sort((a, b) => {
+      if (sortBy === 'duration') {
+        return b.duration - a.duration
+      } else {
+        return 0
       }
     })
   } else if (currentNest < nest) {
@@ -40,10 +46,18 @@ function generateTasksSummary ({ children = Tasks.children, depth, nest = 0, cur
             children: task.children || [],
             depth,
             nest,
+            sortBy,
             currentNest: currentNest + 1
           })
         }
         return item
+      })
+      .sort((a, b) => {
+        if (sortBy === 'duration') {
+          return b.duration - a.duration
+        } else {
+          return 0
+        }
       })
   }
 }
@@ -58,7 +72,7 @@ function generateDaysSummary () {
   })
 }
 
-function generateDaysTasksSummary ({ depth, nest = 0 } = {}) {
+function generateDaysTasksSummary ({ depth, nest = 0, sortBy = 'date' } = {}) {
   return Days.children.map(day => {
     return {
       type: 'day task nest',
@@ -66,9 +80,17 @@ function generateDaysTasksSummary ({ depth, nest = 0 } = {}) {
       children: generateTasksSummary({
         children: day.children,
         depth,
+        sortBy,
         nest: nest + 1,
-        currentNest: 1 }),
+        currentNest: 1
+      }),
       duration: day.duration()
+    }
+  }).sort((a, b) => {
+    if (sortBy === 'duration') {
+      return b.duration - a.duration
+    } else {
+      return 0
     }
   })
 }

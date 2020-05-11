@@ -128,7 +128,8 @@ export default {
       'reportPerHour',
       'reportCost',
       'reportPeriod',
-      'reportDuration'
+      'reportDuration',
+      'reportSortBy'
     ])
   },
   methods: {
@@ -289,7 +290,8 @@ export default {
         if (section.type === 'summary') {
           summaries.push(Report.summary[section.summary.type]({
             depth: parseInt(section.summary.depth, 10),
-            nest: parseInt(section.summary.nest, 10)
+            nest: parseInt(section.summary.nest, 10),
+            sortBy: this.reportSortBy
           }))
         }
       })
@@ -919,7 +921,8 @@ export default {
           }
           const data = Report.summary[section.summary.type]({
             depth: parseInt(section.summary.depth, 10),
-            nest: parseInt(section.summary.nest, 10)
+            nest: parseInt(section.summary.nest, 10),
+            sortBy: this.reportSortBy
           })
           lines = lines.concat(this.generateTextSummary(data)).concat([''])
         }
@@ -1055,7 +1058,8 @@ export default {
           // Table
           const data = Report.summary[section.summary.type]({
             depth: parseInt(section.summary.depth, 10),
-            nest: parseInt(section.summary.nest, 10)
+            nest: parseInt(section.summary.nest, 10),
+            sortBy: this.reportSortBy
           })
           lines = lines.concat(this.generateMarkdownSummary(data)).concat([''])
         }

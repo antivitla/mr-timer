@@ -61,7 +61,8 @@ const state = {
   reportPerHour: true,
   reportCost: true,
   reportDuration: true,
-  reportPeriod: true
+  reportPeriod: true,
+  reportSortBy: 'date'
 }
 
 const getters = {
@@ -84,6 +85,7 @@ const getters = {
     }
     return 'report-duration-only'
   },
+  reportSortBy: state => state.reportSortBy,
   availableFormatsAsOptions: state => {
     return Object
       .keys(state.formats)
@@ -158,6 +160,9 @@ const mutations = {
       state.reportDuration = true
       state.reportCost = false
     }
+  },
+  setReportSortBy (state, payload) {
+    state.reportSortBy = payload.sortBy
   }
 }
 

@@ -28,6 +28,7 @@
           'setReportFormat',
           'setReportPeriod',
           'setReportResult',
+          'setReportSortBy',
           'setReportPerHour'
         ]
         if (types.indexOf(mutation.type) > -1) {

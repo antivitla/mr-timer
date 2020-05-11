@@ -37,6 +37,20 @@
           id="report-period"
           v-model="reportPeriodModel")
         label(for="report-period") {{ label('settings.report.period') }}
+      div
+        custom-radio(
+          id="report-sort-by-duration"
+          :value="'duration'"
+          :model="reportSortBy"
+          @input="setReportSortByModel($event)")
+        label(for="report-sort-by-duration") {{ label('settings.report.sortByDuration') }}
+      div
+        custom-radio(
+          id="report-sort-by-date"
+          :value="'date'"
+          :model="reportSortBy"
+          @input="setReportSortByModel($event)")
+        label(for="report-sort-by-date") {{ label('settings.report.sortByDate') }}
 </template>
 <script>
   import { mapGetters, mapMutations } from 'vuex'
@@ -73,19 +87,22 @@
       ...mapGetters([
         'reportResult',
         'reportPerHour',
-        'reportPeriod'
+        'reportPeriod',
+        'reportSortBy'
       ])
     },
     methods: {
-      setReportResultModel (result) {
-        this.setReportResult({
-          reportResult: result
-        })
+      setReportResultModel (reportResult) {
+        this.setReportResult({ reportResult })
+      },
+      setReportSortByModel (sortBy) {
+        this.setReportSortBy({ sortBy })
       },
       ...mapMutations([
         'setReportResult',
         'setReportPerHour',
-        'setReportPeriod'
+        'setReportPeriod',
+        'setReportSortBy'
       ])
     },
     mixins: [
