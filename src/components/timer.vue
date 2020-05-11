@@ -26,6 +26,7 @@
   import { Storage } from '@/store/storage'
   import { taskDelimiter } from '@/store/ui'
   import capitalize from '@/utils/capitalize'
+  import { startFaviconPinging, stopFaviconPinging } from '@/utils/favicon'
   import { duration, durationFraction } from '@/utils/duration'
   import bus from '@/event-bus'
 
@@ -165,9 +166,11 @@
         this.edit.details = this.details.join(taskDelimiter)
         this.placeholder = capitalize(funnyTask(this.locale))
         this.tick()
+        startFaviconPinging()
       },
       onStop () {
         this.stopTick()
+        stopFaviconPinging()
       },
       updateDetails (event) {
         let details = event.slice(0)

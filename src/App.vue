@@ -48,6 +48,7 @@
   import bodyScrollTopOn from '@/directives/body-scroll-top-on'
   import bus from '@/event-bus'
   import Mitaba from '@/backend/mitaba'
+  import { setFaviconType } from '@/utils/favicon'
   // Components
   import appNavbar from '@/components/layout/app-navbar'
   import appLayout from '@/components/layout/app-layout'
@@ -106,6 +107,9 @@
     },
     created () {
       console.log(`Welcome to ${appTitle}`)
+
+      // Set icon
+      setFaviconType('default')
 
       // Finish auth, if redirected
       if (this.$route.name === 'providerAuthRedirect') {
