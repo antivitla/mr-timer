@@ -44,6 +44,10 @@ Static images in `/static/img/` are added as usual (link to file). Compiler will
 
 Another images are compiled as `data:image` (good for small images). Their path should be some kind of root path with webpack-specific stuf, for example `~@/assets/images/example.png`. You should put such images to `/src/assets/images/`.
 
+**Редиректы авторизаций**
+
+Нужно настроить на сервере редиректы авторизаций, не забыть скопировать `.htaccess` из  `/dist`.
+
 **Деплой изменений**
 
 ``` bash
