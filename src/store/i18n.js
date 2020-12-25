@@ -200,6 +200,9 @@ const ru = ({
     importPlaceholder: 'скопируйте сюда ваши записи (например после использования экспорта ранее)',
     loadAllEntries: 'загрузить сюда все записи',
     importEntries: 'импортировать записи',
+    newsUpdate: 'новости обновлений',
+    doNotShowUntilNextUpdate: 'не показывать до следующего обновления',
+    lastUpdate: 'последнее обновление',
     currentView: 'текущий вид',
     warningContext: 'ВНИМАНИЕ! Импортируемые записи попадут внутрь текущего контекста',
     restoreApp: {
@@ -222,7 +225,10 @@ const ru = ({
       period: 'период'
     },
     confirmDeletePhrase: 'УДАЛИТЬ АККАУНТ И ДАННЫЕ',
-    confirmDeleteLabel: 'Чтоб удалить свой аккаунт и все свои данные введите «УДАЛИТЬ АККАУНТ И ДАННЫЕ»'
+    confirmDeleteLabel: 'Чтоб удалить свой аккаунт и все свои данные введите «УДАЛИТЬ АККАУНТ И ДАННЫЕ»',
+    help: {
+      openHelp: 'помощь'
+    }
   },
   sidebar: {
     icons: 'иконки',
@@ -234,6 +240,8 @@ const ru = ({
     toggleUiSettings: 'настройки'
   },
   profile: {
+    firstName: 'безымянный',
+    lastName: 'фрилансер',
     localAccount: 'локальный аккаунт'
   },
   currency: {
@@ -254,6 +262,11 @@ const ru = ({
     'toggle-sidebar-top': 'открыть меню',
     'toggle-sidebar-in-sidebar': 'закрыть меню',
     'user-profile-logout': 'Выйти из своего аккаунта'
+  },
+  modal: {
+    news: {
+      title: 'Новости обновлений'
+    }
   }
 })
 
@@ -426,6 +439,9 @@ const en = ({
     importPlaceholder: 'paste here your entries (may be using from previous export)',
     loadAllEntries: 'load all entries here',
     importEntries: 'import entries',
+    newsUpdate: 'news about updates',
+    doNotShowUntilNextUpdate: 'do not show until next update',
+    lastUpdate: 'last update',
     currentView: 'current view',
     warningContext: 'WARNING! All imported items will gain current context',
     restoreApp: {
@@ -448,7 +464,10 @@ const en = ({
       period: 'period'
     },
     confirmDeletePhrase: 'DELETE ACCOUNT AND DATA',
-    confirmDeleteLabel: 'To delete your account and all your data enter "DELETE ACCOUNT AND DATA"'
+    confirmDeleteLabel: 'To delete your account and all your data enter "DELETE ACCOUNT AND DATA"',
+    help: {
+      openHelp: 'help'
+    }
   },
   sidebar: {
     icons: 'icons',
@@ -460,6 +479,8 @@ const en = ({
     toggleUiSettings: 'toggle UI settings'
   },
   profile: {
+    firstName: 'Unknown',
+    lastName: 'Freelancer',
     localAccount: 'local account'
   },
   currency: {
@@ -480,6 +501,11 @@ const en = ({
     'toggle-sidebar-top': 'open menu',
     'toggle-sidebar-in-sidebar': 'close menu',
     'user-profile-logout': 'logout your account'
+  },
+  modal: {
+    news: {
+      title: 'New updates'
+    }
   }
 })
 

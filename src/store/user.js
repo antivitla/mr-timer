@@ -63,15 +63,19 @@ const mutations = {
       state[f] = payload[f]
     })
   },
-  clearUser (state) {
+  clearUser (state, payload) {
     state.key = ''
     state.guestKey = ''
     state.mode = ''
     state.avatar = 'static/img/040-ladybug.svg'
     state.email = ''
-    state.firstName = 'Безымянный'
-    state.lastName = 'Фрилансер'
+    state.firstName = payload.locale === 'en' ? 'Unknown' : 'Безымянный'
+    state.lastName = payload.locale === 'en' ? 'Freelancer' : 'Фрилансер'
     state.providers = []
+  },
+  setUnknownFreelancer (state, payload) {
+    state.firstName = payload.locale === 'en' ? 'Unknown' : 'Безымянный'
+    state.lastName = payload.locale === 'en' ? 'Freelancer' : 'Фрилансер'
   }
 }
 

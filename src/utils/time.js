@@ -6,6 +6,11 @@ function safeDate (arg) {
   }
 }
 
+const months = {
+  en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+  ru: ['янв', 'фев', 'мар', 'апр', 'мая', 'июня', 'июля', 'авг', 'сент', 'окт', 'нояб', 'дек']
+}
+
 const timeFormat = {
   'HH': function (ms) {
     let h = new Date(ms).getHours()
@@ -40,6 +45,19 @@ const timeFormat = {
     }
     const yy = d.getFullYear()
     return dd + '.' + mm + '.' + yy
+  },
+
+  'D MMM YYYY': function (ms, locale) {
+    const t = new Date(ms)
+    const d = t.getDate()
+    console.log(locale)
+    const mmm = months[locale || 'en'][t.getMonth()]
+    const yyyy = t.getFullYear()
+    if (locale === 'en') {
+      return mmm + ' ' + d + ', ' + yyyy
+    } else {
+      return d + ' ' + mmm + ' ' + yyyy
+    }
   },
 
   'YYYY.MM.DD': function (ms) {
@@ -89,8 +107,8 @@ const timeFormat = {
 
 export function time (ms) {
   return {
-    format (f) {
-      return timeFormat[f](ms)
+    format (f, locale) {
+      return timeFormat[f](ms, locale)
     }
   }
 }

@@ -298,7 +298,7 @@
         }
         payload.edit.duration = this.group.duration()
         this.edit.duration = durationEditable
-          .stringify(payload.edit.duration)
+          .stringify(payload.edit.duration, this.locale)
         this.startTaskEditing(payload)
       },
       updateDetails (event) {

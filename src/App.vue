@@ -42,6 +42,8 @@
     toaster(slot="other")
     //- Modals
     modal-report(slot="modal" v-if="currentModal === 'report'")
+    modal-news(slot="modal" v-if="currentModal === 'news'")
+    modal-help(slot="modal" v-if="currentModal === 'help'")
 </template>
 <script>
   import { mapGetters, mapMutations, mapActions } from 'vuex'
@@ -67,6 +69,8 @@
   import timeline from '@/components/timeline'
   import mitaba from '@/components/mitaba'
   import modalReport from '@/components/modals/modal-report'
+  import modalNews from '@/components/modals/modal-news'
+  import modalHelp from '@/components/modals/modal-help'
   // Store
   import { appTitle } from '@/store/app-info'
   import { Selected } from '@/store/selected'
@@ -125,7 +129,7 @@
         Mitaba.token = this.authToken
         this.setBackend({ backend: 'mitaba' })
       } else {
-        this.clearUser()
+        this.clearUser({ locale: this.locale })
         this.setBackend({ backend: 'local' })
       }
 
@@ -160,7 +164,7 @@
           bus.$emit('scroll-top')
         },
         setNotAuthorized: mutation => {
-          this.clearUser()
+          this.clearUser({ locale: this.locale })
           this.clearContext()
           this.clearSelected()
           this.clearFilter()
@@ -206,6 +210,7 @@
       const actions = {
         activateLocale: action => {
           document.documentElement.setAttribute('lang', action.payload.locale)
+          this.setUnknownFreelancer({ locale: action.payload.locale })
           // const name = this.$route.name
           // const query = Object.assign({}, this.$route.query, {
           //   locale: action.payload.locale
@@ -235,6 +240,13 @@
       // Init i18n
       this.activateLocale({ locale: this.$route.query.locale || this.locale })
       this.activateCurrency({ currency: this.$route.query.currency || this.currency })
+
+      // Set current update
+      this.setLastUpdate({ lastUpdate: new Date('2020-12-25') })
+      // Show update modal, if needed
+      if (this.lastReadUpdate < this.lastUpdate) {
+        this.openModal({ modal: 'news' })
+      }
     },
     beforeDestroy () {
       this.unsubscribe()
@@ -267,7 +279,9 @@
         'userName',
         'authToken',
         'pagination',
-        'currentModal'
+        'currentModal',
+        'lastUpdate',
+        'lastReadUpdate'
       ])
     },
     methods: {
@@ -279,14 +293,17 @@
         'clearUser',
         'clearContext',
         'clearPagination',
-        'closeSidebar'
+        'closeSidebar',
+        'setLastUpdate',
+        'setUnknownFreelancer'
       ]),
       ...mapActions([
         'getProfile',
         'getEntries',
         'activateLocale',
         'activateCurrency',
-        'authorizeWithMitaba'
+        'authorizeWithMitaba',
+        'openModal'
       ])
     },
     mixins: [
@@ -317,7 +334,9 @@
       mitaba,
       toaster,
       getReport,
-      modalReport
+      modalReport,
+      modalNews,
+      modalHelp
     },
     directives: {
       bodyScrollTopOn

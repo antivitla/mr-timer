@@ -154,7 +154,7 @@ export function durationHuman (d, hrWords, minWord, secWord) {
 
 // 100h 20m
 export const durationEditable = {
-  stringify (d) {
+  stringify (d, locale) {
     const time = Math.abs(d)
     const negative = d < 0
     let hh = 0
@@ -164,9 +164,9 @@ export const durationEditable = {
     const mm = parseInt((time % 3600000) / 60000, 10)
     let H = ''
     if (hh) {
-      H = hh + 'h'
+      H = hh + (locale === 'en' ? 'h' : 'ч')
     }
-    const M = mm + 'm'
+    const M = mm + (locale === 'en' ? 'm' : 'м')
     return (negative ? '-' : '') + (H + ' ' + M).replace('  ', ' ').trim()
   },
 

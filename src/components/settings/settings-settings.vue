@@ -35,6 +35,7 @@
           l10n: false,
           migration: false,
           exportImport: false,
+          newsUpdate: false,
           restoreAppState: false,
           reports: false,
           tasks: false,
@@ -70,6 +71,11 @@
       'models.migration': function () {
         this.setAvailableSettings({
           migration: this.models.migration
+        })
+      },
+      'models.newsUpdate': function () {
+        this.setAvailableSettings({
+          newsUpdate: this.models.newsUpdate
         })
       },
       'models.exportImport': function () {

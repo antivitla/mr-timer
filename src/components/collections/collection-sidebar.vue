@@ -34,14 +34,21 @@
     div(v-if="settings.exportImport")
       h4 {{ label('settings.exportImport') }}
       settings-export-import
-    //- Restore Application
-    div(v-if="settings.restoreAppState")
-      h4 {{ label('settings.restoreApp.title') }}
-      settings-restore
+    //- Updates
+    div(v-if='settings.newsUpdate')
+      h4 {{ label('settings.newsUpdate') }}
+      settings-updates
     //- Settings
     div
       h4 {{ label('settings.settings') }}
       settings-settings
+    //- Restore Application
+    div(v-if="settings.restoreAppState")
+      h4 {{ label('settings.restoreApp.title') }}
+      settings-restore
+    //- Help
+    div(style="margin-top: 40px;")
+      settings-help
 </template>
 <script>
   import { mapGetters, mapMutations } from 'vuex'
@@ -57,6 +64,8 @@
   import settingsDisplay from '@/components/settings/settings-display'
   import settingsRestore from '@/components/settings/settings-restore'
   import settingsReport from '@/components/settings/settings-report'
+  import settingsUpdates from '@/components/settings/settings-updates'
+  import settingsHelp from '@/components/settings/settings-help'
 
   // Tips
   import appTips from '@/mixins/app-tips'
@@ -115,7 +124,9 @@
       settingsSettings,
       settingsDisplay,
       settingsRestore,
-      settingsReport
+      settingsReport,
+      settingsUpdates,
+      settingsHelp
     }
   }
 </script>

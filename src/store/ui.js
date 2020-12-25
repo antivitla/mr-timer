@@ -19,6 +19,7 @@ const state = {
     reports: true,
     displayOptions: true,
     l10n: true,
+    newsUpdate: true,
     migration: false,
     exportImport: false,
     restoreAppState: false
@@ -26,7 +27,9 @@ const state = {
   sidebar: false,
   fullWidth: false,
   paginationOrInterval: true,
-  taskDelimiter
+  taskDelimiter,
+  lastUpdate: new Date(null),
+  lastReadUpdate: new Date(null)
 }
 
 const getters = {
@@ -44,7 +47,9 @@ const getters = {
   taskDelimiter: state => state.taskDelimiter,
   fullWidth: state => state.fullWidth,
   isPagination: state => state.paginationOrInterval,
-  isInterval: state => !state.paginationOrInterval
+  isInterval: state => !state.paginationOrInterval,
+  lastUpdate: state => new Date(state.lastUpdate),
+  lastReadUpdate: state => new Date(state.lastReadUpdate)
 }
 
 const mutations = {
@@ -83,6 +88,12 @@ const mutations = {
   },
   setPaginationOrInterval (state, payload) {
     state.paginationOrInterval = payload.paginationOrInterval
+  },
+  setLastUpdate (state, payload) {
+    state.lastUpdate = payload.lastUpdate
+  },
+  setLastReadUpdate (state, payload) {
+    state.lastReadUpdate = payload.lastReadUpdate
   }
 }
 
