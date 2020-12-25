@@ -74,8 +74,12 @@ const mutations = {
     state.providers = []
   },
   setUnknownFreelancer (state, payload) {
-    state.firstName = payload.locale === 'en' ? 'Unknown' : 'Безымянный'
-    state.lastName = payload.locale === 'en' ? 'Freelancer' : 'Фрилансер'
+    if (state.firstName.match(/Unknown|Безымянный/)) {
+      state.firstName = payload.locale === 'en' ? 'Unknown' : 'Безымянный'
+    }
+    if (state.lastName.match(/Freelancer|Фрилансер/)) {
+      state.lastName = payload.locale === 'en' ? 'Freelancer' : 'Фрилансер'
+    }
   }
 }
 

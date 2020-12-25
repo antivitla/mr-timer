@@ -52,5 +52,5 @@ Another images are compiled as `data:image` (good for small images). Their path 
 
 ``` bash
 npm run build
-scp -r dist/* u49801@u49801.netangels.ru:~/mr-woodman.ru/www/titamota/
+scp -r dist/* c25082@h18.netangels.ru:~/mr-woodman.ru/www/titamota/
 ```
