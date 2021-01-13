@@ -14,13 +14,19 @@
     template(v-if="locale === 'ru'")
       p Добавлен хелп по таймеру. Проверь, может еще не все возможности знаешь?
       p
-        img.modal-news-illustration(src="static/img/show-help-ru.png")
+        img.modal-news-illustration(src="static/img/show-help-ru-02.png")
+      p Или
+      p
+        img.modal-news-illustration(src="static/img/show-help-ru-01.png")
       p
         button.block(@click="openHelp()") Открыть помощь сейчас
     template(v-else)
       p Help added. Check it, chances are you'll find out something new.
       p
-        img.modal-news-illustration(src="static/img/show-help.png")
+        img.modal-news-illustration(src="static/img/show-help-02.png")
+      p Or
+      p
+        img.modal-news-illustration(src="static/img/show-help-01.png")
       p
         button.block(@click="openHelp()") Open help now
 

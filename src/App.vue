@@ -30,8 +30,13 @@
         custom-switch(
           :options="availableViewsAsOptions"
           v-model="viewModel")
+        //- Report
         get-report
           i.material-icons timeline
+        //- Help
+        strong(
+          style="margin-left: 10px; cursor: pointer;"
+          @click="openModal({ modal: 'help' })") ?
     //- Views
     component(:is="viewComponent[currentView]" slot="page")
     //- Sidebar
