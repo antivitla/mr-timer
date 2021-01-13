@@ -182,7 +182,7 @@ export const durationEditable = {
       m = parseInt(str.split('.')[1], 10)
     } else if (str.match(/\d+(h|ч)/) || str.match(/\d+(m|м)/)) {
       if (str.match(/\d+(h|ч)/)) {
-        h = parseInt(str.match(/\d+h/)[0], 10)
+        h = parseInt(str.match(/\d+(h|ч)/)[0], 10)
       }
       if (str.match(/\d+(m|м)/)) {
         m = parseInt(str.match(/\d+(m|м)/)[0], 10)
